@@ -2,7 +2,7 @@
 sudo yum -y install --skip-broken zsh dstat git mlocate gcc subversion python-devel screen python-boto numpy python-setuptools gcc-c++ blas-devel lapack-devel
 wget --no-check-certificate https://github.com/robbyrussell/oh-my-zsh/raw/master/tools/install.sh -O - | sudo sh
 sudo chsh -s /bin/zsh $USER
-git config --global user.name "Sean Thomas Williams"
+git config --global user.name "Sean Williams"
 git config --global user.email seanthomaswilliams@gmail.com
 git pull && git submodule update --init --recursive
 cp ~/dotfiles/.* ~

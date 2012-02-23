@@ -1,7 +1,8 @@
 unset SSH_AUTH_SOCK
 export ADSS_HOME="/opt/adss"
 export TERM=xterm
-export PATH="/usr/local/bin:$ADSS_HOME/deps/python/bin:~/bin:~/Scripts:$ADSS_HOME/deps/wtools:$PATH"
+export SCALA_HOME="/home/swilliams/software/scala"
+export PATH="$SCALA_HOME/bin:/usr/local/bin:$ADSS_HOME/deps/python/bin:~/bin:~/Scripts:$ADSS_HOME/deps/wtools:$PATH"
 export LD_LIBRARY_PATH="/lib/:/usr/local/lib:$LD_LIBRARY_PATH"
 #export JAVA_HOME="/usr/lib/jvm/java-6-openjdk/"
 export EDITOR="/usr/bin/vim"
