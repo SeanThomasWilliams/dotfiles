@@ -1,28 +1,17 @@
 #!/usr/bin/env sh
-sudo yum -y install --skip-broken zsh dstat git mlocate gcc subversion python-devel screen python-boto numpy python-setuptools gcc-c++ blas-devel lapack-devel
-wget --no-check-certificate https://github.com/robbyrussell/oh-my-zsh/raw/master/tools/install.sh -O - | sudo sh
-sudo chsh -s /bin/zsh $USER
-git config --global user.name "Sean Williams"
-git config --global user.email seanthomaswilliams@gmail.com
-git pull && git submodule update --init --recursive
-cp ~/dotfiles/.* ~
-cp -r ~/dotfiles/.vim* ~
-sudo easy_install scipy 
-sudo easy_install matplotlib 
-sudo easy_install ipython 
-sudo easy_install -U distribute 
-sudo easy_install nltk 
-sudo easy_install scikit-learn
-sudo updatedb &
-echo
-echo "=========="
-echo "GCC Version"
-gcc --version
-echo "=========="
-echo "Java Version"
-java -version
-echo "=========="
-echo "Python Version"
-python --version
-echo "== Done =="
-#gpg -o ~/.boto -d .boto.gpg
+
+for file in `echo .*`; do
+    file=$(basename $file)
+    ln -s $PWD/$file $HOME/$file
+done
+
+# Install janus for vim
+if [ ! -d "$HOME/.vim/janus" ]; then
+    curl -Lo- https://bit.ly/janus-bootstrap | bash
+fi
+
+if [ ! -d "$HOME/.bash_it" ]; then
+    git clone http://github.com/revans/bash-it.git ~/.bash_it
+    $HOME/.bash_it/install.sh
+    echo "Edit ~/.bash_profiile"
+fi

@@ -1,0 +1,81 @@
+au BufEnter * if match( getline(1) , '^\#!') == 0 | execute("let b:interpreter = getline(1)[2:]") | endif
+
+fun! CallInterpreter()
+    if exists("b:interpreter")
+         exec ("!".b:interpreter." %")
+    endif
+endfun
+
+map <F5> <ESC>:w<CR>:call CallInterpreter()<CR>
+
+""""""""""""""""""""""""""""""""""
+" Syntax and indent
+""""""""""""""""""""""""""""""""""
+set showmatch  "Show matching bracets when text indicator is over them
+
+" Switch on filetype detection and loads 
+" indent file (indent.vim) for specific file types
+filetype indent on
+filetype on
+set autoindent " Copy indent from the row above
+set si " Smart indent
+
+set expandtab
+set shiftwidth=4
+set softtabstop=4
+syn case match
+syn sync minlines=50
+
+map <F11> :!ctags -R -f ~/.tags `python -c 'from distutils.sysconfig import get_python_lib; print get_python_lib()'`&<CR>
+set tags=~/.tags
+
+nnoremap <C-]> :execute 'tj' expand('<cword>')<CR>zv
+
+"omnicomplete
+inoremap <C-Space> <C-X><C-I>
+
+cabbrev sp vsp
+cabbrev split vsplit
+cabbrev hsplit split
+cabbrev sta vertical sta
+cabbrev help vertical help
+cabbrev new vnew
+cabbrev right botright
+
+"Ctrl-Shift-ArrowKeys = resize active split
+nnoremap <C-S-Left> <C-W><lt>
+nnoremap <C-S-Right> <C-W>>
+nnoremap <C-S-Up> <C-W>+
+nnoremap <C-S-Down> <C-W>-
+
+"Ctrl-ArrowKeys = move between splits
+nnoremap <C-Left> <C-W><left>
+nnoremap <C-Right> <C-W><right>
+nnoremap <C-Up> <C-W><up>
+nnoremap <C-Down> <C-W><down>
+
+nnoremap <C-\> :vsp<CR>
+nnoremap <C-p> :pop<CR>
+
+"tab handling
+nnoremap ,t :tab sp<CR>
+nnoremap ,w :tabc<CR>
+
+"F2 toggles line numbers
+nnoremap <silent> <F2> :set nonumber!<CR>:set foldcolumn=0<CR>
+
+nnoremap <silent> <F7> :TagbarToggle<CR>
+nnoremap <silent> ,l :TlistToggle<CR>
+nnoremap <silent> <F8> :NERDTreeToggle<CR>
+nnoremap <silent> ,n :NERDTreeToggle<CR>
+
+"make Y behave more like C and D
+nmap Y y$ 
+
+"color schemes
+if has("gui_running")
+  colorscheme inkpot
+else
+  colorscheme wombat256
+endif
+
