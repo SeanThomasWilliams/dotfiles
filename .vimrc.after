@@ -24,15 +24,20 @@ set expandtab
 set shiftwidth=4
 set softtabstop=4
 syn case match
-syn sync minlines=50
+syn sync minlines=80
 
-map <F11> :!ctags -R -f ~/.tags `python -c 'from distutils.sysconfig import get_python_lib; print get_python_lib()'`&<CR>
-set tags=~/.tags
+map <F11> :!ctags -R -f ./tags . &<CR>
+set tags=~/.jstags,~/.tags,./tags
 
 nnoremap <C-]> :execute 'tj' expand('<cword>')<CR>zv
 
 "omnicomplete
 inoremap <C-Space> <C-X><C-I>
+
+" Resize splits
+nnoremap <silent> + :exe "vertical resize " . (winwidth(0) * 4/3)<CR>
+nnoremap <silent> = :exe "vertical resize " . (winwidth(0) * 4/3)<CR>
+nnoremap <silent> - :exe "vertical resize " . (winwidth(0) * 3/4)<CR>
 
 cabbrev sp vsp
 cabbrev split vsplit
@@ -55,22 +60,34 @@ nnoremap <C-Up> <C-W><up>
 nnoremap <C-Down> <C-W><down>
 
 nnoremap <C-\> :vsp<CR>
-nnoremap <C-p> :pop<CR>
 
 "tab handling
-nnoremap ,t :tab sp<CR>
-nnoremap ,w :tabc<CR>
+nnoremap \t :tab sp<CR>
+nnoremap \w :tabc<CR>
+
+nnoremap ; :
+vnoremap ; :
+vnoremap : ;
 
 "F2 toggles line numbers
 nnoremap <silent> <F2> :set nonumber!<CR>:set foldcolumn=0<CR>
 
-nnoremap <silent> <F7> :TagbarToggle<CR>
-nnoremap <silent> ,l :TlistToggle<CR>
-nnoremap <silent> <F8> :NERDTreeToggle<CR>
-nnoremap <silent> ,n :NERDTreeToggle<CR>
+nnoremap <silent> <Leader>t :TagbarToggle<CR>
 
 "make Y behave more like C and D
 nmap Y y$ 
+
+" Ack features
+nnoremap \a :Ack 
+nnoremap \A :Ack <C-r><C-w><CR> 
+nnoremap \j :Ack --js --ignore-dir=/opt/adss/a2/a2/a2/public/js/lib --ignore-dir=/opt/adss/a2/a2/a2/public/bootstrap.css --ignore-dir=/opt/adss/a2/a2/a2/public/bootstrap --ignore-dir=/opt/adss/a2/a2/a2/public/fontawesome 
+nnoremap \J :Ack --js --ignore-dir=/opt/adss/a2/a2/a2/public/js/lib --ignore-dir=/opt/adss/a2/a2/a2/public/bootstrap.css --ignore-dir=/opt/adss/a2/a2/a2/public/bootstrap --ignore-dir=/opt/adss/a2/a2/a2/public/fontawesome <C-r><C-w><CR>
+
+" Ack results/compiler
+"ctrl-j/k to jump between 'compiler' messages
+nnoremap <silent> <C-j> :cn<CR>
+nnoremap <silent> <C-k> :cp<CR>
+
 
 "color schemes
 if has("gui_running")
@@ -79,3 +96,40 @@ else
   colorscheme wombat256
 endif
 
+" Pylint
+
+"source ~/.vim/compiler/pylint.vim
+
+"pylint settings
+augroup ftpy2
+        autocmd!
+        autocmd FileType python compiler pylint
+augroup end
+
+command! A2 cd /opt/adss/a2
+
+let g:pylint_inline_highlight = 0
+let g:pylint_onwrite = 0
+let g:pylint_signs = 0
+
+nnoremap <silent> <Leader>p :Pylint<CR> :copen<CR>
+nnoremap <silent> <Leader>c :cclose<CR>
+nnoremap <silent> <Leader>C :copen<CR>
+
+" Tagbar
+let g:tagbar_autofocus = 1
+let g:tagbar_singleclick = 1
+let g:tagbar_autoshowtag = 1
+
+
+" fix syntax hl:
+nnoremap U :syntax sync fromstart<cr>:redraw!<cr>
+
+"try the following line in your .vimrc
+
+nnoremap <leader>v :tabe ~/.vimrc.after \| vert sview /shared/home/mboehm/.vimrc<CR>
+
+"with the cursor in your vimrc (NOT on mine), to exit you can do something like:
+
+"save | close tab | reload vimrc
+nnoremap <leader>V :w \| tabc \| so ~/.vimrc.after<CR>
