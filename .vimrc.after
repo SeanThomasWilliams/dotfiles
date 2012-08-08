@@ -2,7 +2,6 @@
 " BASIC EDITING CONFIGURATION
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 filetype plugin indent on
-let mapleader=","
 set autoindent
 set backspace=indent,eol,start " allow backspacing over everything in insert mode
 set backupdir=~/.vim-tmp,~/.tmp,~/tmp,/var/tmp,/tmp
@@ -69,7 +68,8 @@ augroup END
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 set t_Co=256 " 256 colors
 set background=dark
-color grb256
+" color grb256
+color inkpot
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " STATUS LINE
@@ -86,6 +86,7 @@ augroup ftpy2
 augroup end
 
 command! A2 cd /opt/adss/a2
+command! ADSS cd /opt/adss/
 
 let g:pylint_inline_highlight = 0
 let g:pylint_onwrite = 0
@@ -122,15 +123,13 @@ call MapCR()
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 nnoremap <silent> <F2> :set nonumber!<CR>:set foldcolumn=0<CR>
 nnoremap <F5> <ESC>:w<CR>:call CallInterpreter()<CR>
-nnoremap <silent> <F7> :TagbarToggle<CR>
-nnoremap <silent> <F8> :NERDTreeToggle<CR>
 
-" Resize splits
 map <F11> :!ctags -R -f ./tags . &<CR>
 
 "omnicomplete
 inoremap <C-Space> <C-X><C-I>
 
+" Resize splits
 nnoremap <silent> + :exe "vertical resize " . (winwidth(0) * 4/3)<CR>
 nnoremap <silent> = :exe "vertical resize " . (winwidth(0) * 4/3)<CR>
 nnoremap <silent> - :exe "vertical resize " . (winwidth(0) * 3/4)<CR>
@@ -171,10 +170,6 @@ nnoremap <C-S-Up> <C-W>+
 
 nnoremap <C-\> :vsp<CR>
 
-"tab handling
-nnoremap \t :tab sp<CR>
-nnoremap \w :tabc<CR>
-
 nnoremap ; :
 vnoremap ; :
 vnoremap : ;
@@ -182,27 +177,24 @@ vnoremap : ;
 "F2 toggles line numbers
 nnoremap <silent> <F2> :set nonumber!<CR>:set foldcolumn=0<CR>
 
-nnoremap <silent> <Leader>t :TagbarToggle<CR>
+nnoremap <silent> <Leader>] :TagbarToggle<CR>
 nnoremap <C-]> :execute 'tj' expand('<cword>')<CR>zv
-nnoremap <C-p> :pop<CR>
+"nnoremap <C-p> :pop<CR>
 
 "tab handling
 nnoremap <Leader>t :tab sp<CR>
 nnoremap <Leader>w :tabc<CR>
-nnoremap <silent> + :exe "vertical resize " . (winwidth(0) * 3/2)<CR>
-nnoremap <silent> - :exe "vertical resize " . (winwidth(0) * 2/3)<CR>
-nnoremap <silent> = :exe "vertical resize " . (winwidth(0) * 3/2)<CR>
-nnoremap <silent> <Leader>l :TlistToggle<CR>
+nnoremap <Leader>l :TagbarToggle<CR>
 nnoremap <silent> <Leader>n :NERDTreeToggle<CR>
 
 "make Y behave more like C and D
 nmap Y y$ 
 
 " Ack features
-nnoremap \a :Ack 
-nnoremap \A :Ack <C-r><C-w><CR> 
-nnoremap \j :Ack --js --ignore-dir=/opt/adss/a2/a2/a2/public/js/lib --ignore-dir=/opt/adss/a2/a2/a2/public/bootstrap.css --ignore-dir=/opt/adss/a2/a2/a2/public/bootstrap --ignore-dir=/opt/adss/a2/a2/a2/public/fontawesome 
-nnoremap \J :Ack --js --ignore-dir=/opt/adss/a2/a2/a2/public/js/lib --ignore-dir=/opt/adss/a2/a2/a2/public/bootstrap.css --ignore-dir=/opt/adss/a2/a2/a2/public/bootstrap --ignore-dir=/opt/adss/a2/a2/a2/public/fontawesome <C-r><C-w><CR>
+nnoremap <Leader>a :Ack 
+nnoremap <Leader>A :Ack <C-r><C-w><CR> 
+nnoremap <Leader>j :Ack --js --ignore-dir=/opt/adss/a2/a2/a2/public/js/lib --ignore-dir=/opt/adss/a2/a2/a2/public/bootstrap.css --ignore-dir=/opt/adss/a2/a2/a2/public/bootstrap --ignore-dir=/opt/adss/a2/a2/a2/public/fontawesome 
+nnoremap <Leader>J :Ack --js --ignore-dir=/opt/adss/a2/a2/a2/public/js/lib --ignore-dir=/opt/adss/a2/a2/a2/public/bootstrap.css --ignore-dir=/opt/adss/a2/a2/a2/public/bootstrap --ignore-dir=/opt/adss/a2/a2/a2/public/fontawesome <C-r><C-w><CR>
 
 " ctrl-j/k to jump between 'compiler' messages
 nnoremap <silent> <C-j> :cn<CR>
@@ -249,7 +241,7 @@ function! RenameFile()
         redraw!
     endif
 endfunction
-map <leader>n :call RenameFile()<cr>
+map <leader>r :call RenameFile()<cr>
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Md5 COMMAND
