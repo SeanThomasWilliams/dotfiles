@@ -1,106 +1,85 @@
-au BufEnter * if match( getline(1) , '^\#!') == 0 | execute("let b:interpreter = getline(1)[2:]") | endif
-
-fun! CallInterpreter()
-    if exists("b:interpreter")
-         exec ("!".b:interpreter." %")
-    endif
-endfun
-
-map <F5> <ESC>:w<CR>:call CallInterpreter()<CR>
-
-""""""""""""""""""""""""""""""""""
-" Syntax and indent
-""""""""""""""""""""""""""""""""""
-set showmatch  "Show matching bracets when text indicator is over them
-
-" Switch on filetype detection and loads 
-" indent file (indent.vim) for specific file types
-filetype indent on
-filetype on
-set autoindent " Copy indent from the row above
-set si " Smart indent
-
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" BASIC EDITING CONFIGURATION
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+filetype plugin indent on
+let mapleader=","
+set autoindent
+set backspace=indent,eol,start " allow backspacing over everything in insert mode
+set backupdir=~/.vim-tmp,~/.tmp,~/tmp,/var/tmp,/tmp
+set backup " Store temporary files in a central spot
+set cmdheight=2
+set cursorline " highlight current line
+set directory=~/.vim-tmp,~/.tmp,~/tmp,/var/tmp,/tmp
 set expandtab
+set hidden
+set history=10000
+set hlsearch
+set ignorecase smartcase " make searches case-sensitive only if they contain upper-case characters
+set incsearch
+set laststatus=2
+set nocompatible
+set numberwidth=5
+set scrolloff=3 " keep more context when scrolling off the end of a buffer
+set shell=bash " This makes RVM work inside Vim. I have no idea why.
 set shiftwidth=4
+set showcmd " display incomplete commands
+set showmatch
+set showtabline=2
 set softtabstop=4
+set switchbuf=useopen
+set tabstop=4
+set tags=~/.jstags,~/.tags,./tags
+set t_ti= t_te= " Prevent Vim from clobbering the scrollback buffer. See
+set wildmenu " make tab completion for files/buffers act like bash
+set wildmode=longest,list " use emacs-style tab completion when selecting files, etc
+set winwidth=79
 syn case match
 syn sync minlines=80
+syntax on " Enable highlighting for syntax
 
-map <F11> :!ctags -R -f ./tags . &<CR>
-set tags=~/.jstags,~/.tags,./tags
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" CUSTOM AUTOCMDS
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+augroup vimrcEx
+  " Clear all autocmds in the group
+  autocmd!
+  autocmd FileType text setlocal textwidth=78
+  " Jump to last cursor position unless it's invalid or in an event handler
+  autocmd BufReadPost *
+    \ if line("'\"") > 0 && line("'\"") <= line("$") |
+    \   exe "normal g`\"" |
+    \ endif
 
-nnoremap <C-]> :execute 'tj' expand('<cword>')<CR>zv
+  autocmd FileType javascript,python set sw=4 sts=4 et
 
-"omnicomplete
-inoremap <C-Space> <C-X><C-I>
+  " Indent p tags
+  autocmd FileType html,eruby if g:html_indent_tags !~ '\\|p\>' | let g:html_indent_tags .= '\|p\|li\|dt\|dd' | endif
 
-" Resize splits
-nnoremap <silent> + :exe "vertical resize " . (winwidth(0) * 4/3)<CR>
-nnoremap <silent> = :exe "vertical resize " . (winwidth(0) * 4/3)<CR>
-nnoremap <silent> - :exe "vertical resize " . (winwidth(0) * 3/4)<CR>
+  " Don't syntax highlight markdown because it's often wrong
+  autocmd! FileType mkd setlocal syn=off
 
-cabbrev sp vsp
-cabbrev split vsplit
-cabbrev hsplit split
-cabbrev sta vertical sta
-cabbrev help vertical help
-cabbrev new vnew
-cabbrev right botright
+  " Leave the return key alone when in command line windows, since it's used
+  " to run commands there.
+  autocmd! CmdwinEnter * :unmap <cr>
+  autocmd! CmdwinLeave * :call MapCR()
+augroup END
 
-"Ctrl-Shift-ArrowKeys = resize active split
-nnoremap <C-S-Left> <C-W><lt>
-nnoremap <C-S-Right> <C-W>>
-nnoremap <C-S-Up> <C-W>+
-nnoremap <C-S-Down> <C-W>-
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" COLOR
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+set t_Co=256 " 256 colors
+set background=dark
+color grb256
 
-"Ctrl-ArrowKeys = move between splits
-nnoremap <C-Left> <C-W><left>
-nnoremap <C-Right> <C-W><right>
-nnoremap <C-Up> <C-W><up>
-nnoremap <C-Down> <C-W><down>
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" STATUS LINE
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+:set statusline=%<%f\ (%{&ft})\ %-4(%m%)%=%-19(%3l,%02c%03V%)
 
-nnoremap <C-\> :vsp<CR>
-
-"tab handling
-nnoremap \t :tab sp<CR>
-nnoremap \w :tabc<CR>
-
-nnoremap ; :
-vnoremap ; :
-vnoremap : ;
-
-"F2 toggles line numbers
-nnoremap <silent> <F2> :set nonumber!<CR>:set foldcolumn=0<CR>
-
-nnoremap <silent> <Leader>t :TagbarToggle<CR>
-
-"make Y behave more like C and D
-nmap Y y$ 
-
-" Ack features
-nnoremap \a :Ack 
-nnoremap \A :Ack <C-r><C-w><CR> 
-nnoremap \j :Ack --js --ignore-dir=/opt/adss/a2/a2/a2/public/js/lib --ignore-dir=/opt/adss/a2/a2/a2/public/bootstrap.css --ignore-dir=/opt/adss/a2/a2/a2/public/bootstrap --ignore-dir=/opt/adss/a2/a2/a2/public/fontawesome 
-nnoremap \J :Ack --js --ignore-dir=/opt/adss/a2/a2/a2/public/js/lib --ignore-dir=/opt/adss/a2/a2/a2/public/bootstrap.css --ignore-dir=/opt/adss/a2/a2/a2/public/bootstrap --ignore-dir=/opt/adss/a2/a2/a2/public/fontawesome <C-r><C-w><CR>
-
-" Ack results/compiler
-"ctrl-j/k to jump between 'compiler' messages
-nnoremap <silent> <C-j> :cn<CR>
-nnoremap <silent> <C-k> :cp<CR>
-
-
-"color schemes
-if has("gui_running")
-  colorscheme inkpot
-else
-  colorscheme wombat256
-endif
-
-" Pylint
-
-"source ~/.vim/compiler/pylint.vim
-
-"pylint settings
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" PLUGIN SETTINGS
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Pylint settings
 augroup ftpy2
         autocmd!
         autocmd FileType python compiler pylint
@@ -121,15 +100,189 @@ let g:tagbar_autofocus = 1
 let g:tagbar_singleclick = 1
 let g:tagbar_autoshowtag = 1
 
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" MISC FUNCTIONS
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+au BufEnter * if match( getline(1) , '^\#!') == 0 | execute("let b:interpreter = getline(1)[2:]") | endif
+
+fun! CallInterpreter()
+    if exists("b:interpreter")
+         exec ("!".b:interpreter." %")
+    endif
+endfun
+
+" Clear the search buffer when hitting return
+function! MapCR()
+  nnoremap <cr> :nohlsearch<cr>
+endfunction
+call MapCR()
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" MISC KEY MAPS
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+nnoremap <silent> <F2> :set nonumber!<CR>:set foldcolumn=0<CR>
+nnoremap <F5> <ESC>:w<CR>:call CallInterpreter()<CR>
+nnoremap <silent> <F7> :TagbarToggle<CR>
+nnoremap <silent> <F8> :NERDTreeToggle<CR>
+
+" Resize splits
+map <F11> :!ctags -R -f ./tags . &<CR>
+
+"omnicomplete
+inoremap <C-Space> <C-X><C-I>
+
+nnoremap <silent> + :exe "vertical resize " . (winwidth(0) * 4/3)<CR>
+nnoremap <silent> = :exe "vertical resize " . (winwidth(0) * 4/3)<CR>
+nnoremap <silent> - :exe "vertical resize " . (winwidth(0) * 3/4)<CR>
+
+" Find tag for selected word
+nnoremap <C-]> :execute 'tj' expand('<cword>')<CR>zv
+
+map <leader>y "*y
+
+" Move around splits with <c-hjkl>
+nnoremap <c-j> <c-w>j
+nnoremap <c-k> <c-w>k
+nnoremap <c-h> <c-w>h
+nnoremap <c-l> <c-w>l
+
+" Insert a hash rocket with <c-l>
+imap <c-l> <space>=><space>
+
+" Can't be bothered to understand ESC vs <c-c> in insert mode
+imap <c-c> <esc>
+
+nnoremap <leader><leader> <c-^>
+
+"omnicomplete
+inoremap <C-Space> <C-X><C-I>
+
+"Ctrl-ArrowKeys = move between splits
+nnoremap <C-Down> <C-W><down>
+nnoremap <C-Left> <C-W><left>
+nnoremap <C-Right> <C-W><right>
+nnoremap <C-Up> <C-W><up>
+
+"Ctrl-Shift-ArrowKeys = resize active split
+nnoremap <C-S-Down> <C-W>-
+nnoremap <C-S-Left> <C-W><lt>
+nnoremap <C-S-Right> <C-W>>
+nnoremap <C-S-Up> <C-W>+
+
+nnoremap <C-\> :vsp<CR>
+
+"tab handling
+nnoremap \t :tab sp<CR>
+nnoremap \w :tabc<CR>
+
+nnoremap ; :
+vnoremap ; :
+vnoremap : ;
+
+"F2 toggles line numbers
+nnoremap <silent> <F2> :set nonumber!<CR>:set foldcolumn=0<CR>
+
+nnoremap <silent> <Leader>t :TagbarToggle<CR>
+nnoremap <C-]> :execute 'tj' expand('<cword>')<CR>zv
+nnoremap <C-p> :pop<CR>
+
+"tab handling
+nnoremap <Leader>t :tab sp<CR>
+nnoremap <Leader>w :tabc<CR>
+nnoremap <silent> + :exe "vertical resize " . (winwidth(0) * 3/2)<CR>
+nnoremap <silent> - :exe "vertical resize " . (winwidth(0) * 2/3)<CR>
+nnoremap <silent> = :exe "vertical resize " . (winwidth(0) * 3/2)<CR>
+nnoremap <silent> <Leader>l :TlistToggle<CR>
+nnoremap <silent> <Leader>n :NERDTreeToggle<CR>
+
+"make Y behave more like C and D
+nmap Y y$ 
+
+" Ack features
+nnoremap \a :Ack 
+nnoremap \A :Ack <C-r><C-w><CR> 
+nnoremap \j :Ack --js --ignore-dir=/opt/adss/a2/a2/a2/public/js/lib --ignore-dir=/opt/adss/a2/a2/a2/public/bootstrap.css --ignore-dir=/opt/adss/a2/a2/a2/public/bootstrap --ignore-dir=/opt/adss/a2/a2/a2/public/fontawesome 
+nnoremap \J :Ack --js --ignore-dir=/opt/adss/a2/a2/a2/public/js/lib --ignore-dir=/opt/adss/a2/a2/a2/public/bootstrap.css --ignore-dir=/opt/adss/a2/a2/a2/public/bootstrap --ignore-dir=/opt/adss/a2/a2/a2/public/fontawesome <C-r><C-w><CR>
+
+" ctrl-j/k to jump between 'compiler' messages
+nnoremap <silent> <C-j> :cn<CR>
+nnoremap <silent> <C-k> :cp<CR>
 
 " fix syntax hl:
-nnoremap U :syntax sync fromstart<cr>:redraw!<cr>
-
-"try the following line in your .vimrc
-
+nnoremap U :syntax sync fromstart<cr>:redraw!<cr> 
 nnoremap <leader>v :tabe ~/.vimrc.after \| vert sview /shared/home/mboehm/.vimrc<CR>
-
-"with the cursor in your vimrc (NOT on mine), to exit you can do something like:
-
 "save | close tab | reload vimrc
-nnoremap <leader>V :w \| tabc \| so ~/.vimrc.after<CR>
+nnoremap <leader>V :w \| tabc \| so ~/.vimrc.after<CR> 
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" MULTIPURPOSE TAB KEY
+" Indent if we're at the beginning of a line. Else, do completion.
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+function! InsertTabWrapper()
+    let col = col('.') - 1
+    if !col || getline('.')[col - 1] !~ '\k'
+        return "\<tab>"
+    else
+        return "\<c-p>"
+    endif
+endfunction
+inoremap <tab> <c-r>=InsertTabWrapper()<cr>
+inoremap <s-tab> <c-n>
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" ARROW KEYS ARE UNACCEPTABLE
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+map <Left> <Nop>
+map <Right> <Nop>
+map <Up> <Nop>
+map <Down> <Nop>
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" RENAME CURRENT FILE
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+function! RenameFile()
+    let old_name = expand('%')
+    let new_name = input('New file name: ', expand('%'), 'file')
+    if new_name != '' && new_name != old_name
+        exec ':saveas ' . new_name
+        exec ':silent !rm ' . old_name
+        redraw!
+    endif
+endfunction
+map <leader>n :call RenameFile()<cr>
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Md5 COMMAND
+" Show the MD5 of the current buffer
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+command! -range Md5 :echo system('echo '.shellescape(join(getline(<line1>, <line2>), '\n')) . '| md5')
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" OpenChangedFiles COMMAND
+" Open a split for each dirty file in git
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+function! OpenChangedFiles()
+  only " Close all windows, unless they're modified
+  let status = system('git status -s | grep "^ \?\(M\|A\|UU\)" | sed "s/^.\{3\}//"')
+  let filenames = split(status, "\n")
+  exec "edit " . filenames[0]
+  for filename in filenames[1:]
+    exec "sp " . filename
+  endfor
+endfunction
+command! OpenChangedFiles :call OpenChangedFiles()
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" InsertTime COMMAND
+" Insert the current time
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+command! InsertTime :normal a<c-r>=strftime('%F %H:%M:%S.0 %z')<cr>
+
+cabbrev help vertical help
+cabbrev hsplit split
+cabbrev new vnew
+cabbrev right botright
+cabbrev sp vsp
+cabbrev split vsplit
+cabbrev sta vertical sta
+
