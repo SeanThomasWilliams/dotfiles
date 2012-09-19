@@ -11,7 +11,15 @@ export BASH_IT=$HOME/.bash_it
 
 # Lock and Load a custom theme file
 # location /.bash_it/themes/
-export BASH_IT_THEME='bobby'
+export BASH_IT_THEME='envy'
+# envy
+# pete
+# candy
+
+# base.theme.bash bobby candy clean colors.theme.bash demula dos doubletime 
+# doubletime_multiline doubletime_multiline_pyonly envy hawaii50 mbriggs 
+# minimal modern modern-t n0qorg pete rainbowbrite rjorgenson simple sirup 
+# standard tonka tylenol zitron zork
 
 # Your place for hosting Git repos. I use this for private repos.
 export GIT_HOSTING='git@github.com'
@@ -47,3 +55,30 @@ export HISTFILESIZE=600000
 complete -d cd
 set -o vi
 [[ -s $HOME/.alias ]] && source $HOME/.alias
+PROMPT_COMMAND="$PROMPT_COMMAND"$'\nhistory -a; history -n'
+
+HOSTNAME=`uname -n`
+if [ "$TERM" = "xterm" ]
+then
+   ilabel () { /bin/echo "]1;$*"; }
+   label ()  { /bin/echo "]2;$*"; }
+   alias stripe='label $HOSTNAME - ${PWD#$HOME/}'
+   alias stripe2='label $HOSTNAME - vi $*'
+   cds () {
+     if [ -z "$1" ]
+     then
+         "cd"
+     else
+         "cd" $*
+     fi
+     eval stripe;
+   }
+   vis () { eval stripe2; "vi" $*; eval stripe; }
+   alias cd=cds
+   alias vi=vis
+   eval stripe
+   eval ilabel "$HOSTNAME"
+fi
+
+clear
+

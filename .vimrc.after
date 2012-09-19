@@ -3,6 +3,7 @@
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 filetype plugin indent on
 set autoindent
+set autochdir
 set backspace=indent,eol,start " allow backspacing over everything in insert mode
 set backupdir=~/.vim-tmp,~/.tmp,~/tmp,/var/tmp,/tmp
 set backup " Store temporary files in a central spot
@@ -10,7 +11,10 @@ set cmdheight=2
 set cursorline " highlight current line
 set directory=~/.vim-tmp,~/.tmp,~/tmp,/var/tmp,/tmp
 set expandtab
-set hidden
+set guioptions-=T
+set guioptions+=LlRrb
+set guioptions-=LlRrb
+set guifont=Terminus\ 10
 set history=10000
 set hlsearch
 set ignorecase smartcase " make searches case-sensitive only if they contain upper-case characters
@@ -32,6 +36,8 @@ set t_ti= t_te= " Prevent Vim from clobbering the scrollback buffer. See
 set wildmenu " make tab completion for files/buffers act like bash
 set wildmode=longest,list " use emacs-style tab completion when selecting files, etc
 set winwidth=79
+set list
+set listchars=tab:▸\ ,trail:⋅,nbsp:⋅
 syn case match
 syn sync minlines=80
 syntax on " Enable highlighting for syntax
@@ -148,9 +154,6 @@ nnoremap <c-l> <c-w>l
 " Insert a hash rocket with <c-l>
 imap <c-l> <space>=><space>
 
-" Can't be bothered to understand ESC vs <c-c> in insert mode
-imap <c-c> <esc>
-
 nnoremap <leader><leader> <c-^>
 
 "omnicomplete
@@ -163,23 +166,32 @@ nnoremap <C-Right> <C-W><right>
 nnoremap <C-Up> <C-W><up>
 
 "Ctrl-Shift-ArrowKeys = resize active split
-nnoremap <C-S-Down> <C-W>-
-nnoremap <C-S-Left> <C-W><lt>
-nnoremap <C-S-Right> <C-W>>
-nnoremap <C-S-Up> <C-W>+
+"nnoremap <C-S-Down> <C-W>-
+"nnoremap <C-S-Left> <C-W><lt>
+"nnoremap <C-S-Right> <C-W>>
+"nnoremap <C-S-Up> <C-W>+
 
-nnoremap <C-\> :vsp<CR>
+nnoremap <C-\> :call DWM_New()<CR>\|:CtrlPMRU<CR>
+nnoremap <C-C> :call DWM_Close()<CR>
+nnoremap <C-A> :call DWM_Focus()<CR>
 
-nnoremap ; :
-vnoremap ; :
-vnoremap : ;
+"clear highlight search
+nmap <silent> <leader><space> :nohlsearch<CR>
+
+"nnoremap ; :
+"vnoremap ; :
+"vnoremap : ;
+
+map [[ ?{<CR>w99[{
+map ][ /}<CR>b99]}
+map ]] j0[[%/{<CR>
+map [] k$][%?}<CR>
 
 "F2 toggles line numbers
 nnoremap <silent> <F2> :set nonumber!<CR>:set foldcolumn=0<CR>
 
 nnoremap <silent> <Leader>] :TagbarToggle<CR>
 nnoremap <C-]> :execute 'tj' expand('<cword>')<CR>zv
-"nnoremap <C-p> :pop<CR>
 
 "tab handling
 nnoremap <Leader>t :tab sp<CR>
@@ -197,11 +209,12 @@ nnoremap <Leader>j :Ack --js --ignore-dir=/opt/adss/a2/a2/a2/public/js/lib --ign
 nnoremap <Leader>J :Ack --js --ignore-dir=/opt/adss/a2/a2/a2/public/js/lib --ignore-dir=/opt/adss/a2/a2/a2/public/bootstrap.css --ignore-dir=/opt/adss/a2/a2/a2/public/bootstrap --ignore-dir=/opt/adss/a2/a2/a2/public/fontawesome <C-r><C-w><CR>
 
 " CtrlP from a directory
-nnoremap <C-a> :CtrlP /opt/adss<CR>
+nnoremap <C-p> :CtrlP /opt/adss<CR>
+nnoremap <C-t> :CtrlPMRU<CR>
 
 " ctrl-j/k to jump between 'compiler' messages
-nnoremap <silent> <C-j> :cn<CR>
-nnoremap <silent> <C-k> :cp<CR>
+nnoremap <silent> <C-n> :cn<CR>
+nnoremap <silent> <C-m> :cp<CR>
 
 " fix syntax hl:
 nnoremap U :syntax sync fromstart<cr>:redraw!<cr> 
@@ -221,7 +234,9 @@ function! InsertTabWrapper()
         return "\<c-p>"
     endif
 endfunction
+
 inoremap <tab> <c-r>=InsertTabWrapper()<cr>
+inoremap <c-l> <c-x><c-l>
 inoremap <s-tab> <c-n>
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

@@ -3,4 +3,5 @@ call janus#disable_plugin('zoomwin')
 call janus#disable_plugin('buffergator')
 call janus#disable_plugin('syntastic')
 call janus#disable_plugin('snipmate')
+"call janus#disable_plugin('nerdtree')
 
