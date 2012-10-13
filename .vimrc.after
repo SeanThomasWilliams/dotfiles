@@ -3,7 +3,6 @@
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 filetype plugin indent on
 set autoindent
-set autochdir
 set backspace=indent,eol,start " allow backspacing over everything in insert mode
 set backupdir=~/.vim-tmp,~/.tmp,~/tmp,/var/tmp,/tmp
 set backup " Store temporary files in a central spot
@@ -99,6 +98,7 @@ let g:pylint_onwrite = 0
 let g:pylint_signs = 0
 
 nnoremap <silent> <Leader>p :Pylint<CR> :copen<CR>
+nnoremap <silent> <Leader>P :call Pep8()<CR> :copen<<CR>
 nnoremap <silent> <Leader>c :cclose<CR>
 nnoremap <silent> <Leader>C :copen<CR>
 
@@ -177,6 +177,7 @@ nnoremap <C-A> :call DWM_Focus()<CR>
 
 "clear highlight search
 nmap <silent> <leader><space> :nohlsearch<CR>
+nnoremap <silent> <Leader>s :%s/\s\+$<CR>
 
 "nnoremap ; :
 "vnoremap ; :
@@ -200,12 +201,12 @@ nnoremap <Leader>l :TagbarToggle<CR>
 nnoremap <silent> <Leader>n :NERDTreeToggle<CR>
 
 "make Y behave more like C and D
-nmap Y y$ 
+nmap Y y$
 
 " Ack features
-nnoremap <Leader>a :Ack 
-nnoremap <Leader>A :Ack <C-r><C-w><CR> 
-nnoremap <Leader>j :Ack --js --ignore-dir=/opt/adss/a2/a2/a2/public/js/lib --ignore-dir=/opt/adss/a2/a2/a2/public/bootstrap.css --ignore-dir=/opt/adss/a2/a2/a2/public/bootstrap --ignore-dir=/opt/adss/a2/a2/a2/public/fontawesome 
+nnoremap <Leader>a :Ack
+nnoremap <Leader>A :Ack <C-r><C-w><CR>
+nnoremap <Leader>j :Ack --js --ignore-dir=/opt/adss/a2/a2/a2/public/js/lib --ignore-dir=/opt/adss/a2/a2/a2/public/bootstrap.css --ignore-dir=/opt/adss/a2/a2/a2/public/bootstrap --ignore-dir=/opt/adss/a2/a2/a2/public/fontawesome
 nnoremap <Leader>J :Ack --js --ignore-dir=/opt/adss/a2/a2/a2/public/js/lib --ignore-dir=/opt/adss/a2/a2/a2/public/bootstrap.css --ignore-dir=/opt/adss/a2/a2/a2/public/bootstrap --ignore-dir=/opt/adss/a2/a2/a2/public/fontawesome <C-r><C-w><CR>
 
 " CtrlP from a directory
@@ -217,10 +218,10 @@ nnoremap <silent> <C-n> :cn<CR>
 nnoremap <silent> <C-m> :cp<CR>
 
 " fix syntax hl:
-nnoremap U :syntax sync fromstart<cr>:redraw!<cr> 
+nnoremap U :syntax sync fromstart<cr>:redraw!<cr>
 nnoremap <leader>v :tabe ~/.vimrc.after \| vert sview /shared/home/mboehm/.vimrc<CR>
 "save | close tab | reload vimrc
-nnoremap <leader>V :w \| tabc \| so ~/.vimrc.after<CR> 
+nnoremap <leader>V :w \| tabc \| so ~/.vimrc.after<CR>
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " MULTIPURPOSE TAB KEY
