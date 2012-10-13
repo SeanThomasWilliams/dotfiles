@@ -1,4 +1,5 @@
 #!/usr/bin/env sh
+set -e
 
 for file in `echo .*`; do
     file=$(basename $file)
