@@ -39,5 +39,10 @@ export TODO="t"
 # https://github.com/xvzf/vcprompt
 #export VCPROMPT_EXECUTABLE=~/.vcprompt/bin/vcprompt
 
+
+if [ -f ~/.alias ]; then
+    . ~/.alias
+fi
+
 # Load Bash It
 source $BASH_IT/bash_it.sh
