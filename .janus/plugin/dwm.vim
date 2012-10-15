@@ -86,6 +86,7 @@ endfunction
 
 
 function! DWM_New ()
+  call s:CloseHiddenBuffers()
   call DWM_Ball()
   vert topleft new
   call DWM_SyncBufs()
@@ -93,6 +94,7 @@ function! DWM_New ()
 endfunction
 
 function! DWM_Close()
+  call s:CloseHiddenBuffers()
   bd
   call DWM_Ball()
   if DWM_BufCount() > 1  
@@ -104,8 +106,8 @@ function! DWM_Close()
 endfunction
 
 function! DWM_Focus()
+  call s:CloseHiddenBuffers()
   let bname = bufname('%')
-"  call CloseHiddenBuffers()
   call DWM_TopBuf(bufnr(bname))
   call DWM_Ball()
   if DWM_BufCount() > 1  
@@ -116,28 +118,21 @@ function! DWM_Focus()
   endif
 endfunction
 
-function! CloseHiddenBuffers()
-  " figure out which buffers are visible in any tab
-  let visible = {}
-  for t in range(1, tabpagenr('$'))
-    for b in tabpagebuflist(t)
-      let visible[b] = 1
-    endfor
+command! CloseHiddenBuffers call s:CloseHiddenBuffers()
+function! s:CloseHiddenBuffers()
+  let open_buffers = []
+
+  for i in range(tabpagenr('$'))
+    call extend(open_buffers, tabpagebuflist(i + 1))
   endfor
 
-  " close any buffer that are loaded and not visible
-  for b in range(1, bufnr('$'))
-    if buflisted(b) && !has_key(visible, b)
-      exe 'bw ' . b
+  for num in range(1, bufnr("$") + 1)
+    if buflisted(num) && index(open_buffers, num) == -1
+      exec "bdelete ".num
     endif
   endfor
+endfunction
 
-endfun
-
-" map <C-N> :call DWM_New()<CR>
-" map <C-C> :call DWM_Close()<CR>
-" map <C-F> :call DWM_Focus()<CR>
-" map <C-B> :call DWM_Ball()<CR>
 
 map <C-J> <C-W>w
 map <C-K> <C-W>W
