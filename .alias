@@ -1,5 +1,6 @@
 unset SSH_AUTH_SOCK
 export ADSS_HOME="/adss"
+export GIT_EDITOR="vim"
 export TERM=xterm
 export SCALA_HOME="/opt/adss/deps/scala"
 export JAVA_HOME="/opt/adss/deps/java"

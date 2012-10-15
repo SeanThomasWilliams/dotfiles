@@ -204,9 +204,9 @@ nnoremap <silent> <Leader>n :NERDTreeToggle<CR>
 nmap Y y$
 
 " Ack features
-nnoremap <Leader>a :Ack
+nnoremap <Leader>a :Ack 
 nnoremap <Leader>A :Ack <C-r><C-w><CR>
-nnoremap <Leader>j :Ack --js --ignore-dir=/opt/adss/a2/a2/a2/public/js/lib --ignore-dir=/opt/adss/a2/a2/a2/public/bootstrap.css --ignore-dir=/opt/adss/a2/a2/a2/public/bootstrap --ignore-dir=/opt/adss/a2/a2/a2/public/fontawesome
+nnoremap <Leader>j :Ack --js --ignore-dir=/opt/adss/a2/a2/a2/public/js/lib --ignore-dir=/opt/adss/a2/a2/a2/public/bootstrap.css --ignore-dir=/opt/adss/a2/a2/a2/public/bootstrap --ignore-dir=/opt/adss/a2/a2/a2/public/fontawesome 
 nnoremap <Leader>J :Ack --js --ignore-dir=/opt/adss/a2/a2/a2/public/js/lib --ignore-dir=/opt/adss/a2/a2/a2/public/bootstrap.css --ignore-dir=/opt/adss/a2/a2/a2/public/bootstrap --ignore-dir=/opt/adss/a2/a2/a2/public/fontawesome <C-r><C-w><CR>
 
 " CtrlP from a directory
