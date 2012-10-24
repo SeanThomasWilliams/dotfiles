@@ -4,11 +4,11 @@
 filetype plugin indent on
 set autoindent
 set backspace=indent,eol,start " allow backspacing over everything in insert mode
-set backupdir=~/.vim-tmp,~/.tmp,~/tmp,/var/tmp,/tmp
+set backupdir=/var/tmp,/tmp
 set backup " Store temporary files in a central spot
 set cmdheight=2
 set cursorline " highlight current line
-set directory=~/.vim-tmp,~/.tmp,~/tmp,/var/tmp,/tmp
+set directory=/var/tmp,/tmp
 set expandtab
 set guioptions-=T
 set guioptions+=LlRrb
@@ -131,6 +131,9 @@ nnoremap <silent> <F2> :set nonumber!<CR>:set foldcolumn=0<CR>
 nnoremap <F5> <ESC>:w<CR>:call CallInterpreter()<CR>
 
 map <F11> :!ctags -R -f ./tags . &<CR>
+
+" Insert the current date
+nnoremap <silent><Leader>d :read !date<CR>
 
 "omnicomplete
 inoremap <C-Space> <C-X><C-I>
