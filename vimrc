@@ -82,7 +82,6 @@ nmap <silent><leader>lo :lw<CR>
 nmap <leader>nt :NERDTreeToggle<CR>
 nmap <leader>nf :NERDTreeFocus<CR>
 nmap <leader>nch :NERDTree .<CR>
-nmap <leader>ct :call ToggleFoldColumn()<cr>
 
 " Autocommands that cant live in after/filetypes
 " ----------------------------------------------
@@ -101,17 +100,9 @@ function! <SID>SynStack()
     echo map(synstack(line('.'), col('.')), 'synIDattr(v:val, "name")')
 endfunc
 
-function! ToggleFoldColumn()
-    if &foldcolumn
-        setlocal foldcolumn=0
-    else
-        setlocal foldcolumn=4
-    endif
-endfunction
-
 " If there is a vimrc.local source that before current
-if filereadable(expand('$HOME/vimrc.local'))
-    source expand('$HOME/vimrc.local')
+if filereadable(expand("~/.vimrc.local"))
+      source ~/.vimrc.local
 endif
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -128,10 +119,6 @@ set directory=/var/tmp,/tmp
 set encoding=utf8 " We write unicode so use utf8
 set errorbells
 set expandtab " Always use soft tabs
-set foldcolumn=4 " Set gutter to 4 columns for folding
-set foldlevel=0
-set foldmethod=indent " Use indenting for fold method
-set foldnestmax=2 " Only fold up to two levels
 set hidden "If I close a buffer dont delete the changes
 set history=10000
 set hlsearch "Highlight results of a search
@@ -212,9 +199,6 @@ color inkpot
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " PLUGIN SETTINGS
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-command! A2 cd /opt/adss/a2
-command! ADSS cd /opt/adss/
-
 let g:pylint_inline_highlight = 0
 let g:pylint_onwrite = 0
 let g:pylint_signs = 0
@@ -315,9 +299,6 @@ map ][ /}<CR>b99]}
 map ]] j0[[%/{<CR>
 map [] k$][%?}<CR>
 
-"F2 toggles line numbers
-nnoremap <silent> <F2> :set nonumber!<CR>:set foldcolumn=0<CR>
-
 nnoremap <silent> <Leader>] :TagbarToggle<CR>
 nnoremap <C-]> :execute 'tj' expand('<cword>')<CR>zv
 
@@ -333,11 +314,6 @@ nmap Y y$
 " Ack features
 nnoremap <Leader>a :Ack
 nnoremap <Leader>A :Ack <C-r><C-w><CR>
-nnoremap <Leader>j :Ack --js --ignore-dir=/opt/adss/a2/a2/a2/public/js/lib --ignore-dir=/opt/adss/a2/a2/a2/public/bootstrap.css --ignore-dir=/opt/adss/a2/a2/a2/public/bootstrap --ignore-dir=/opt/adss/a2/a2/a2/public/fontawesome
-nnoremap <Leader>J :Ack --js --ignore-dir=/opt/adss/a2/a2/a2/public/js/lib --ignore-dir=/opt/adss/a2/a2/a2/public/bootstrap.css --ignore-dir=/opt/adss/a2/a2/a2/public/bootstrap --ignore-dir=/opt/adss/a2/a2/a2/public/fontawesome <C-r><C-w><CR>
-
-" CtrlP from a directory
-nnoremap <C-p> :CtrlP /opt/adss<CR>
 nnoremap <C-t> :CtrlPMRU<CR>
 
 " ctrl-j/k to jump between 'compiler' messages
@@ -346,7 +322,6 @@ nnoremap <silent> <C-m> :cp<CR>
 
 " fix syntax hl:
 nnoremap U :syntax sync fromstart<cr>:redraw!<cr>
-nnoremap <leader>v :tabe ~/.vimrc.after \| vert sview /shared/home/mboehm/.vimrc<CR>
 "save | close tab | reload vimrc
 nnoremap <leader>V :w \| tabc \| so ~/.vimrc.after<CR>
 
