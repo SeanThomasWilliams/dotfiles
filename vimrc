@@ -23,7 +23,6 @@ Bundle 'scrooloose/nerdcommenter'
 Bundle 'scrooloose/nerdtree'
 Bundle 'scrooloose/syntastic'
 Bundle 'sjl/gundo.vim'
-Bundle 'szw/rope-vim'
 Bundle 'Townk/vim-autoclose'
 Bundle 'tpope/vim-fugitive'
 Bundle 'tpope/vim-surround'
@@ -113,9 +112,11 @@ set autoindent
 set backspace=indent,eol,start " allow backspacing over everything in insert mode
 set backup " Store temporary files in a central spot
 set backupdir=/var/tmp,/tmp
+set backupdir=~/.vim/tmp/backup/
 set cmdheight=2
 set cursorline " Show highlight on the cursor line
 set directory=/var/tmp,/tmp
+set directory=~/.vim/tmp/swap/
 set encoding=utf8 " We write unicode so use utf8
 set errorbells
 set expandtab " Always use soft tabs
@@ -129,6 +130,7 @@ set list
 set listchars=tab:▸\ ,trail:⋅,nbsp:⋅,eol:¬
 set magic
 set nocompatible
+set noswapfile
 set numberwidth=5
 set scrolloff=3 " keep more context when scrolling off the end of a buffer
 set shell=bash " This makes RVM work inside Vim. I have no idea why.
@@ -157,6 +159,13 @@ syn case match
 syn sync minlines=80
 syntax on " Enable highlighting for syntax
 
+" Make those folders automatically if they don't already exist.
+if !isdirectory(expand(&backupdir))
+    call mkdir(expand(&backupdir), "p")
+endif
+if !isdirectory(expand(&directory))
+    call mkdir(expand(&directory), "p")
+endif
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
 " CUSTOM AUTOCMDS
@@ -199,6 +208,12 @@ color inkpot
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " PLUGIN SETTINGS
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" PyLint
+augroup ftpy
+   autocmd!
+   autocmd FileType python compiler pylint
+augroup end
+
 let g:pylint_inline_highlight = 0
 let g:pylint_onwrite = 0
 let g:pylint_signs = 0
@@ -247,7 +262,6 @@ nnoremap <silent><Leader>d :read !date<CR>
 inoremap <C-Space> <C-X><C-I>
 
 " Resize splits
-nnoremap <silent> + :exe "vertical resize " . (winwidth(0) * 4/3)<CR>
 nnoremap <silent> = :exe "vertical resize " . (winwidth(0) * 4/3)<CR>
 nnoremap <silent> - :exe "vertical resize " . (winwidth(0) * 3/4)<CR>
 
@@ -276,13 +290,7 @@ nnoremap <C-Left> <C-W><left>
 nnoremap <C-Right> <C-W><right>
 nnoremap <C-Up> <C-W><up>
 
-"Ctrl-Shift-ArrowKeys = resize active split
-"nnoremap <C-S-Down> <C-W>-
-"nnoremap <C-S-Left> <C-W><lt>
-"nnoremap <C-S-Right> <C-W>>
-"nnoremap <C-S-Up> <C-W>+
-
-nnoremap <C-\> :call DWM_New()<CR>\|:CtrlPMRU<CR>
+nnoremap <C-\> :call DWM_New()<CR>\|:CtrlPMRUFiles<CR>
 nnoremap <C-C> :call DWM_Close()<CR>
 nnoremap <C-A> :call DWM_Focus()<CR>
 
@@ -314,7 +322,16 @@ nmap Y y$
 " Ack features
 nnoremap <Leader>a :Ack
 nnoremap <Leader>A :Ack <C-r><C-w><CR>
-nnoremap <C-t> :CtrlPMRU<CR>
+
+" CtrlP
+let g:ctrlp_working_path_mode = 2
+let g:ctrlp_extensions = ['dir']
+let g:ctrlp_custom_ignore = {
+\ 'dir':  'public/js/lib$',
+\ 'file': '\.exe$\|\.so$\|\.dll$|\.swp$|\.swo$|\.pyc$|\.orig$',
+\ 'link': 'some_bad_symbolic_links',
+\ }
+nnoremap <C-t> :CtrlPMRUFiles<CR>
 
 " ctrl-j/k to jump between 'compiler' messages
 nnoremap <silent> <C-n> :cn<CR>
@@ -365,6 +382,9 @@ function! OpenChangedFiles()
 endfunction
 command! OpenChangedFiles :call OpenChangedFiles()
 nnoremap <Leader>cf :OpenChangedFiles<CR>
+
+"DiffOrig opens a diff between the current buffer and the saved version
+command! DiffOrig vert new | set bt=nofile | r # | 0d_ | diffthis | wincmd p | diffthis
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " InsertTime COMMAND
