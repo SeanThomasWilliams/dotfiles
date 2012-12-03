@@ -13,21 +13,23 @@ Bundle 'gmarik/vundle'
 "/____/ ----- Vim Bundles -------
 "
 
+Bundle 'Lokaltog/vim-powerline'
+Bundle 'SeanThomasWilliams/dwm.vim'
+Bundle 'Townk/vim-autoclose'
+Bundle 'derekwyatt/vim-scala'
 Bundle 'gagoar/StripWhiteSpaces'
 Bundle 'kien/ctrlp.vim'
-Bundle 'Lokaltog/vim-powerline'
 Bundle 'michaeljsmith/vim-indent-object'
+Bundle 'mileszs/ack.vim'
 Bundle 'nathanaelkane/vim-indent-guides'
-Bundle 'voithos/vim-multiselect'
 Bundle 'scrooloose/nerdcommenter'
 Bundle 'scrooloose/nerdtree'
 Bundle 'scrooloose/syntastic'
 Bundle 'sjl/gundo.vim'
-Bundle 'Townk/vim-autoclose'
 Bundle 'tpope/vim-fugitive'
 Bundle 'tpope/vim-surround'
-Bundle 'mileszs/ack.vim'
-Bundle 'SeanThomasWilliams/dwm.vim'
+Bundle 'vim-scripts/vimwiki'
+Bundle 'voithos/vim-multiselect'
 
 "        _
 " _   __(_)___ ___   ____  _________ _
@@ -127,10 +129,11 @@ set ignorecase "Dont care about case when searching
 set incsearch " Show search results while doing /
 set laststatus=2 " Always have a status line regardless
 set list
-set listchars=tab:▸\ ,trail:⋅,nbsp:⋅,eol:¬
+set listchars=tab:▸\ ,trail:⋅,nbsp:⋅ ",eol:¬
 set magic
 set nocompatible
 set noswapfile
+set number
 set numberwidth=5
 set scrolloff=3 " keep more context when scrolling off the end of a buffer
 set shell=bash " This makes RVM work inside Vim. I have no idea why.
@@ -147,9 +150,9 @@ set t_ti= t_te= " Prevent Vim from clobbering the scrollback buffer. See
 set tabstop=4
 set tags=~/.jstags,~/.tags,./tags " Look for tags in this file
 set title "Show a window title
-set tw=80
+set textwidth=120
 set undolevels=20 " Keep 20 undo levels
-set visualbell
+" set visualbell "Make the screen flash on bell
 set wildignore=*.swp,*.bak,*.pyc " Set wildignore to hid swp, bak and pyc files
 set wildmenu " make tab completion for files/buffers act like bash
 set wildmode=longest,list " use emacs-style tab completion when selecting files, etc
@@ -209,14 +212,14 @@ color inkpot
 " PLUGIN SETTINGS
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " PyLint
-augroup ftpy
-   autocmd!
-   autocmd FileType python compiler pylint
-augroup end
+"augroup ftpy
+"   autocmd!
+"   autocmd FileType python compiler pylint
+"augroup end
 
-let g:pylint_inline_highlight = 0
-let g:pylint_onwrite = 0
-let g:pylint_signs = 0
+"let g:pylint_inline_highlight = 0
+"let g:pylint_onwrite = 0
+"let g:pylint_signs = 0
 
 nnoremap <silent> <Leader>p :Pylint<CR> :copen<CR>
 nnoremap <silent> <Leader>P :call Pep8()<CR> :copen<<CR>
@@ -290,13 +293,13 @@ nnoremap <C-Left> <C-W><left>
 nnoremap <C-Right> <C-W><right>
 nnoremap <C-Up> <C-W><up>
 
-nnoremap <C-\> :call DWM_New()<CR>\|:CtrlPMRUFiles<CR>
+nnoremap <C-\> :call DWM_New() <bar> :CtrlPMixed<CR>
 nnoremap <C-C> :call DWM_Close()<CR>
 nnoremap <C-A> :call DWM_Focus()<CR>
 
 "clear highlight search
 nmap <silent> <leader><space> :nohlsearch<CR>
-nnoremap <silent> <Leader>s :%s/\s\+$<CR>
+nnoremap <silent> <Leader>s :StripWhiteSpaces<CR>
 
 "nnoremap ; :
 "vnoremap ; :
@@ -340,7 +343,7 @@ nnoremap <silent> <C-m> :cp<CR>
 " fix syntax hl:
 nnoremap U :syntax sync fromstart<cr>:redraw!<cr>
 "save | close tab | reload vimrc
-nnoremap <leader>V :w \| tabc \| so ~/.vimrc.after<CR>
+nnoremap <leader>V :w \| tabc \| so ~/.vimrc<CR>
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " MULTIPURPOSE TAB KEY
