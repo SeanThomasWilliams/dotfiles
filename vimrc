@@ -24,16 +24,6 @@ Bundle 'tpope/vim-fugitive'
 Bundle 'tpope/vim-surround'
 Bundle 'vim-scripts/vimwiki'
 
-"        _
-" _   __(_)___ ___   ____  _________ _
-"| | / / / __ `__ \ / __ \/ ___/ __ `/
-"| |/ / / / / / / // /_/ / /  / /_/ /
-"|___/_/_/ /_/ /_(_)____/_/   \__, /
-" Bundles ------------------ /____/
-
-Bundle 'genutils'
-
-
 "+----------------- Basic Configurations ------------+
 "
 
