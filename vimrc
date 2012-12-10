@@ -15,21 +15,14 @@ Bundle 'gmarik/vundle'
 
 Bundle 'Lokaltog/vim-powerline'
 Bundle 'SeanThomasWilliams/dwm.vim'
-Bundle 'Townk/vim-autoclose'
 Bundle 'derekwyatt/vim-scala'
 Bundle 'gagoar/StripWhiteSpaces'
 Bundle 'kien/ctrlp.vim'
-Bundle 'michaeljsmith/vim-indent-object'
 Bundle 'mileszs/ack.vim'
-Bundle 'nathanaelkane/vim-indent-guides'
-Bundle 'scrooloose/nerdcommenter'
-Bundle 'scrooloose/nerdtree'
 Bundle 'scrooloose/syntastic'
-Bundle 'sjl/gundo.vim'
 Bundle 'tpope/vim-fugitive'
 Bundle 'tpope/vim-surround'
 Bundle 'vim-scripts/vimwiki'
-Bundle 'voithos/vim-multiselect'
 
 "        _
 " _   __(_)___ ___   ____  _________ _
@@ -38,8 +31,6 @@ Bundle 'voithos/vim-multiselect'
 "|___/_/_/ /_/ /_(_)____/_/   \__, /
 " Bundles ------------------ /____/
 
-Bundle "bufexplorer.zip"
-Bundle 'JavaScript-Indent'
 Bundle 'genutils'
 
 
