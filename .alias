@@ -1,7 +1,7 @@
 unset SSH_AUTH_SOCK
 export ADSS_HOME="/adss"
 export GIT_EDITOR="vim"
-export TERM=xterm
+export TERM=xterm-256color
 export SCALA_HOME="/opt/adss/deps/scala"
 export JAVA_HOME="/opt/adss/deps/java"
 export PATH="$ADSS_HOME/deps/python/bin:$JAVA_HOME/bin:$SCALA_HOME/bin:/usr/local/bin:~/bin:~/Scripts:$ADSS_HOME/deps/wtools:~/git/play:$PATH"
@@ -77,6 +77,7 @@ alias speak="espeak -v en+m6 -s 150 -p 50 -g 3 -f "
 alias sr="screen -R -d"
 alias ssh_tunnel="ssh -C2qTnN -D 8080 xeed@xeed.me"
 alias terrain="cd /work/terrain && ls"
+alias tmux="tmux -2 attach || tmux -2"
 alias vi="vim"
 alias vncserver="vncserver -geometry 1280x1024"
 alias vnc="vncviewer -nocursorshape -depth 1 -quality 0 -compresslevel 9 -bgr233 xeed0.dyndns.org"
