@@ -13,7 +13,6 @@ Bundle 'gmarik/vundle'
 "/____/ ----- Vim Bundles -------
 "
 
-Bundle 'Lokaltog/vim-powerline'
 Bundle 'SeanThomasWilliams/dwm.vim'
 Bundle 'derekwyatt/vim-scala'
 Bundle 'gagoar/StripWhiteSpaces'
