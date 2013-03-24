@@ -2,6 +2,7 @@
 
 filetype off
 set rtp+=~/.vim/bundle/vundle/
+set rtp+=$GOROOT/misc/vim
 call vundle#rc()
 Bundle 'gmarik/vundle'
 
@@ -22,6 +23,7 @@ Bundle 'scrooloose/syntastic'
 Bundle 'tpope/vim-fugitive'
 Bundle 'tpope/vim-surround'
 Bundle 'vim-scripts/vimwiki'
+Bundle 'jnwhiteh/vim-golang'
 
 "+----------------- Basic Configurations ------------+
 "
@@ -383,3 +385,7 @@ cabbrev sp vsp
 cabbrev split vsplit
 cabbrev sta vertical sta
 
+
+" VJDE
+let g:vjde_tab_cfu=1
+let g:vjde_ctags_exts="java"
