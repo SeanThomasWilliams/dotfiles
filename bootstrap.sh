@@ -24,3 +24,5 @@ git submodule init
 git submodule update
 
 bash -c "go get -u github.com/nsf/gocode"
+bash -c "go get -u github.com/vmihailenco/redis"
+
