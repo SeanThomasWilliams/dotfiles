@@ -110,8 +110,8 @@ set hlsearch "Highlight results of a search
 set ignorecase "Dont care about case when searching
 set incsearch " Show search results while doing /
 set laststatus=2 " Always have a status line regardless
-set list
-set listchars=tab:▸\ ,trail:⋅,nbsp:⋅ ",eol:¬
+"set list
+"set listchars=tab:▸\ ,trail:⋅,nbsp:⋅ ",eol:¬
 set magic
 set nocompatible
 set noswapfile
