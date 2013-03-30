@@ -7,7 +7,6 @@ bind c screen 1
 bindkey "[C" next  # change window with ctrl-right
 bindkey "[D" prev  # change window with ctrl-left
 bufferfile "$HOME/.screen/exchange"
-chdir /opt/adss
 defbce on    # use current bg color for erased chars
 defscrollback 50000
 defutf8 on
@@ -18,8 +17,7 @@ hardstatus on
 hardstatus string '%{= kG}[ %{G}%H %{g}][%= %{= kw}%?%-Lw%?%{r}(%{W}%n*%f%t%?(%u)%?%{r})%{w}%?%+Lw%?%?%= %{g}][%{B} %m-%d %{W} %c %{g}]'
 maptimeout 5 # Wait no longer than 5ms between keypresses
 nonblock on
-screen -t vim 1 vim /opt/adss
-screen -t python 6 ipython
+screen -t vim 1 vim .
 screen -t bash 5
 screen -t bash 4
 screen -t bash 3
