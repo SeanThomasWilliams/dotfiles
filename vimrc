@@ -2,7 +2,7 @@
 
 filetype off
 set rtp+=~/.vim/bundle/vundle/
-set rtp+=$GOROOT/misc/vim
+"set rtp+=$GOROOT/misc/vim
 call vundle#rc()
 Bundle 'gmarik/vundle'
 
@@ -240,8 +240,8 @@ nnoremap <F5> <ESC>:w<CR>:call CallInterpreter()<CR>
 
 map <F11> :!ctags -R -f ./tags . &<CR>
 
-" Insert the current date
-nnoremap <silent><Leader>d :read !date<CR>
+" Call godoc on keyword
+nnoremap <silent><Leader>d :Godoc<CR>
 
 "omnicomplete
 inoremap <C-Space> <C-X><C-I>
