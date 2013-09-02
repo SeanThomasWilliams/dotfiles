@@ -275,7 +275,7 @@ nnoremap <C-Left> <C-W><left>
 nnoremap <C-Right> <C-W><right>
 nnoremap <C-Up> <C-W><up>
 
-nnoremap <C-\> :call DWM_New() <bar> :CtrlPMixed<CR>
+nnoremap <C-\> :call DWM_New() <bar> :CtrlP<CR>
 nnoremap <C-C> :call DWM_Close()<CR>
 nnoremap <C-A> :call DWM_Focus()<CR>
 
