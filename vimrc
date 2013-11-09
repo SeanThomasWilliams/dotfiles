@@ -275,7 +275,7 @@ nnoremap <C-Left> <C-W><left>
 nnoremap <C-Right> <C-W><right>
 nnoremap <C-Up> <C-W><up>
 
-nnoremap <C-\> :call DWM_New() <bar> :CtrlP<CR>
+nnoremap <C-\> :call DWM_New() <bar> :CtrlPCurWD<CR>
 nnoremap <C-C> :call DWM_Close()<CR>
 nnoremap <C-A> :call DWM_Focus()<CR>
 
@@ -309,14 +309,14 @@ nnoremap <Leader>a :Ack
 nnoremap <Leader>A :Ack <C-r><C-w><CR>
 
 " CtrlP
-let g:ctrlp_working_path_mode = 2
-let g:ctrlp_extensions = ['dir']
+"let g:ctrlp_working_path_mode = 2
+"let g:ctrlp_extensions = ['dir']
 let g:ctrlp_custom_ignore = {
 \ 'dir':  'public/js/lib$',
 \ 'file': '\.exe$\|\.so$\|\.dll$|\.swp$|\.swo$|\.pyc$|\.orig$',
 \ 'link': 'some_bad_symbolic_links',
 \ }
-nnoremap <C-t> :CtrlPMRUFiles<CR>
+nnoremap <C-t> :CtrlPCurWD<CR>
 
 " ctrl-j/k to jump between 'compiler' messages
 nnoremap <silent> <C-n> :cn<CR>
