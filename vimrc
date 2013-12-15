@@ -385,14 +385,10 @@ cabbrev sp vsp
 cabbrev split vsplit
 cabbrev sta vertical sta
 
-
 " VJDE
 let g:vjde_tab_cfu=1
 let g:vjde_ctags_exts="java"
 
-function! Browser_reload()
-    write
-    silent !echo  'reload' | nc -w 1 webclient 32000 2>&1 > /dev/null
-    redraw!
-endfunction
-map <F5> <esc>:call Browser_reload()<cr>
+" Firefox refresh
+" let g:firefox_refresh_files = "*.js"
+let $firefox_refresh_host = "webclient"
