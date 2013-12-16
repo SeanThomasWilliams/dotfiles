@@ -391,3 +391,7 @@ let g:vjde_ctags_exts="java"
 " Firefox refresh
 " let g:firefox_refresh_files = "*.js"
 let $firefox_refresh_host = "webclient"
+
+" Go
+let g:gofmt_command="goimports"
+autocmd FileType go autocmd BufWritePre <buffer> Fmt
