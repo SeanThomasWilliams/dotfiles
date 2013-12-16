@@ -98,8 +98,8 @@ set backupdir=/var/tmp,/tmp
 set backupdir=~/.vim/tmp/backup/
 set cmdheight=2
 set cursorline " Show highlight on the cursor line
-set directory=/var/tmp,/tmp
-set directory=~/.vim/tmp/swap/
+set directory=~/.vim/tmp/
+set diffopt+=iwhite
 set encoding=utf8 " We write unicode so use utf8
 set errorbells
 set expandtab " Always use soft tabs
