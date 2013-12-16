@@ -15,7 +15,6 @@ Bundle 'gmarik/vundle'
 "
 
 Bundle 'SeanThomasWilliams/dwm.vim'
-Bundle 'derekwyatt/vim-scala'
 Bundle 'gagoar/StripWhiteSpaces'
 Bundle 'kien/ctrlp.vim'
 Bundle 'mileszs/ack.vim'
