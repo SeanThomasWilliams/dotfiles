@@ -71,6 +71,7 @@ nmap <leader>nch :NERDTree .<CR>
 
 if has('autocmd')
     autocmd BufNewFile,Bufread *.wsgi set ft=python
+    autocmd BufNewFile,Bufread *.spect set ft=spec
 endif
 
 " Extra Functions
@@ -93,8 +94,8 @@ endif
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 filetype plugin indent on
 " set visualbell "Make the screen flash on bell
-set list
-set listchars=tab:▸\ ,trail:⋅,nbsp:⋅ ",eol:¬
+"set list
+"set listchars=tab:▸\ ,trail:⋅,nbsp:⋅ ",eol:¬
 if exists('+relativenumber')
 	set relativenumber
 endif
@@ -466,5 +467,5 @@ let g:vjde_ctags_exts="java"
 let $firefox_refresh_host = "webclient"
 
 " Go
-let g:gofmt_command="goimports"
-autocmd FileType go autocmd BufWritePre <buffer> Fmt
+"let g:gofmt_command="goimports"
+"autocmd FileType go autocmd BufWritePre <buffer> Fmt
