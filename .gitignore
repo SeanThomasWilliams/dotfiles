@@ -2,3 +2,5 @@ vim/bundle/
 vim/tmp/
 *.gz
 install/
+vim/bundle/vundle
+vim/bundle/*
