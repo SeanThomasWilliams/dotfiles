@@ -33,7 +33,7 @@ if has('gui_running')
     set spell " Spelling looks ugly in command line mode
     set spelllang=en_us " We speak amuurican
     set guioptions-=T
-    set guioptions=+M "Turn off annoying bars
+    "set guioptions=+M "Turn off annoying bars
     set guioptions+=LlRrb "Some kind of hack for scrollbars
     set guioptions-=LlRrb
     set guifont=Terminus\ 10
@@ -105,7 +105,6 @@ set autoread                    " Automatically reread changed files without ask
 set autowrite                   " Automatically save before :next, :make etc.
 set backspace=indent,eol,start " allow backspacing over everything in insert mode
 set backup " Store temporary files in a central spot
-set backupdir=/var/tmp,/tmp
 set backupdir=~/.vim/tmp/backup/
 set cmdheight=2
 set complete=.,w,b,u,t " Better Completion
@@ -391,7 +390,7 @@ au FileType go nmap <Leader>i <Plug>(go-info)
 
 au FileType go nmap  <leader>r  <Plug>(go-run)
 au FileType go nmap  <leader>b  <Plug>(go-build)
-au FileType go nmap  <leader>t  <Plug>(go-test)
+"au FileType go nmap  <leader>t  <Plug>(go-test)
 
 au FileType go nmap <Leader>d <Plug>(go-doc-vertical)
 
