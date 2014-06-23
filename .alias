@@ -1,5 +1,6 @@
 unset SSH_AUTH_SOCK
 export GIT_EDITOR="vim"
+export GOMAXPROCS=8
 export VIDEX="/opt/videx"
 export TERM=xterm-256color
 export JAVA_HOME="/usr/lib/jvm/latest"
