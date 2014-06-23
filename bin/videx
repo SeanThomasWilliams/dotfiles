@@ -1,0 +1,42 @@
+#!/bin/bash
+# Script to restart the go webserver by building and restarting the binary whenever go files change
+
+set -e
+source $HOME/.videx.env
+
+#NOVETTA=$GOPATH/src/github.com/Novetta
+#cd $NOVETTA
+#go run $NOVETTA/common/executor/executor_service/main.go &
+
+WATCHDIR=$NOVETTA
+BUILDDIR=$NOVETTA/VideoEnterprise/webserver/
+
+function __restart_goserver(){
+  cd $BUILDDIR
+  binary="$(basename $(pwd))"
+  echo "building $binary"
+  if go build -o $GOBIN/$binary
+  then
+    echo "killing old process"
+    kill -9 $(pidof "$binary") > /dev/null 2>&1
+    echo "starting '$binary'"
+    $GOBIN/$binary & #run it in background
+    echo "started with pid: $!"
+  else
+    echo "server restart failed"
+  fi
+}
+
+#cd to the right directory
+cd $WATCHDIR
+__restart_goserver
+#the command before the pipe is a blocking command, i.e. it doesn't end
+inotifywait -mrq --exclude="$(basename $(pwd))" --format '%f' -e close_write $1 | while read file
+do
+  if (echo $file | grep -E '^(.*\.go)$')
+  then
+    echo "--------------------"
+    #once we know that a go file has been written to we run it
+    __restart_goserver
+  fi
+done
