@@ -1,0 +1,22 @@
+#!/bin/bash
+
+set -e
+
+for fname in $(echo .*); do
+    if [ -d $fname ]; then
+        continue
+    fi
+
+    fname=$(basename $fname)
+    ln -sf $PWD/$fname $HOME/$fname
+done
+
+mkdir -p $HOME/bin
+cp $PWD/bin/* $HOME/bin/
+
+if [ ! -L "$HOME/.vim" ]; then
+    ln -sf $PWD/vim/ $HOME/.vim
+fi
+
+git submodule init
+git submodule update
