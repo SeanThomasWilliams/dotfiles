@@ -1,0 +1,4 @@
+#!/bin/bash
+
+source $HOME/.videx.env
+go run $GOPATH/src/github.com/Novetta/common/executor/executor_service/main.go

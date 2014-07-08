@@ -12,7 +12,7 @@ for fname in $(echo .*); do
 done
 
 mkdir -p $HOME/bin
-cp $PWD/bin/* $HOME/bin/
+ln -sf $PWD/bin/* $HOME/bin/
 
 if [ ! -L "$HOME/.vim" ]; then
     ln -sf $PWD/vim/ $HOME/.vim

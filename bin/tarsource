@@ -1,0 +1,18 @@
+#!/bin/bash
+
+OUTFILE=$HOME/gosrc.tar.gz
+rm $OUTFILE
+
+cd $GOPATH
+tar -cvf \
+    $OUTFILE src \
+    --exclude 'Fusion' \
+    --exclude .git \
+    --exclude .hg \
+    --exclude "*.bak" \
+    --exclude 'Atlas' \
+    --exclude 'deps' \
+    --exclude 'vlc/*' \
+    --exclude 'perseus' \
+    --exclude 'maven'
+echo "Done!"

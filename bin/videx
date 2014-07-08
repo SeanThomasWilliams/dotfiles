@@ -1,12 +1,7 @@
 #!/bin/bash
 # Script to restart the go webserver by building and restarting the binary whenever go files change
 
-set -e
 source $HOME/.videx.env
-
-#NOVETTA=$GOPATH/src/github.com/Novetta
-#cd $NOVETTA
-#go run $NOVETTA/common/executor/executor_service/main.go &
 
 WATCHDIR=$NOVETTA
 BUILDDIR=$NOVETTA/VideoEnterprise/webserver/
