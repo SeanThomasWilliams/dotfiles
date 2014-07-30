@@ -104,14 +104,14 @@ set autoindent
 set autoread                    " Automatically reread changed files without asking me anything
 set autowrite                   " Automatically save before :next, :make etc.
 set backspace=indent,eol,start " allow backspacing over everything in insert mode
+set backupdir=~/.vim/tmp/backup// " backups
 set backup " Store temporary files in a central spot
-set backupdir=~/.vim/tmp/backup/
 set cmdheight=2
-set complete=.,w,b,u,t " Better Completion
 set completeopt=longest,menuone " Better Completion
+set complete=.,w,b,u,t " Better Completion
 set cursorline " Show highlight on the cursor line
 set diffopt+=iwhite
-set directory=~/.vim/tmp/
+set directory=~/.vim/tmp/swap//   " swap files
 set encoding=utf8 " We write unicode so use utf8
 set errorbells
 set expandtab " Always use soft tabs
@@ -122,15 +122,22 @@ set hlsearch "Highlight results of a search
 set ignorecase "Dont care about case when searching
 set incsearch " Show search results while doing /
 set laststatus=2 " Always have a status line regardless
+set lazyredraw
+set listchars=tab:▸\ ,eol:¬,extends:❯,precedes:❮
 set magic
+set matchtime=3
+set modelines=0
 set nocompatible
 set noerrorbells                " No beeps
-set noswapfile
+set noswapfile                    " it's 2013, Vim.
 set number
 set numberwidth=5
-set scrolloff=3 " keep more context when scrolling off the end of a buffer
+set pastetoggle=<F4>
+set scrolloff=3 " keep moreiabbrev lmis ಠ‿ಠearch matches in the middle of the window.
 set shell=bash " This makes RVM work inside Vim. I have no idea why.
+set shiftround " Round intentations to the nearest shiftwidth
 set shiftwidth=4
+set showbreak=↪
 set showcmd " display incomplete commands
 set showmatch
 set showmode " Always show mode
@@ -142,34 +149,48 @@ set splitbelow                  " Split horizontal windows below to the current 
 set splitright                  " Split vertical windows right to the current windows
 set switchbuf=useopen
 set synmaxcol=800 " Don't try to highlight lines longer than 800 characters.
-set t_Co=256 " If in terminal use 256 colors
-set t_ti= t_te= " Prevent Vim from clobbering the scrollback buffer. See
 set tabstop=4
 set tags=~/.jstags,~/.tags,./tags " Look for tags in this file
+set t_Co=256 " If in terminal use 256 colors
 set textwidth=120
 set title "Show a window title
+set t_ti= t_te= " Prevent Vim from clobbering the scrollback buffer. See
 set ttyfast
+set undodir=~/.vim/tmp/undo//     " undo files
 set undolevels=20 " Keep 20 undo levels
-set wildignore+=*.DS_Store                       " OSX bullshit
 set wildignore+=*.aux,*.out,*.toc                " LaTeX intermediate files
+set wildignore+=*.DS_Store                       " OSX bullshit
+set wildignore+=.hg,.git,.svn                    " Version control
 set wildignore+=*.jpg,*.bmp,*.gif,*.png,*.jpeg   " binary images
 set wildignore+=*.luac                           " Lua byte code
+set wildignore+=migrations                       " Django migrations
 set wildignore+=*.o,*.obj,*.exe,*.dll,*.manifest " compiled object files
 set wildignore+=*.orig                           " Merge resolution files
 set wildignore+=*.pyc                            " Python byte code
 set wildignore+=*.spl                            " compiled spelling word lists
-set wildignore+=*.sw?                            " Vim swap files
-set wildignore+=.hg,.git,.svn                    " Version control
-set wildignore+=migrations                       " Django migrations
 set wildignore=*.swp,*.bak,*.pyc " Set wildignore to hid swp, bak and pyc files
+set wildignore+=*.sw?                            " Vim swap files
 set wildmenu " make tab completion for files/buffers act like bash
 set wildmode=list:full
 set winminheight=0
 set winwidth=79
+
 syntax case match
 syntax sync minlines=256
 syntax on " Enable highlighting for syntax
 
+" Save when losing focus
+au FocusLost * :silent! wall
+
+" Resize splits when the window is resized
+au VimResized * :wincmd =
+
+" Only show cursorline in the current window and in normal mode.
+augroup cline
+    au!
+    au WinLeave,InsertEnter * set nocursorline
+    au WinEnter,InsertLeave * set cursorline
+augroup END
 
 " Make those folders automatically if they don't already exist.
 if !isdirectory(expand(&backupdir))
@@ -178,6 +199,21 @@ endif
 if !isdirectory(expand(&directory))
     call mkdir(expand(&directory), "p")
 endif
+
+iabbrev ldis ಠ_ಠ
+iabbrev lsad ಥ_ಥ
+iabbrev lhap ಥ‿ಥ
+iabbrev lmis ಠ‿ಠ
+
+" Center on c-o
+nnoremap <c-o> <c-o>zz
+
+" Don't auto-jump on *
+nnoremap * *<c-o>
+
+" Sort lines
+nnoremap <leader>s vip:!sort<cr>
+vnoremap <leader>s :!sort<cr>
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""}}}
 " CUSTOM AUTOCMDS
@@ -195,7 +231,7 @@ augroup vimrcEx
   autocmd FileType javascript,python set sw=4 sts=4 et
 
   " Indent p tags
-  autocmd FileType html,eruby if g:html_indent_tags !~ '\\|p\>' | let g:html_indent_tags .= '\|p\|li\|dt\|dd' | endif
+  " autocmd FileType html,eruby if g:html_indent_tags !~ '\\|p\>' | let g:html_indent_tags .= '\|p\|li\|dt\|dd' | endif
 
   " Don't syntax highlight markdown because it's often wrong
   autocmd! FileType mkd setlocal syn=off
@@ -333,8 +369,8 @@ nnoremap <silent> <Leader>n :NERDTreeToggle<CR>
 nmap Y y$
 
 " Ack features
-nnoremap <Leader>a :Ack
-nnoremap <Leader>A :Ack <C-r><C-w><CR>
+nnoremap <Leader>a :Ack --type=%:e
+nnoremap <Leader>A :Ack --type=%:e <C-r><C-w><CR>
 
 "Dont show me any output when I build something
 "Because I am using quickfix for errors
@@ -371,7 +407,6 @@ nnoremap <silent> <C-m> :cp<CR>
 nnoremap U :syntax sync fromstart<cr>:redraw!<cr>
 "save | close tab | reload vimrc
 nnoremap <leader>V :w \| tabc \| so ~/.vimrc<CR>
-
 
 " ------------------------------------------"
 " Plugin Settings
@@ -453,18 +488,8 @@ cabbrev help vertical help
 cabbrev hsplit split
 cabbrev new vnew
 cabbrev right botright
-cabbrev sp vsp
-cabbrev split vsplit
 cabbrev sta vertical sta
-
-" VJDE
-let g:vjde_tab_cfu=1
-let g:vjde_ctags_exts="java"
 
 " Firefox refresh
 " let g:firefox_refresh_files = "*.js"
 let $firefox_refresh_host = "webclient"
-
-" Go
-"let g:gofmt_command="goimports"
-"autocmd FileType go autocmd BufWritePre <buffer> Fmt
