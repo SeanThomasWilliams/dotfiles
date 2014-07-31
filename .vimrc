@@ -24,6 +24,9 @@ Bundle 'tpope/vim-surround'
 Bundle 'vim-scripts/vimwiki'
 Bundle 'airblade/vim-gitgutter'
 Bundle 'fatih/vim-go'
+Bundle 'maksimr/vim-jsbeautify'
+Bundle 'einars/js-beautify'
+
 
 "+----------------- Basic Configurations ------------+
 "
@@ -241,6 +244,11 @@ augroup vimrcEx
   autocmd! CmdwinEnter * :unmap <cr>
   autocmd! CmdwinLeave * :call MapCR()
 augroup END
+
+".vimrc
+autocmd FileType javascript nnoremap <leader>f :call JsBeautify()<cr>
+autocmd FileType html nnoremap <leader>f :call HtmlBeautify()<cr>
+autocmd FileType css nnoremap <leader>f :call CSSBeautify()<cr>
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " COLOR
