@@ -26,7 +26,7 @@ function __restart_goserver(){
 cd $WATCHDIR
 __restart_goserver
 #the command before the pipe is a blocking command, i.e. it doesn't end
-inotifywait -mrq --exclude="$(basename $(pwd))" --format '%f' -e close_write $1 | while read file
+inotifywait -m -r --format '%f' -e close_write $WATCHDIR | while read file
 do
   if (echo $file | grep -E '^(.*\.go)$')
   then
