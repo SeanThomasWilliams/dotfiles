@@ -13,13 +13,16 @@ export EDITOR="/usr/bin/vim"
 export C_COLON_BACKSLASH='C:${PWD//\//\\\}>'
 alias dos='export PS1=$C_COLON_BACKSLASH'
 alias fgrep="find . | awk '!/CVS|\.git|\.svn|_Stub|\.#/  {print \$0;}' | sed 's/\ /\\\ /g' | xargs grep --color=always -in "
-alias gitpp="git pull && git push"
+alias gitpp="git pull --rebase && git push"
 alias grepc="grep --color=always -i"
 alias locate="locate -i"
 alias ls="ls -hl --color"
 alias meminfo="ps aux | awk '{print \$4\" \"\$11}' |  uniq -c | awk '{print \$2\" \"\$3}' | sort -nr|head -3"
 alias sr="screen -R -d"
 alias tmux="tmux -2 attach || tmux -2"
+alias ve="cd $GOPATH/src/github.com/Novetta/VideoEnterprise"
+alias cm="cd $GOPATH/src/github.com/Novetta/common"
+alias pe="cd $GOPATH/src/github.com/Novetta/perseus"
 
 if [[ -f "$HOME/.local.alias" ]]; then
     source $HOME/.local.alias
