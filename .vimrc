@@ -103,6 +103,10 @@ if exists('+relativenumber')
 	set relativenumber
 endif
 
+if exists('+undodir')
+    set undodir=~/.vim/tmp/undo//     " undo files
+endif
+
 set autoindent
 set autoread                    " Automatically reread changed files without asking me anything
 set autowrite                   " Automatically save before :next, :make etc.
@@ -159,7 +163,6 @@ set textwidth=120
 set title "Show a window title
 set t_ti= t_te= " Prevent Vim from clobbering the scrollback buffer. See
 set ttyfast
-set undodir=~/.vim/tmp/undo//     " undo files
 set undolevels=20 " Keep 20 undo levels
 set wildignore+=*.aux,*.out,*.toc                " LaTeX intermediate files
 set wildignore+=*.DS_Store                       " OSX bullshit
