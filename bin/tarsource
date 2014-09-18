@@ -14,5 +14,6 @@ tar -cvf \
     --exclude 'deps' \
     --exclude 'vlc/*' \
     --exclude 'perseus' \
+    --exclude 'SeanThomasWilliams' \
     --exclude 'maven'
 echo "Done!"
