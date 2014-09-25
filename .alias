@@ -9,18 +9,25 @@ export GOPATH="$HOME/gocode"
 export GOBIN="$GOPATH/bin"
 export GO_LOGGING_CONFIG="$HOME/logging.ini"
 export PATH="$JAVA_HOME/bin:/usr/local/bin:$HOME/bin:$GOROOT/bin:$GOBIN:$VIDEX/bin:$PATH"
+export PROMPT_COMMAND="history -a; history -c; history -r; ${PROMPT_COMMAND}"
 export EDITOR="/usr/bin/vim"
 export C_COLON_BACKSLASH='C:${PWD//\//\\\}>'
 export LC_ALL=C
+export HISTSIZE=
+export HISTFILESIZE=
+export HISTFILE="$HOME/.bash_eternal_history"
 alias dos='export PS1=$C_COLON_BACKSLASH'
 alias fgrep="find . | awk '!/CVS|\.git|\.svn|_Stub|\.#/  {print \$0;}' | sed 's/\ /\\\ /g' | xargs grep --color=always -in "
-alias gitpp="git pull && git push"
+alias gitpp="git pull --rebase && git push"
 alias grepc="grep --color=always -i"
 alias locate="locate -i"
 alias ls="ls -hl --color"
 alias meminfo="ps aux | awk '{print \$4\" \"\$11}' |  uniq -c | awk '{print \$2\" \"\$3}' | sort -nr|head -3"
 alias sr="screen -R -d"
 alias tmux="tmux -2 attach || tmux -2"
+alias ve="cd $GOPATH/src/github.com/Novetta/VideoEnterprise"
+alias cm="cd $GOPATH/src/github.com/Novetta/common"
+alias pe="cd $GOPATH/src/github.com/Novetta/perseus"
 
 if [[ -f "$HOME/.local.alias" ]]; then
     source $HOME/.local.alias
