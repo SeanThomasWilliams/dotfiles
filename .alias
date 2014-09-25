@@ -11,6 +11,7 @@ export GO_LOGGING_CONFIG="$HOME/logging.ini"
 export PATH="$JAVA_HOME/bin:/usr/local/bin:$HOME/bin:$GOROOT/bin:$GOBIN:$VIDEX/bin:$PATH"
 export EDITOR="/usr/bin/vim"
 export C_COLON_BACKSLASH='C:${PWD//\//\\\}>'
+export LC_ALL=C
 alias dos='export PS1=$C_COLON_BACKSLASH'
 alias fgrep="find . | awk '!/CVS|\.git|\.svn|_Stub|\.#/  {print \$0;}' | sed 's/\ /\\\ /g' | xargs grep --color=always -in "
 alias gitpp="git pull && git push"
