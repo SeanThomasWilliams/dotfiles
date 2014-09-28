@@ -26,6 +26,7 @@ Bundle 'airblade/vim-gitgutter'
 Bundle 'fatih/vim-go'
 Bundle 'maksimr/vim-jsbeautify'
 Bundle 'einars/js-beautify'
+Bundle 'bling/vim-airline'
 
 
 "+----------------- Basic Configurations ------------+
@@ -111,11 +112,11 @@ set autoindent
 set autoread                    " Automatically reread changed files without asking me anything
 set autowrite                   " Automatically save before :next, :make etc.
 set backspace=indent,eol,start " allow backspacing over everything in insert mode
-set backupdir=~/.vim/tmp/backup// " backups
 set backup " Store temporary files in a central spot
+set backupdir=~/.vim/tmp/backup// " backups
 set cmdheight=2
-set completeopt=longest,menuone " Better Completion
 set complete=.,w,b,u,t " Better Completion
+set completeopt=longest,menuone " Better Completion
 set cursorline " Show highlight on the cursor line
 set diffopt+=iwhite
 set directory=~/.vim/tmp/swap//   " swap files
@@ -136,6 +137,7 @@ set matchtime=3
 set modelines=0
 set nocompatible
 set noerrorbells                " No beeps
+set noshowmode " Always show mode
 set noswapfile                    " it's 2013, Vim.
 set number
 set numberwidth=5
@@ -147,7 +149,6 @@ set shiftwidth=4
 set showbreak=↪
 set showcmd " display incomplete commands
 set showmatch
-set showmode " Always show mode
 set showtabline=2
 set smartcase
 set smartindent " Be smart when indenting
@@ -156,12 +157,13 @@ set splitbelow                  " Split horizontal windows below to the current 
 set splitright                  " Split vertical windows right to the current windows
 set switchbuf=useopen
 set synmaxcol=800 " Don't try to highlight lines longer than 800 characters.
+set t_Co=256 " If in terminal use 256 colors
+set t_ti= t_te= " Prevent Vim from clobbering the scrollback buffer. See
 set tabstop=4
 set tags=~/.jstags,~/.tags,./tags " Look for tags in this file
-set t_Co=256 " If in terminal use 256 colors
 set textwidth=120
+set timeoutlen=50
 set title "Show a window title
-set t_ti= t_te= " Prevent Vim from clobbering the scrollback buffer. See
 set ttyfast
 set undolevels=20 " Keep 20 undo levels
 set wildignore+=*.aux,*.out,*.toc                " LaTeX intermediate files
@@ -504,3 +506,5 @@ cabbrev sta vertical sta
 " Firefox refresh
 " let g:firefox_refresh_files = "*.js"
 let $firefox_refresh_host = "webclient"
+
+let g:airline#extensions#tabline#enabled = 1
