@@ -162,7 +162,7 @@ set t_ti= t_te= " Prevent Vim from clobbering the scrollback buffer. See
 set tabstop=4
 set tags=~/.jstags,~/.tags,./tags " Look for tags in this file
 set textwidth=120
-set timeoutlen=50
+"set timeoutlen=50
 set title "Show a window title
 set ttyfast
 set undolevels=20 " Keep 20 undo levels
