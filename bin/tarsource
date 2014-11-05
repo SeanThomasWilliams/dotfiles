@@ -13,7 +13,7 @@ tar -cvf \
     --exclude 'Atlas' \
     --exclude 'deps' \
     --exclude 'vlc/*' \
-    --exclude 'perseus' \
     --exclude 'SeanThomasWilliams' \
+    --exclude 'perseus' \
     --exclude 'maven'
 echo "Done!"

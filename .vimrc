@@ -162,7 +162,7 @@ set t_ti= t_te= " Prevent Vim from clobbering the scrollback buffer. See
 set tabstop=4
 set tags=~/.jstags,~/.tags,./tags " Look for tags in this file
 set textwidth=120
-"set timeoutlen=50
+set timeoutlen=250
 set title "Show a window title
 set ttyfast
 set undolevels=20 " Keep 20 undo levels
@@ -426,21 +426,16 @@ nnoremap <leader>V :w \| tabc \| so ~/.vimrc<CR>
 " ----------------------------------------- "
 
 " golang settings
-au BufNewFile,BufRead *.go setlocal noet ts=4 sw=4 sts=4
-
 let g:go_fmt_fail_silently = 1
-
+au BufNewFile,BufRead *.go setlocal noet ts=4 sw=4 sts=4
 au FileType go nmap gd <Plug>(go-def)
 au FileType go nmap <Leader>s <Plug>(go-def-split)
 au FileType go nmap <Leader>v <Plug>(go-def-vertical)
-
 au FileType go nmap <Leader>i <Plug>(go-info)
-
-au FileType go nmap  <leader>r  <Plug>(go-run)
-au FileType go nmap  <leader>b  <Plug>(go-build)
-"au FileType go nmap  <leader>t  <Plug>(go-test)
-
+au FileType go nmap <leader>r <Plug>(go-run)
+au FileType go nmap <leader>b <Plug>(go-build)
 au FileType go nmap <Leader>d <Plug>(go-doc-vertical)
+"au FileType go nmap  <leader>t  <Plug>(go-test)
 
 " lua settings
 au BufNewFile,BufRead *.lua setlocal noet ts=4 sw=4 sts=4
@@ -508,3 +503,6 @@ cabbrev sta vertical sta
 let $firefox_refresh_host = "webclient"
 
 let g:airline#extensions#tabline#enabled = 1
+let g:airline_detect_modified=1
+let g:airline_detect_paste=1
+let g:airline_mode_map = {} " see source for the defaults
