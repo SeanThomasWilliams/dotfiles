@@ -1,3 +1,4 @@
+acladd root
 altscreen on
 attrcolor b ".I"    # allow bold colors - necessary for some reason
 backtick 1 5 5 true
@@ -16,12 +17,13 @@ hardstatus alwayslastline
 hardstatus on
 hardstatus string '%{= kG}[ %{G}%H %{g}][%= %{= kw}%?%-Lw%?%{r}(%{W}%n*%f%t%?(%u)%?%{r})%{w}%?%+Lw%?%?%= %{g}][%{B} %m-%d %{W} %c %{g}]'
 maptimeout 5 # Wait no longer than 5ms between keypresses
+multiuser on
 nonblock on
-screen -t vim 1 vim .
-screen -t bash 5
-screen -t bash 4
-screen -t bash 3
 screen -t bash 2
+screen -t bash 3
+screen -t bash 4
+screen -t bash 5
+screen -t vim 1 vim .
 setenv DISPLAY ':0'
 shell -${SHELL}
 startup_message off
