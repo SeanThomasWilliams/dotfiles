@@ -14,7 +14,7 @@ if !exists("$firefox_refresh_host")
 endif
 
 function! RefreshBrowser()
-    silent !echo  'reload' | nc -w 1 "$firefox_refresh_host" 32000 2>&1 > /dev/null
+    silent !echo  'reload' | nc -w 1 "$firefox_refresh_host" 32000 2>&1 > /dev/null &
 endfunction
 
 exec 'autocmd BufWritePost ' . g:firefox_refresh_files . ' :call RefreshBrowser()'
