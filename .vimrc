@@ -27,6 +27,8 @@ Bundle 'fatih/vim-go'
 Bundle 'maksimr/vim-jsbeautify'
 Bundle 'einars/js-beautify'
 Bundle 'bling/vim-airline'
+Bundle 'benmills/vimux'
+Bundle 'benmills/vimux-golang'
 
 
 "+----------------- Basic Configurations ------------+
@@ -435,6 +437,8 @@ au FileType go nmap <Leader>i <Plug>(go-info)
 au FileType go nmap <leader>r <Plug>(go-run)
 au FileType go nmap <leader>b <Plug>(go-build)
 au FileType go nmap <Leader>d <Plug>(go-doc-vertical)
+au FileType go map <Leader>ra :wa<CR> :GolangTestCurrentPackage<CR>
+au FileType go map <Leader>rf :wa<CR> :GolangTestFocused<CR>
 "au FileType go nmap  <leader>t  <Plug>(go-test)
 
 " lua settings

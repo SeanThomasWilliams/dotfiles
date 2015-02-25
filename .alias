@@ -12,6 +12,7 @@ export PATH="$JAVA_HOME/bin:/usr/local/bin:$HOME/bin:$GOROOT/bin:$GOBIN:$VIDEX/b
 export PROMPT_COMMAND="history -a; history -c; history -r; ${PROMPT_COMMAND}"
 export EDITOR="/usr/bin/vim"
 export C_COLON_BACKSLASH='C:${PWD//\//\\\}>'
+export LD_LIBRARY_PATH="/usr/local/lib:$LD_LIBRARY_PATH"
 export LC_ALL=C
 export HISTSIZE=
 export HISTFILESIZE=
@@ -23,8 +24,7 @@ alias grepc="grep --color=always -i"
 alias locate="locate -i"
 alias ls="ls -hl --color"
 alias meminfo="ps aux | awk '{print \$4\" \"\$11}' |  uniq -c | awk '{print \$2\" \"\$3}' | sort -nr|head -3"
-alias sr="screen -R -d"
-alias tmux="tmux -2 attach || tmux -2"
+which tmux &> /dev/null && alias sr="tmux -2 attach || tmux -2" || alias sr="screen -R -d"
 alias nov="cd $GOPATH/src/github.com/Novetta"
 alias ve="cd $GOPATH/src/github.com/Novetta/VideoEnterprise"
 alias cm="cd $GOPATH/src/github.com/Novetta/common"
