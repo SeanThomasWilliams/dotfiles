@@ -10,7 +10,7 @@ function __restart_goserver(){
   cd $BUILDDIR
   binary="$(basename $(pwd))"
   echo "building $binary"
-  if go build -o $GOBIN/$binary
+  if go build -race -o $GOBIN/$binary
   then
     echo "killing old process"
     kill -9 $(pidof "$binary") > /dev/null 2>&1
