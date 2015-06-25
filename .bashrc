@@ -38,6 +38,10 @@ if [ -f /etc/bash_completion ] && ! shopt -oq posix; then
     . /etc/bash_completion
 fi
 
+if [ -f $HOME/bin/git-completion.bash ] && ! shopt -oq posix; then
+    . $HOME/bin/git-completion.bash
+fi
+
 if [ -f ~/.bash_profile ]; then
     . ~/.bash_profile
 fi
