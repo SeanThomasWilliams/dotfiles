@@ -4,3 +4,4 @@ vim/tmp/
 install/
 vim/bundle/vundle
 vim/bundle/*
+.netrwhist
