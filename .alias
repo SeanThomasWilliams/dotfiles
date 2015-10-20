@@ -18,6 +18,7 @@ export HISTSIZE=
 export HISTFILESIZE=
 export HISTFILE="$HOME/.bash_eternal_history"
 alias dos='export PS1=$C_COLON_BACKSLASH'
+alias dstatall='dstat -amnl --top-io --top-latency'
 alias fgrep="find . | awk '!/CVS|\.git|\.svn|_Stub|\.#/  {print \$0;}' | sed 's/\ /\\\ /g' | xargs grep --color=always -in "
 alias htop="TERM=screen htop"
 alias gitpp="git pull --rebase && git push"
