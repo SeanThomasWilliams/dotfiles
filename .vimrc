@@ -28,6 +28,7 @@ Bundle 'mileszs/ack.vim'
 Bundle 'scrooloose/syntastic'
 Bundle 'tpope/vim-fugitive'
 Bundle 'tpope/vim-surround'
+Bundle 'tpope/vim-dispatch'
 Bundle 'veegee/cql-vim'
 Bundle 'vim-scripts/vimwiki'
 
@@ -447,6 +448,7 @@ let g:go_highlight_methods = 1
 let g:go_highlight_operators = 1
 let g:go_highlight_structs = 1
 let g:go_play_open_browser = 0
+let g:go_dispatch_enabled = 1
 "let g:go_fmt_command = "goimports"
 
 
