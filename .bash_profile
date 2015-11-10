@@ -10,3 +10,4 @@ PS1="$(if [[ ${EUID} == 0 ]]; then echo '\[\033[01;31m\]\h'; else echo '\[\033[0
 if [ -f ~/.alias ]; then
     . ~/.alias
 fi
+export PATH="/home/williamss/bin/Sencha/Cmd/6.0.2.14/..:$PATH"
