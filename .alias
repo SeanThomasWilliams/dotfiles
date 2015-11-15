@@ -35,6 +35,10 @@ alias vb="cd $VIDEX/videx2/videxweb && sencha app watch"
 alias cm="cd $NOVETTA/common"
 alias pe="cd $NOVETTA/perseus"
 
+if [[ -f "$HOME/.videx.env" ]]; then
+    source $HOME/.videx.env
+fi
+
 if [[ -f "$HOME/.local.alias" ]]; then
     source $HOME/.local.alias
 fi
