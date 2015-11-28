@@ -55,7 +55,8 @@ let g:NERDTreeIgnore = ['\.pyc$', '\.swp$', '.DS_Store'] " Nerdtree doesnt follo
 let g:Powerline_symbols='fancy' " Use fancy theme for PowerLine
 let g:indent_guides_guide_size = 1 " Only use one column to show indent
 let g:indent_guides_start_level = 2 " Start on the second level of indents
-let g:syntastic_javascript_jslint_conf = "" " Default jslint
+let g:syntastic_javascript_checkers = ['jshint']
+
 
 " Keymappings
 " ============================
