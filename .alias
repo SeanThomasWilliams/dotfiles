@@ -31,7 +31,8 @@ which tmux &> /dev/null && alias sr="tmux -2 attach || tmux -2" || alias sr="scr
 alias nov="cd $NOVETTA"
 alias ve="cd $VIDEX"
 alias vs="cd $VIDEX && go run videx2/videxserver/server/server.go"
-alias vb="cd $VIDEX/videx2/videxweb && sencha app watch"
+alias vb="cd $VIDEX/videx2/videxweb && sencha app build"
+alias vx="cd $VIDEX/videx2/dev && ./dev-run-executor.sh -n"
 alias cm="cd $NOVETTA/common"
 alias pe="cd $NOVETTA/perseus"
 
