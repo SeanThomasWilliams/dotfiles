@@ -57,7 +57,6 @@ let g:indent_guides_guide_size = 1 " Only use one column to show indent
 let g:indent_guides_start_level = 2 " Start on the second level of indents
 let g:syntastic_javascript_checkers = ['jshint']
 
-
 " Keymappings
 " ============================
 "
@@ -433,7 +432,7 @@ nnoremap <leader>V :w \| tabc \| so ~/.vimrc<CR>
 " golang settings
 au BufNewFile,BufRead *.go setlocal noet ts=4 sw=4 sts=4
 au FileType go map <Leader>gi :wa<CR> :GoImports<CR>
-au FileType go map <Leader>l  :wa<CR> :GoLint<CR>
+au FileType go map <Leader>gb :wa<CR> :GoBuild<CR>
 au FileType go map <Leader>ra :wa<CR> :GolangTestCurrentPackage<CR>
 au FileType go map <Leader>rf :wa<CR> :GolangTestFocused<CR>
 au FileType go nmap <Leader>d <Plug>(go-def-vertical)
@@ -451,7 +450,8 @@ let g:go_highlight_structs = 1
 let g:go_play_open_browser = 0
 let g:go_dispatch_enabled = 1
 "let g:go_fmt_command = "goimports"
-
+let g:syntastic_go_checkers = ['gometalinter', 'govet', 'errcheck', 'gofmt']
+"let g:syntastic_mode_map = { 'mode': 'active', 'passive_filetypes': ['go'] }
 
 " lua settings
 au BufNewFile,BufRead *.lua setlocal noet ts=4 sw=4 sts=4
