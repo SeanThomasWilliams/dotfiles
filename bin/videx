@@ -3,8 +3,8 @@
 
 source $HOME/.videx.env
 
-WATCHDIR=$NOVETTA/VideoEnterprise/webserver/webserver
-BUILDDIR=$NOVETTA/VideoEnterprise/webserver/
+WATCHDIR=$NOVETTA/VideoEnterprise/videx2/videxserver
+BUILDDIR=$NOVETTA/VideoEnterprise/videx2/videxserver/server
 
 function __restart_goserver(){
   cd $BUILDDIR
