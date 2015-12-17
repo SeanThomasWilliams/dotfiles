@@ -2,21 +2,18 @@
 
 set -e
 
-for fname in $(echo .*); do
-    if [ -d $fname ]; then
-        continue
-    fi
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-    fname=$(basename $fname)
-    ln -sf $PWD/$fname $HOME/$fname
+for fname in $DIR/.*; do
+    if [ -f $fname ]; then
+        fname=$(basename $fname)
+        ln -sf $PWD/$fname $HOME/$fname
+    fi
 done
 
 mkdir -p $HOME/bin
 ln -sf $PWD/bin/* $HOME/bin/
-
-if [ ! -L "$HOME/.vim" ]; then
-    ln -sf $PWD/vim/ $HOME/.vim
-fi
+ln -sf $PWD/vim/ $HOME/.vim
 
 # Requires: "sudo yum -y install automake gcc gcc-c++ kernel-devel cmake"
 git submodule update --init --recursive

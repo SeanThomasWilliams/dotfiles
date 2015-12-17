@@ -9,7 +9,7 @@
     ui = auto
 
 [alias]
-    st = status
+    st = status -s
     ci = commit
     co = checkout
     di = diff
