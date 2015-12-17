@@ -5,8 +5,6 @@
 [core]
     editor = vim
 
-[diff]
-
 [color]
     ui = auto
 
@@ -27,13 +25,6 @@
     ds = diff --stat=160,120
     dh1 = diff HEAD~1
 
-    # Divergence (commits we added and commits remote added)
-    div = divergence
-
-    # Goodness (summary of diff lines added/removed/total)
-    gn = goodness
-    gnc = goodness --cached
-
     # Fancy logging.
     #   h = head
     #   hp = head with patch
@@ -48,13 +39,15 @@
     ra = !git r --all
     l = "!source ~/.githelpers && pretty_git_log"
     la = !git l --all
-	up = !sh -c \"git commit -a -m \"Before rebase\" && git pull --rebase && git reset head^\"
-	wu = log --stat origin..@{0}
-	wup = log -p origin..@{0}
+    up = !sh -c \"git commit -a -m \"Before rebase\" && git pull --rebase && git reset head^\"
+    wu = log --stat origin..@{0}
+    wup = log -p origin..@{0}
 
 [merge]
     tool = vimdiff
+
 [push]
-	default = current
+    default = current
+
 [url "git@github.com:"]
-	insteadOf = https://github.com/
+    insteadOf = https://github.com/
