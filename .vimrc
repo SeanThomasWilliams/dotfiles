@@ -15,6 +15,7 @@ Bundle 'gmarik/vundle'
 "
 
 Bundle 'SeanThomasWilliams/dwm.vim'
+Bundle 'Valloric/YouCompleteMe'
 Bundle 'airblade/vim-gitgutter'
 Bundle 'benmills/vimux'
 Bundle 'benmills/vimux-golang'
@@ -26,9 +27,9 @@ Bundle 'kien/ctrlp.vim'
 Bundle 'maksimr/vim-jsbeautify'
 Bundle 'mileszs/ack.vim'
 Bundle 'scrooloose/syntastic'
+Bundle 'tpope/vim-dispatch'
 Bundle 'tpope/vim-fugitive'
 Bundle 'tpope/vim-surround'
-Bundle 'tpope/vim-dispatch'
 Bundle 'veegee/cql-vim'
 Bundle 'vim-scripts/vimwiki'
 
