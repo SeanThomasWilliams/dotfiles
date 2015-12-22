@@ -17,5 +17,9 @@ ln -sf $PWD/vim/ $HOME/.vim
 
 # Requires: "sudo yum -y install automake gcc gcc-c++ kernel-devel cmake"
 git submodule update --init --recursive
-cd $PWD/vim/bundle/YouCompleteMe
+cd $DIR/vim/bundle/YouCompleteMe
 ./install.py --gocode-completer
+
+# Requires npm and node
+cd $DIR/vim/bundle/tern_for_vim
+npm install .
