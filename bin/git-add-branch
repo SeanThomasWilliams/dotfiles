@@ -10,5 +10,4 @@ fi
 BRANCH=$1
 
 git checkout -b $BRANCH
-git push
-git branch --set-upstream $BRANCH origin/$BRANCH
+git push origin $BRANCH
