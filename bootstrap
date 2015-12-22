@@ -20,6 +20,9 @@ git submodule update --init --recursive
 cd $DIR/vim/bundle/YouCompleteMe
 ./install.py --gocode-completer
 
+vim +BundleInstall! +qall
+vim +GoInstallBinaries +qall
+
 # Requires npm and node
 cd $DIR/vim/bundle/tern_for_vim
 npm install .
