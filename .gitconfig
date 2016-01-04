@@ -45,7 +45,6 @@
 
 [merge]
     tool = vimdiff
-
 [push]
     default = current
 [url "git@github.com:Novetta"]
