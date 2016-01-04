@@ -10,4 +10,4 @@ fi
 BRANCH=$1
 
 git checkout -b $BRANCH
-git push origin $BRANCH
+git push -u
