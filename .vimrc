@@ -440,11 +440,13 @@ au FileType go map <Leader>ra :wa<CR> :GolangTestCurrentPackage<CR>
 au FileType go map <Leader>rf :wa<CR> :GolangTestFocused<CR>
 au FileType go nmap <Leader>d <Plug>(go-def-vertical)
 au FileType go nmap <Leader>i <Plug>(go-info)
+au FileType go nmap <Leader>r <Plug>(go-rename)
 au FileType go nmap gd <Plug>(go-def)
 au FileType javascript nmap gd :TernDef<CR>
 au FileType javascript nmap <Leader>d :TernDefSplit<CR>
 au FileType javascript nmap <Leader>i :TernDoc<CR>
 let g:go_auto_type_info = 1
+let g:go_dispatch_enabled = 1
 let g:go_fmt_fail_silently = 1
 let g:go_highlight_array_whitespace_error = 1
 let g:go_highlight_chan_whitespace_error = 1
@@ -452,13 +454,14 @@ let g:go_highlight_functions = 1
 let g:go_highlight_methods = 1
 let g:go_highlight_operators = 1
 let g:go_highlight_structs = 1
+let g:go_jump_to_error = 1
 let g:go_play_open_browser = 0
-let g:go_dispatch_enabled = 1
-let g:syntastic_go_checkers = ['gometalinter', 'govet', 'gofmt']
-let g:syntastic_check_on_open=1
-let g:tern_map_keys=1
-let g:tern_show_argument_hints='on_hold'
+let g:syntastic_check_on_open= 0
+let g:syntastic_go_checkers = ['gometalinter', 'golint', 'govet']
+let g:tern_map_keys = 1
 let g:tern_map_prefix = '<leader>'
+let g:tern_show_argument_hints='on_hold'
+
 
 " lua settings
 au BufNewFile,BufRead *.lua setlocal noet ts=4 sw=4 sts=4

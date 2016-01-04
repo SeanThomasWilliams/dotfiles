@@ -1,4 +1,18 @@
-unset SSH_AUTH_SOCK
+#!/bin/bash
+
+screen-reattach(){
+    SESSIONNAME=${1:-tmux}
+    which tmux &> /dev/null
+    if [ $? -eq 0 ]
+    then
+        tmux -2 new -A -s $SESSIONNAME
+    else
+        screen -R -d $SESSIONNAME
+    fi
+}
+export -f screen-reattach
+alias sr="screen-reattach"
+
 export GIT_EDITOR="vim"
 export GOMAXPROCS=8
 export TERM=xterm-256color
@@ -27,14 +41,14 @@ alias grepc="grep --color=always -i"
 alias locate="locate -i"
 alias ls="ls -hl --color"
 alias meminfo="ps aux | awk '{print \$4\" \"\$11}' |  uniq -c | awk '{print \$2\" \"\$3}' | sort -nr|head -3"
-which tmux &> /dev/null && alias sr="tmux -2 attach || tmux -2" || alias sr="screen -R -d"
 alias nov="cd $NOVETTA"
 alias ve="cd $VIDEX"
 alias vs="cd $VIDEX && go run videx2/videxserver/server/server.go"
 alias vb="cd $VIDEX/videx2/videxweb && source ui.env && sencha app build"
 alias vx="cd $VIDEX/videx2/dev && ./dev-run-executor.sh -n"
-alias cm="cd $NOVETTA/common"
+alias cm="cd $novetta/common"
 alias pe="cd $NOVETTA/perseus"
+alias itk="cd $NOVETTA/ITK"
 
 if [[ -f "$HOME/.videx.env" ]]; then
     source $HOME/.videx.env
