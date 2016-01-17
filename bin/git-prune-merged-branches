@@ -1,4 +1,6 @@
 #!/bin/bash
 
+git fetch -p
+
 # Prune branches that have already been merged with master
 git branch --merged | grep -v -E "\*|master|dev" | xargs -n 1 git branch -d
