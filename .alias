@@ -29,7 +29,6 @@ export PROMPT_COMMAND="history -a; history -c; history -r; ${PROMPT_COMMAND}"
 export EDITOR="/usr/bin/vim"
 export C_COLON_BACKSLASH='C:${PWD//\//\\\}>'
 export LD_LIBRARY_PATH="/usr/local/lib:$LD_LIBRARY_PATH"
-export LC_ALL=C
 export HISTSIZE=
 export HISTFILESIZE=
 export HISTFILE="$HOME/.bash_eternal_history"

@@ -16,7 +16,7 @@ trap 'cleanup' SIGINT SIGTERM EXIT
 
 function cleanup(){
     for jpid in ${JOBPID[*]}; do
-        pkill -KILL -P $jpid 2> /dev/null
+        pkill -TERM -P $jpid 2> /dev/null
     done
 }
 

@@ -13,21 +13,11 @@ done
 
 mkdir -p $HOME/bin
 ln -sf $PWD/bin/* $HOME/bin/
-ln -sf $PWD/vim/ $HOME/.vim
-
-# Requires: "sudo yum -y install automake gcc gcc-c++ kernel-devel cmake"
-git submodule update --init --recursive
-cd $DIR/vim/bundle/YouCompleteMe
-./install.py --gocode-completer
+ln -sf $PWD/vim $HOME/.vim
 
 echo "Installing bundles"
 vim +BundleInstall! +qall
 echo "Installing GO binaries"
 vim +GoInstallBinaries +qall
-
-# Requires npm and node
-echo "Installing tern"
-cd $DIR/vim/bundle/tern_for_vim
-npm install .
 
 echo "Done!"
