@@ -3,20 +3,26 @@
 if [[ $# -lt 2 ]]; then
     echo "Usage $0 WATCHDIR COMMAND"
     echo "This script runs then given command on a change to the specified directory"
-    echo ""
+    echo
     exit 1
 fi
 
+trap 'cleanup' SIGINT SIGTERM EXIT
+
+JOBPID=()
 WATCHDIR=$1
 shift
 COMMAND=$@
-JOBPID=()
-
-trap 'cleanup' SIGINT SIGTERM EXIT
 
 function cleanup(){
     for jpid in ${JOBPID[*]}; do
-        pkill -TERM -P $jpid 2> /dev/null
+        if ( kill -0 $jpid 2> /dev/null ); then
+            pkill -TERM -P $jpid && sleep 1
+
+            if ( kill -0 $jpid 2> /dev/null ); then
+                echo "KILL $jpid" && pkill -KILL -P $jpid && sleep 1
+            fi
+        fi
     done
 }
 
@@ -27,12 +33,13 @@ function runcommand(){
     JOBPID+=($!)
 }
 
-runcommand &
+runcommand
 
 #the command before the pipe is a blocking command, i.e. it doesn't end
-inotifywait -m -r --format '%f' -e close_write $WATCHDIR | while read file; do
-    if ( echo $file | grep -E '^(.*\.go)$|^(.*\.js)$|^(.*\.*css)' > /dev/null ); then
-        echo "File $file modified"
-        runcommand
-    fi
-done
+inotifywait -m -r --format '%f' -e close_write $WATCHDIR | \
+    while read fname; do
+        if ( echo "$fname" | grep -E '^(.*\.go)' > /dev/null ); then
+            echo "File $fname modified"
+            runcommand
+        fi
+    done
