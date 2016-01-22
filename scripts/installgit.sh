@@ -3,7 +3,8 @@
 set -e
 
 sudo yum -y groupinstall "Development Tools"
-sudo yum -y install gettext-devel openssl-devel perl-CPAN perl-devel zlib-devel wget
+sudo yum -y install gettext-devel openssl-devel perl-CPAN perl-devel zlib-devel wget libcurl-devel
+sudo yum -y remove git
 
 mkdir -p $HOME/software
 cd $HOME/software
