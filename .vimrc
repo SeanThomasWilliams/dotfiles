@@ -442,26 +442,31 @@ au FileType go nmap <Leader>d <Plug>(go-def-vertical)
 au FileType go nmap <Leader>i <Plug>(go-info)
 au FileType go nmap <Leader>r <Plug>(go-rename)
 au FileType go nmap gd <Plug>(go-def)
+au FileType go nmap <leader>rt <Plug>(go-run-tab)
+au FileType go nmap <Leader>rs <Plug>(go-run-split)
+au FileType go nmap <Leader>rv <Plug>(go-run-vertical)
 au FileType javascript nmap gd :TernDef<CR>
 au FileType javascript nmap <Leader>d :TernDefSplit<CR>
 au FileType javascript nmap <Leader>i :TernDoc<CR>
 let g:go_auto_type_info = 1
-let g:go_dispatch_enabled = 1
-let g:go_fmt_fail_silently = 1
+let g:go_dispatch_enabled = 0
+let g:go_fmt_fail_silently = 0
 let g:go_highlight_array_whitespace_error = 1
+let g:go_highlight_build_constraints = 1
 let g:go_highlight_chan_whitespace_error = 1
 let g:go_highlight_functions = 1
+let g:go_highlight_interfaces = 1
 let g:go_highlight_methods = 1
 let g:go_highlight_operators = 1
 let g:go_highlight_structs = 1
 let g:go_jump_to_error = 1
 let g:go_play_open_browser = 0
-let g:syntastic_check_on_open= 0
-let g:syntastic_go_checkers = ['gometalinter', 'golint', 'govet']
+let g:syntastic_check_on_open = 0
+let g:syntastic_go_checkers = ['go', 'golint', 'govet']
+let g:go_term_mode = "split"
 let g:tern_map_keys = 1
 let g:tern_map_prefix = '<leader>'
 let g:tern_show_argument_hints='on_hold'
-
 
 " lua settings
 au BufNewFile,BufRead *.lua setlocal noet ts=4 sw=4 sts=4
