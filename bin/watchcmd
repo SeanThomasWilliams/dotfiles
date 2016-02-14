@@ -36,7 +36,7 @@ function runcommand(){
 runcommand
 
 #the command before the pipe is a blocking command, i.e. it doesn't end
-inotifywait -m -r --format '%f' -e close_write $WATCHDIR | \
+inotifywait -q -m -r --format '%f' -e close_write $WATCHDIR | \
     while read fname; do
         if ( echo "$fname" | grep -E '.*(\.go)' > /dev/null ); then
             echo "File $fname modified"
