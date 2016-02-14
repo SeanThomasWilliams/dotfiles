@@ -77,6 +77,9 @@ nmap <leader>nt :NERDTreeToggle<CR>
 nmap <leader>nf :NERDTreeFocus<CR>
 nmap <leader>nch :NERDTree .<CR>
 
+" Quick search and replace
+nmap  S  :%s//g<LEFT><LEFT>
+
 " Autocommands that cant live in after/filetypes
 " ----------------------------------------------
 
@@ -111,8 +114,10 @@ if exists('+relativenumber')
 	set relativenumber
 endif
 
-if exists('+undodir')
+if has('persistent_undo')
+    set undolevels=5000
     set undodir=~/.vim/tmp/undo//     " undo files
+    set undofile
 endif
 
 set autoindent
@@ -123,7 +128,7 @@ set backup " Store temporary files in a central spot
 set backupdir=~/.vim/tmp/backup// " backups
 set cmdheight=2
 set complete=.,w,b,u,t " Better Completion
-set completeopt=longest,menuone " Better Completion
+set completeopt=longest,menuone,preview " Better Completion Options
 set cursorline " Show highlight on the cursor line
 set diffopt+=iwhite
 set directory=~/.vim/tmp/swap//   " swap files
@@ -172,7 +177,7 @@ set textwidth=120
 set timeoutlen=250
 set title "Show a window title
 set ttyfast
-set undolevels=20 " Keep 20 undo levels
+set updatecount=10
 set wildignore+=*.aux,*.out,*.toc                " LaTeX intermediate files
 set wildignore+=*.DS_Store                       " OSX bullshit
 set wildignore+=.hg,.git,.svn                    " Version control
@@ -431,6 +436,9 @@ nnoremap <leader>V :w \| tabc \| so ~/.vimrc<CR>
 " ------------------------------------------"
 " Plugin Settings
 " ----------------------------------------- "
+
+" YCM settings
+let g:ycm_autoclose_preview_window_after_insertion = 1
 
 " golang settings
 au BufNewFile,BufRead *.go setlocal noet ts=4 sw=4 sts=4
