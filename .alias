@@ -59,6 +59,7 @@ alias aresappwatch="cd $ARES/aresweb && sencha app watch"
 alias aresunittest="~/bin/watchcmd $ARES/aresserver $ARES/dev/rununittests.sh"
 alias aresserver="~/bin/watchcmd $ARES/aresserver go run $ARES/aresserver/server/server.go"
 alias ar="cd $ARES"
+which nvim &> /dev/null && alias vim="nvim"
 
 export PATH=/opt/rh/python27/root/usr/bin${PATH:+:${PATH}}
 export LD_LIBRARY_PATH=/opt/rh/python27/root/usr/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
