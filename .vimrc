@@ -27,13 +27,13 @@ Bundle 'kien/ctrlp.vim'
 Bundle 'maksimr/vim-jsbeautify'
 Bundle 'marijnh/tern_for_vim'
 Bundle 'mileszs/ack.vim'
-Bundle 'scrooloose/syntastic'
+"Bundle 'scrooloose/syntastic'
 Bundle 'tpope/vim-dispatch'
 Bundle 'tpope/vim-fugitive'
 Bundle 'tpope/vim-surround'
 Bundle 'veegee/cql-vim'
 Bundle 'vim-scripts/vimwiki'
-
+Bundle 'benekastah/neomake'
 
 "+----------------- Basic Configurations ------------+
 " GUI Configuration
@@ -73,6 +73,13 @@ if has('autocmd')
     autocmd BufNewFile,Bufread *.wsgi set ft=python
     autocmd BufNewFile,Bufread *.spect set ft=spec
     autocmd BufNewFile,BufRead *.lua setlocal noet ts=4 sw=4 sts=4
+    autocmd BufNewFile,BufRead *.js setlocal et ts=4 sw=4 sts=4
+    " Beautify
+    autocmd FileType javascript nnoremap <leader>f :call JsBeautify()<cr>
+    autocmd FileType html nnoremap <leader>f :call HtmlBeautify()<cr>
+    autocmd FileType css nnoremap <leader>f :call CSSBeautify()<cr>
+    " Make
+    autocmd! BufWritePost * Neomake
 endif
 
 au VimResized * :wincmd = " Resize splits when the window is resized
@@ -151,11 +158,11 @@ set softtabstop=4
 set splitbelow                  " Split horizontal windows below to the current windows
 set splitright                  " Split vertical windows right to the current windows
 set switchbuf=useopen
-set synmaxcol=800 " Don't try to highlight lines longer than 800 characters.
+set synmaxcol=128 " Don't try to highlight lines longer than X characters.
 set t_Co=256 " If in terminal use 256 colors
 set t_ti= t_te= " Prevent Vim from clobbering the scrollback buffer. See
 set tabstop=4
-set tags=~/.jstags,~/.tags,./tags " Look for tags in this file
+set tags=~/.tags,./tags " Look for tags in this file
 set textwidth=120
 set timeoutlen=250
 set title "Show a window title
@@ -211,11 +218,6 @@ nnoremap <c-o> <c-o>zz
 
 " Don't auto-jump on *
 nnoremap * *<c-o>
-
-" Beautify
-autocmd FileType javascript nnoremap <leader>f :call JsBeautify()<cr>
-autocmd FileType html nnoremap <leader>f :call HtmlBeautify()<cr>
-autocmd FileType css nnoremap <leader>f :call CSSBeautify()<cr>
 
 " COLOR
 set background=dark
@@ -352,6 +354,7 @@ au FileType go nmap gd <Plug>(go-def)
 au FileType go nmap <leader>rt <Plug>(go-run-tab)
 au FileType go nmap <Leader>rs <Plug>(go-run-split)
 au FileType go nmap <Leader>rv <Plug>(go-run-vertical)
+
 " Tern
 au FileType javascript nmap gd :TernDef<CR>
 au FileType javascript nmap <Leader>d :TernDefSplit<CR>
@@ -361,14 +364,9 @@ au FileType javascript nmap <Leader>i :TernDoc<CR>
 let g:go_auto_type_info = 1
 let g:go_dispatch_enabled = 0
 let g:go_fmt_fail_silently = 0
-let g:go_highlight_array_whitespace_error = 1
-let g:go_highlight_build_constraints = 1
-let g:go_highlight_chan_whitespace_error = 1
 let g:go_highlight_functions = 1
-let g:go_highlight_interfaces = 1
 let g:go_highlight_methods = 1
 let g:go_highlight_operators = 1
-let g:go_highlight_structs = 1
 let g:go_jump_to_error = 1
 let g:go_play_open_browser = 0
 let g:go_term_mode = "split"
@@ -378,14 +376,22 @@ let g:tern_map_keys = 1
 let g:tern_map_prefix = '<leader>'
 let g:tern_show_argument_hints='on_hold'
 
-" Syntastic plugin
+" Syntastic plugin (Deprecate vs neomake?)
 let g:syntastic_aggregate_errors = 1
 let g:syntastic_always_populate_loc_list = 0
 let g:syntastic_auto_loc_list = 0
 let g:syntastic_check_on_open = 0
 let g:syntastic_check_on_wq = 0
-let g:syntastic_go_checkers = ['go', 'golint', 'govet']
+let g:syntastic_go_checkers = ['govet']
 let g:syntastic_javascript_checkers = ['jshint']
+
+" Neomake
+let g:neomake_javascript_enabled_makers = ['eslint']
+let g:neomake_javascript_jshint_maker = {
+    \ 'args': ['--verbose'],
+    \ 'errorformat': '%A%f: line %l\, col %v\, %m \(%t%*\d\)',
+    \ }
+let g:neomake_javascript_enabled_makers = ['eslint', 'jshint']
 
 " Firefox refresh
 "let g:firefox_refresh_files = "*.js"
