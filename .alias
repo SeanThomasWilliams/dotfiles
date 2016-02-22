@@ -35,7 +35,7 @@ export HISTFILESIZE=
 export HISTFILE="$HOME/.bash_eternal_history"
 alias cm="cd $NOVETTA/common"
 alias dos='export PS1=$C_COLON_BACKSLASH'
-alias dstatall='dstat -amnl --top-io --top-latency'
+alias dstatall='dstat -larm --top-io --top-latency 10'
 alias fgrep="find . | awk '!/CVS|\.git|\.svn|_Stub|\.#/  {print \$0;}' | sed 's/\ /\\\ /g' | xargs grep --color=always -in "
 alias gitpp="git pull --rebase && git push"
 alias grepc="grep --color=always -i"
