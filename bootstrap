@@ -13,6 +13,7 @@ done
 
 mkdir -p $HOME/bin
 ln -sf $PWD/bin/* $HOME/bin/
+rm -f $HOME/.vim
 ln -sf $PWD/vim $HOME/.vim
 
 echo "Installing bundles"

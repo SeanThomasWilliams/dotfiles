@@ -79,7 +79,7 @@ if has('autocmd')
     autocmd FileType html nnoremap <leader>f :call HtmlBeautify()<cr>
     autocmd FileType css nnoremap <leader>f :call CSSBeautify()<cr>
     " Make
-    autocmd! BufWritePost * Neomake
+    autocmd! BufWritePost,BufEnter * Neomake
 endif
 
 au VimResized * :wincmd = " Resize splits when the window is resized
@@ -386,12 +386,16 @@ let g:syntastic_go_checkers = ['govet']
 let g:syntastic_javascript_checkers = ['jshint']
 
 " Neomake
-let g:neomake_javascript_enabled_makers = ['eslint']
-let g:neomake_javascript_jshint_maker = {
-    \ 'args': ['--verbose'],
-    \ 'errorformat': '%A%f: line %l\, col %v\, %m \(%t%*\d\)',
-    \ }
 let g:neomake_javascript_enabled_makers = ['eslint', 'jshint']
+let g:neomake_error_sign = {
+    \ 'text': 'E>',
+    \ 'texthl': 'ErrorMsg',
+    \ }
+let g:neomake_warning_sign = {
+    \ 'text': 'W>',
+    \ 'texthl': 'WarningMsg',
+    \ }
+
 
 " Firefox refresh
 "let g:firefox_refresh_files = "*.js"
