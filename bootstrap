@@ -11,6 +11,12 @@ for fname in $DIR/.*; do
     fi
 done
 
+# For neovim
+mkdir -p $HOME/.config
+rm -f $HOME/.config/nvim
+ln -sf $PWD/vim $HOME/.config/nvim
+ln -sf $PWD/.vimrc $HOME/.config/nvim/init.vim
+
 mkdir -p $HOME/bin
 ln -sf $PWD/bin/* $HOME/bin/
 rm -f $HOME/.vim
