@@ -320,9 +320,10 @@ nnoremap <Leader>w :tabc<CR>
 "make Y behave more like C and D
 nmap Y y$
 
-" Ack features
-nnoremap <Leader>a :Ack --type=%:e
-nnoremap <Leader>A :Ack --type=%:e <C-r><C-w><CR>
+" Ack/ag features
+nnoremap <Leader>a :Ack --%:e
+nnoremap <Leader>A :Ack --%:e "\b<C-r><C-w>\b"<CR>
+
 
 " CtrlP
 "let g:ctrlp_working_path_mode = 2
@@ -344,6 +345,20 @@ let g:ctrlp_buftag_types = {
             \ 'objc'       : '--language-force=objc --objc-types=mpci',
             \ 'rc'         : '--language-force=rust --rust-types=fTm'
             \ }
+
+if executable('ag')
+    let g:ackprg = 'ag --nogroup --nocolor --column'
+
+      " Use ag over grep
+  set grepprg=ag\ --nogroup\ --nocolor
+
+  " Use ag in CtrlP for listing files. Lightning fast and respects .gitignore
+  let g:ctrlp_user_command = 'ag %s -l --nocolor -g ""'
+
+  " ag is fast enough that CtrlP doesn't need to cache
+  let g:ctrlp_use_caching = 0
+endif
+
 nnoremap <C-t> :CtrlPCurWD<CR>
 
 " ctrl-n/m to jump between 'compiler' messages
