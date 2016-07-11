@@ -48,7 +48,7 @@ endif
 
 " Vim-Script Configurations
 let g:indent_guides_guide_size = 1 " Only use one column to show indent
-let g:indent_guides_start_level = 2 " Start on the second level of indents
+let g:indent_guides_start_level = 2 " Start on the second level o
 
 " Keymappings
 " Quick write, write quit and quit key mappings for normal mode
@@ -81,7 +81,27 @@ if has('autocmd')
     autocmd! BufWritePost,BufEnter * Neomake
 endif
 
+" Show absolute numbers when in insert mode
+augroup toggle_relative_number
+    autocmd!
+    autocmd InsertEnter * :setlocal norelativenumber
+    autocmd InsertLeave * :setlocal relativenumber
+augroup END
+
+" Only use relative numbers when the window is active
+augroup active_relative_number
+  au!
+  au BufEnter * :setlocal relativenumber
+  au WinEnter * :setlocal relativenumber
+  au BufLeave * :setlocal norelativenumber
+  au WinLeave * :setlocal norelativenumber
+augroup END
+
 au VimResized * :wincmd = " Resize splits when the window is resized
+
+" Don't lose selection when shifting text in visual mode
+xnoremap < <gv
+xnoremap > >gv
 
 " ARROW KEYS ARE UNACCEPTABLE
 map <Left> <Nop>
