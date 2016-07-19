@@ -177,7 +177,7 @@ set softtabstop=4
 set splitbelow                  " Split horizontal windows below to the current windows
 set splitright                  " Split vertical windows right to the current windows
 set switchbuf=useopen
-set synmaxcol=128 " Don't try to highlight lines longer than X characters.
+set synmaxcol=200 " Don't try to highlight lines longer than X characters.
 set t_Co=256 " If in terminal use 256 colors
 set t_ti= t_te= " Prevent Vim from clobbering the scrollback buffer. See
 set tabstop=4
