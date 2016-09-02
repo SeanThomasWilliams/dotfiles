@@ -28,6 +28,7 @@ Bundle 'kien/ctrlp.vim'
 Bundle 'maksimr/vim-jsbeautify'
 Bundle 'marijnh/tern_for_vim'
 Bundle 'mileszs/ack.vim'
+Bundle 'pearofducks/ansible-vim'
 Bundle 'tpope/vim-dispatch'
 Bundle 'tpope/vim-fugitive'
 Bundle 'tpope/vim-surround'
@@ -73,6 +74,8 @@ if has('autocmd')
     autocmd BufNewFile,Bufread *.spect set ft=spec
     autocmd BufNewFile,BufRead *.lua setlocal noet ts=4 sw=4 sts=4
     autocmd BufNewFile,BufRead *.js setlocal et ts=4 sw=4 sts=4
+    autocmd BufNewFile,BufRead *.yml setlocal ft=ansible
+
     " Beautify
     autocmd FileType javascript nnoremap <leader>f :call JsBeautify()<cr>
     autocmd FileType html nnoremap <leader>f :call HtmlBeautify()<cr>
@@ -324,7 +327,6 @@ nmap Y y$
 nnoremap <Leader>a :Ack --%:e
 nnoremap <Leader>A :Ack --%:e "\b<C-r><C-w>\b"<CR>
 
-
 " CtrlP
 "let g:ctrlp_working_path_mode = 2
 "let g:ctrlp_extensions = ['dir']
@@ -347,13 +349,13 @@ let g:ctrlp_buftag_types = {
             \ }
 
 if executable('ag')
-    let g:ackprg = 'ag --nogroup --nocolor --column'
+  let g:ackprg = 'ag --path-to-agignore ~/.agignore --nogroup --nocolor --column'
 
       " Use ag over grep
   set grepprg=ag\ --nogroup\ --nocolor
 
   " Use ag in CtrlP for listing files. Lightning fast and respects .gitignore
-  let g:ctrlp_user_command = 'ag %s -l --nocolor -g ""'
+  let g:ctrlp_user_command = 'ag %s -l --path-to-agignore ~/.agignore --nocolor -g ""'
 
   " ag is fast enough that CtrlP doesn't need to cache
   let g:ctrlp_use_caching = 0
@@ -396,28 +398,19 @@ au FileType javascript nmap <Leader>i :TernDoc<CR>
 
 " Go settings
 let g:go_auto_type_info = 1
-let g:go_dispatch_enabled = 0
+let g:go_dispatch_enabled = 1
 let g:go_fmt_fail_silently = 0
 let g:go_highlight_functions = 1
 let g:go_highlight_methods = 1
 let g:go_highlight_operators = 1
 let g:go_jump_to_error = 1
 let g:go_play_open_browser = 0
-let g:go_term_mode = "split"
+let g:go_def_mapping_enabled=0
 
 " Tern
 let g:tern_map_keys = 1
 let g:tern_map_prefix = '<leader>'
 let g:tern_show_argument_hints='on_hold'
-
-" Syntastic plugin (Deprecate vs neomake?)
-let g:syntastic_aggregate_errors = 1
-let g:syntastic_always_populate_loc_list = 0
-let g:syntastic_auto_loc_list = 0
-let g:syntastic_check_on_open = 0
-let g:syntastic_check_on_wq = 0
-let g:syntastic_go_checkers = ['govet']
-let g:syntastic_javascript_checkers = ['jshint']
 
 " Neomake
 let g:neomake_javascript_enabled_makers = ['eslint', 'jshint']
@@ -429,7 +422,6 @@ let g:neomake_warning_sign = {
     \ 'text': 'W>',
     \ 'texthl': 'WarningMsg',
     \ }
-
 
 " Firefox refresh
 "let g:firefox_refresh_files = "*.js"
