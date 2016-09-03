@@ -81,13 +81,14 @@ fi
 
 # presumably you already have a .gnupg directory, but this won't hurt even if you do
 mkdir -p -m 700 ~/.gnupg
-export GPG_TTY=$(tty)
-# And give gpg-agent a whirl:
-gpg-connect-agent /bye &> /dev/null || gpg-agent --daemon --enable-ssh-support --write-env-file "${HOME}/.gpg-agent-info" &>/dev/null
 
-#Create the necessary environment variables
-if [ -f "${HOME}/.gpg-agent-info" ]; then
-    . "${HOME}/.gpg-agent-info"
-    export SSH_AUTH_SOCK
-    export SSH_AGENT_PID
+gpgenv="$HOME/.gnupg/gpg-agent.env"
+if [[ -e "$gpgenv" ]] && kill -0 $(grep GPG_AGENT_INFO "$gpgenv" | cut -d: -f 2) 2>/dev/null; then
+    eval "$(cat "$gpgenv")"
+else
+    eval "$(gpg-agent --daemon --enable-ssh-support --write-env-file "$gpgenv")"
 fi
+
+export GPG_AGENT_INFO    # the env file does not contain the export statement
+export SSH_AUTH_SOCK     # enable gpg-agent for ssh
+export GPG_TTY=$(tty)
