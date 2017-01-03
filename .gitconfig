@@ -1,7 +1,6 @@
 [user]
     name = Sean Williams
     email = seanthomaswilliams@gmail.com
-	signingkey = 037A73D54AF715AC
 
 [core]
     editor = vim
@@ -48,5 +47,3 @@
     tool = vimdiff
 [push]
     default = current
-[commit]
-	gpgsign = true
