@@ -33,7 +33,8 @@ Bundle 'tpope/vim-dispatch'
 Bundle 'tpope/vim-fugitive'
 Bundle 'tpope/vim-surround'
 Bundle 'veegee/cql-vim'
-Bundle 'vim-scripts/vimwiki'
+Bundle 'vimwiki/vimwiki'
+Bundle 'vim-perl/vim-perl'
 
 "+----------------- Basic Configurations ------------+
 " GUI Configuration
@@ -432,3 +433,13 @@ let g:airline#extensions#tabline#enabled = 1
 let g:airline_detect_modified=1
 let g:airline_detect_paste=1
 let g:airline_mode_map = {} " see source for the defaults
+
+" Vimwiki
+let g:vimwiki_list = [{
+  \ 'path': '$HOME/vimwiki',
+  \ 'path_html': '/var/www/html',
+  \ 'template_path': '/var/www/html-templates',
+  \ 'template_default': 'default',
+  \ 'template_ext': '.html',
+  \ }]
+au FileType vimwiki map <Leader>p :VimwikiAll2HTML<CR>

@@ -17,9 +17,9 @@ sudo make install
 
 # Get tmux
 cd $HOME/software
-wget https://github.com/tmux/tmux/releases/download/2.1/tmux-2.1.tar.gz
-tar -xvf tmux-2.1.tar.gz
-cd tmux-2.1
+wget -O tmux.tar.gz https://github.com/tmux/tmux/releases/download/2.1/tmux-2.1.tar.gz
+tar -xvf tmux.tar.gz
+cd tmux*
 make configure
 ./configure --prefix=/usr/
 make -j
