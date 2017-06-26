@@ -12,10 +12,8 @@ Bundle 'gmarik/vundle'
 " \__, /_/\__/_/ /_/\__,_/_.___/
 "/____/ ----- Vim Bundles -------
 "
-
 Bundle 'SeanThomasWilliams/dwm.vim'
 Bundle 'Shougo/deoplete.nvim'
-Bundle 'zchee/deoplete-go', { 'do': 'make' }
 Bundle 'airblade/vim-gitgutter'
 Bundle 'benekastah/neomake'
 Bundle 'benmills/vimux'
@@ -29,6 +27,7 @@ Bundle 'kien/ctrlp.vim'
 Bundle 'maksimr/vim-jsbeautify'
 Bundle 'marijnh/tern_for_vim'
 Bundle 'mileszs/ack.vim'
+Bundle 'mjbrownie/hackertyper.vim'
 Bundle 'pearofducks/ansible-vim'
 Bundle 'tpope/vim-dispatch'
 Bundle 'tpope/vim-fugitive'
@@ -36,6 +35,7 @@ Bundle 'tpope/vim-surround'
 Bundle 'veegee/cql-vim'
 Bundle 'vim-perl/vim-perl'
 Bundle 'vimwiki/vimwiki'
+Bundle 'zchee/deoplete-go', { 'do': 'make' }
 
 "+----------------- Basic Configurations ------------+
 " GUI Configuration
@@ -113,6 +113,8 @@ map <Left> <Nop>
 map <Right> <Nop>
 map <Up> <Nop>
 map <Down> <Nop>
+
+map <Esc>[B <Down>
 
 " If there is a vimrc.local source that before current
 if filereadable(expand("~/.vimrc.local"))
@@ -337,7 +339,7 @@ let g:ctrlp_clear_cache_on_exit = 1
 let g:ctrlp_cache_dir = $HOME.'/.cache/ctrlp'
 let g:ctrlp_custom_ignore = {
 \ 'dir':  '\.git$\|\.hg$\|\.svn$\|ext$\|resources$\|project_files$\|test$',
-\ 'file': '\v\.(exe|so|dll|swp|swo|pyc|orig|jpg|png)$',
+\ 'file': '\v\.(exe|so|dll|swp|swo|pyc|orig|jpg|png|tif|jpg|png|tiff)$',
 \ }
 let g:ctrlp_buftag_types = {
             \ 'go'         : '--language-force=go --golang-types=ftv',
@@ -348,13 +350,13 @@ let g:ctrlp_buftag_types = {
             \ }
 
 if executable('ag')
-  let g:ackprg = 'ag --path-to-agignore ~/.agignore --nogroup --nocolor --column'
+  let g:ackprg = 'ag --nogroup --nocolor --column'
 
       " Use ag over grep
   set grepprg=ag\ --nogroup\ --nocolor
 
   " Use ag in CtrlP for listing files. Lightning fast and respects .gitignore
-  let g:ctrlp_user_command = 'ag %s -l --path-to-agignore ~/.agignore --nocolor -g ""'
+  let g:ctrlp_user_command = 'ag %s -l --nocolor -g ""'
 
   " ag is fast enough that CtrlP doesn't need to cache
   let g:ctrlp_use_caching = 0
