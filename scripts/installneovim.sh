@@ -17,7 +17,7 @@ else
     git pull
 fi
 
-which cmake || sudo yum -y install libtool automake autoconf
+sudo yum -y install libtool automake autoconf cmake gcc-c++ gcc
 
 rm -rf .deps
 mkdir -p .deps
