@@ -14,7 +14,8 @@ Bundle 'gmarik/vundle'
 "
 
 Bundle 'SeanThomasWilliams/dwm.vim'
-Bundle 'Valloric/YouCompleteMe'
+Bundle 'Shougo/deoplete.nvim'
+Bundle 'zchee/deoplete-go', { 'do': 'make' }
 Bundle 'airblade/vim-gitgutter'
 Bundle 'benekastah/neomake'
 Bundle 'benmills/vimux'
@@ -33,8 +34,8 @@ Bundle 'tpope/vim-dispatch'
 Bundle 'tpope/vim-fugitive'
 Bundle 'tpope/vim-surround'
 Bundle 'veegee/cql-vim'
-Bundle 'vimwiki/vimwiki'
 Bundle 'vim-perl/vim-perl'
+Bundle 'vimwiki/vimwiki'
 
 "+----------------- Basic Configurations ------------+
 " GUI Configuration
@@ -140,7 +141,7 @@ set backup " Store temporary files in a central spot
 set backupdir=~/.vim/tmp/backup// " backups
 set cmdheight=2
 set complete=.,w,b,u,t " Better Completion
-set completeopt=longest,menuone,preview " Better Completion Options
+set completeopt=longest,menuone,preview,noinsert,noselect " Better Completion Options
 set cursorline " Show highlight on the cursor line
 set diffopt+=iwhite
 set directory=~/.vim/tmp/swap//   " swap files
@@ -271,9 +272,6 @@ nnoremap <F5> <ESC>:w<CR>:call CallInterpreter()<CR>
 
 map <F11> :!ctags -R -f ./tags . &<CR>
 
-" Call godoc on keyword
-nnoremap <silent><Leader>d :Godoc<CR>
-
 "omnicomplete
 inoremap <C-Space> <C-X><C-I>
 
@@ -375,8 +373,18 @@ nnoremap U :syntax sync fromstart<cr>:redraw!<cr>
 " Plugin Settings
 " ----------------------------------------- "
 
-" YCM settings
-let g:ycm_autoclose_preview_window_after_insertion = 1
+" Skip the check of neovim module
+let g:python3_host_skip_check = 1
+
+" Deoplete
+let g:deoplete#enable_at_startup = 1
+
+" Run deoplete.nvim automatically
+let g:deoplete#enable_at_startup = 1
+" deoplete-go settings
+let g:deoplete#sources#go#sort_class = ['package', 'func', 'type', 'var', 'const']
+let g:deoplete#sources#go#use_cache = 1
+let g:deoplete#sources#go#json_directory = $HOME . '.vim/deocache'
 
 " Golang
 au BufNewFile,BufRead *.go setlocal noet ts=4 sw=4 sts=4
@@ -384,13 +392,16 @@ au FileType go map <Leader>gi :wa<CR> :GoImports<CR>
 au FileType go map <Leader>b :wa<CR> :GoBuild<CR>
 au FileType go map <Leader>ra :wa<CR> :GolangTestCurrentPackage<CR>
 au FileType go map <Leader>rf :wa<CR> :GolangTestFocused<CR>
-au FileType go nmap <Leader>d <Plug>(go-def-vertical)
+au FileType go nmap <Leader>ds <Plug>(go-def-vertical)
+au FileType go nmap <Leader>dv <Plug>(go-def-vertical)
 au FileType go nmap <Leader>i <Plug>(go-info)
 au FileType go nmap <Leader>r <Plug>(go-rename)
 au FileType go nmap gd <Plug>(go-def)
 au FileType go nmap <leader>rt <Plug>(go-run-tab)
 au FileType go nmap <Leader>rs <Plug>(go-run-split)
 au FileType go nmap <Leader>rv <Plug>(go-run-vertical)
+"au FileTYpe go nnoremap <silent><Leader>d :Godoc<CR>
+
 
 " Tern
 au FileType javascript nmap gd :TernDef<CR>
@@ -438,8 +449,5 @@ let g:airline_mode_map = {} " see source for the defaults
 let g:vimwiki_list = [{
   \ 'path': '$HOME/vimwiki',
   \ 'path_html': '/var/www/html',
-  \ 'template_path': '/var/www/html-templates',
-  \ 'template_default': 'default',
-  \ 'template_ext': '.html',
   \ }]
 au FileType vimwiki map <Leader>p :VimwikiAll2HTML<CR>

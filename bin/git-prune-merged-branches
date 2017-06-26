@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -eo pipefail
+
 git fetch -p
 
 # Prune branches that have already been merged with master

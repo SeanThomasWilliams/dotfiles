@@ -1,13 +1,17 @@
 #!/bin/bash
 
 screen-reattach(){
-    SESSIONNAME=${1:-tmux}
-    which tmux &> /dev/null
-    if [ $? -eq 0 ]
-    then
-        tmux -2 new -A -s $SESSIONNAME
+    if [[ $1 == "ls" ]]; then
+        tmux list-sessions || screen -ls
     else
-        screen -R -d $SESSIONNAME
+        SESSIONNAME=${1:-tmux}
+        which tmux &> /dev/null
+        if [ $? -eq 0 ]
+        then
+            tmux -2 new -A -s $SESSIONNAME
+        else
+            screen -R -d $SESSIONNAME
+        fi
     fi
 }
 export -f screen-reattach
@@ -23,11 +27,12 @@ export GOPATH="$HOME/gocode"
 export NOVETTA="$HOME/gocode/src/github.com/Novetta"
 export ARES="$HOME/gocode/src/github.com/Novetta/pwcop"
 export HYDRA="$HOME/gocode/src/github.com/Novetta/hydra"
+export FISSION="$HOME/gocode/src/github.com/Novetta/fission"
 export ITK="$HOME/gocode/src/github.com/Novetta/ITK"
 export VIDEX="$HOME/gocode/src/github.com/Novetta/VideoEnterprise"
 export GOBIN="$GOPATH/bin"
 export GO_LOGGING_CONFIG="$HOME/logging.ini"
-export PATH="$HOME/bin/Sencha/Cmd:$JAVA_HOME/bin:/usr/local/bin:$HOME/bin:$GOROOT/bin:$GOBIN:$VIDEX/bin:/home/williamss/software/apache-maven-3.3.9/bin:$PATH"
+export PATH="$HOME/bin/Sencha/Cmd:$JAVA_HOME/bin:/usr/local/bin:$HOME/bin:$GOROOT/bin:$GOBIN:$VIDEX/bin:/home/williamss/software/apache-maven-3.3.9/bin:$HOME/software/node-v6.10.3-linux-x64/bin:/home/williamss/gocode/src/github.com/xeedio/incubator-joshua/bin:$PATH"
 export PROMPT_COMMAND="history -a; history -c; history -r; ${PROMPT_COMMAND}"
 export EDITOR="/usr/bin/vim"
 export C_COLON_BACKSLASH='C:${PWD//\//\\\}>'
@@ -37,7 +42,7 @@ export HISTFILESIZE=
 export HISTFILE="$HOME/.bash_eternal_history"
 alias cm="cd $NOVETTA/common"
 alias dos='export PS1=$C_COLON_BACKSLASH'
-alias dstatall='dstat -larm --top-io --top-latency 10'
+alias dstatall='dstat -larm --top-io --top-latency'
 alias fgrep="find . -type f | awk '!/CVS|\.git|\.svn|_Stub|\.#/  {print \$0;}' | sed 's/\ /\\\ /g' | xargs grep --color=always -in "
 alias gitpp="git pull --rebase && git push"
 alias grepc="grep --color=always -i"
@@ -61,15 +66,17 @@ alias ar="cd $ARES"
 alias hydraappbuild="cd $HYDRA/hydraweb && sencha app build"
 alias hydraunittest="~/bin/watchcmd $HYDRA/hydraserver $HYDRA/dev/rununittests.sh"
 alias hydraserver="source $HYDRA/dev/hydra_dev.env && source ~/.hydra && ~/bin/watchcmd $HYDRA/hydraserver go run $HYDRA/hydraserver/server/server.go"
+alias fis="cd $FISSION"
 alias hy="cd $HYDRA"
-which nvim &> /dev/null && alias vim="nvim"
+alias xe="cd $GOPATH/src/github.com/xeedio"
+which nvim &> /dev/null || alias vim="nvim"
 
-export PATH=/opt/rh/python27/root/usr/bin${PATH:+:${PATH}}
-export LD_LIBRARY_PATH=/opt/rh/python27/root/usr/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
-export MANPATH=/opt/rh/python27/root/usr/share/man:${MANPATH}
-# # For pkg-config
-export PKG_CONFIG_PATH=/opt/rh/python27/root/usr/lib64/pkgconfig${PKG_CONFIG_PATH:+:${PKG_CONFIG_PATH}}
-export PYTHONPATH=/usr/lib/python2.7/site-packages:/opt/rh/python27/root/usr/lib64/python2.7/site-packages
+#export LD_LIBRARY_PATH=/opt/rh/python27/root/usr/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
+#export MANPATH=/opt/rh/python27/root/usr/share/man:${MANPATH}
+# For pkg-config
+#export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:/opt/rh/python27/root/usr/lib64/pkgconfig${PKG_CONFIG_PATH:+:${PKG_CONFIG_PATH}}
+#export PYTHONPATH=/usr/lib/python2.7/site-packages
+#:/opt/rh/python27/root/usr/lib64/python2.7/site-packages
 
 if [[ -f "$HOME/.videx.env" ]]; then
     source $HOME/.videx.env
