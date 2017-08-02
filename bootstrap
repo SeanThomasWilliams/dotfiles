@@ -4,6 +4,10 @@ set -e
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
+cd $DIR
+
+git submodule update --init --recursive
+
 for fname in $DIR/.*; do
     if [ -f $fname ]; then
         fname=$(basename $fname)
