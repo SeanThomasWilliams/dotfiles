@@ -26,9 +26,12 @@ ln -sf $PWD/bin/* $HOME/bin/
 rm -f $HOME/.vim
 ln -sf $PWD/vim $HOME/.vim
 
+pip install neovim
+
 echo "Installing bundles"
 vim +BundleInstall! +qall
 echo "Installing GO binaries"
 vim +GoInstallBinaries +qall
+vim +UpdateRemotePlugins +qall
 
 echo "Done!"
