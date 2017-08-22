@@ -4,6 +4,10 @@ set -e
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
+cd $DIR
+
+git submodule update --init --recursive
+
 for fname in $DIR/.*; do
     if [ -f $fname ]; then
         fname=$(basename $fname)
@@ -22,9 +26,12 @@ ln -sf $PWD/bin/* $HOME/bin/
 rm -f $HOME/.vim
 ln -sf $PWD/vim $HOME/.vim
 
+pip install neovim
+
 echo "Installing bundles"
 vim +BundleInstall! +qall
 echo "Installing GO binaries"
 vim +GoInstallBinaries +qall
+vim +UpdateRemotePlugins +qall
 
 echo "Done!"

@@ -32,7 +32,7 @@ export ITK="$HOME/gocode/src/github.com/Novetta/ITK"
 export VIDEX="$HOME/gocode/src/github.com/Novetta/VideoEnterprise"
 export GOBIN="$GOPATH/bin"
 export GO_LOGGING_CONFIG="$HOME/logging.ini"
-export PATH="$HOME/bin/Sencha/Cmd:$JAVA_HOME/bin:/usr/local/bin:$HOME/bin:$GOROOT/bin:$GOBIN:$VIDEX/bin:/home/williamss/software/apache-maven-3.3.9/bin:$HOME/software/node-v6.10.3-linux-x64/bin:/home/williamss/gocode/src/github.com/xeedio/incubator-joshua/bin:$PATH"
+export PATH="$HOME/anaconda3/bin:$HOME/bin/Sencha/Cmd:$JAVA_HOME/bin:/usr/local/bin:$HOME/bin:$GOROOT/bin:$GOBIN:$VIDEX/bin:/home/williamss/software/apache-maven-3.3.9/bin:$HOME/software/node-v6.10.3-linux-x64/bin:/home/williamss/gocode/src/github.com/xeedio/incubator-joshua/bin:$PATH"
 export PROMPT_COMMAND="history -a; history -c; history -r; ${PROMPT_COMMAND}"
 export EDITOR="/usr/bin/vim"
 export C_COLON_BACKSLASH='C:${PWD//\//\\\}>'
@@ -69,7 +69,7 @@ alias hydraserver="source $HYDRA/dev/hydra_dev.env && source ~/.hydra && ~/bin/w
 alias fis="cd $FISSION"
 alias hy="cd $HYDRA"
 alias xe="cd $GOPATH/src/github.com/xeedio"
-which nvim &> /dev/null || alias vim="nvim"
+which nvim &> /dev/null && alias vim="nvim"
 
 #export LD_LIBRARY_PATH=/opt/rh/python27/root/usr/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
 #export MANPATH=/opt/rh/python27/root/usr/share/man:${MANPATH}
