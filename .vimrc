@@ -427,6 +427,7 @@ let g:tern_map_prefix = '<leader>'
 let g:tern_show_argument_hints='on_hold'
 
 " Neomake
+let g:neomake_python_enabled_makers = ['python']
 let g:neomake_javascript_enabled_makers = ['eslint', 'jshint']
 let g:neomake_error_sign = {
     \ 'text': 'E>',
