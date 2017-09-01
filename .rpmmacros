@@ -1,1 +1,4 @@
 %_topdir    %{getenv:HOME}/rpmbuild
+%_signature gpg
+%_gpg_path ${getenv:HOME}/.gnupg
+%_gpg_name Xeed.IO
