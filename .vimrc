@@ -27,7 +27,6 @@ Bundle 'kien/ctrlp.vim'
 Bundle 'maksimr/vim-jsbeautify'
 Bundle 'marijnh/tern_for_vim'
 Bundle 'mileszs/ack.vim'
-Bundle 'mjbrownie/hackertyper.vim'
 Bundle 'pearofducks/ansible-vim'
 Bundle 'tpope/vim-dispatch'
 Bundle 'tpope/vim-fugitive'
@@ -36,6 +35,8 @@ Bundle 'veegee/cql-vim'
 Bundle 'vim-perl/vim-perl'
 Bundle 'vimwiki/vimwiki'
 Bundle 'zchee/deoplete-go', { 'do': 'make' }
+Bundle 'zchee/deoplete-jedi'
+
 
 "+----------------- Basic Configurations ------------+
 " GUI Configuration
