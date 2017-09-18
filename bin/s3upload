@@ -1,0 +1,14 @@
+#!/bin/bash
+
+# This script uploads the given file to S3. Assumes you have ~/.aws credentials configured with 'aws configure'
+
+if [[ $# -lt 1 ]]; then
+    echo "Usage $0 <FILE> <BUCKET>"
+    exit 1
+fi
+
+FILE=$1
+BUCKET=${2:-fbnc-rpms}
+
+aws s3 cp $FILE s3://$BUCKET/ --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
+echo "$FILE available at https://s3.amazonaws.com/$BUCKET/$(basename $FILE)"
