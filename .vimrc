@@ -22,6 +22,7 @@ Bundle 'bling/vim-airline'
 Bundle 'einars/js-beautify'
 Bundle 'fatih/vim-go'
 Bundle 'gagoar/StripWhiteSpaces'
+Bundle 'jacoborus/tender.vim'
 Bundle 'jelera/vim-javascript-syntax'
 Bundle 'kien/ctrlp.vim'
 Bundle 'maksimr/vim-jsbeautify'
@@ -36,7 +37,6 @@ Bundle 'vim-perl/vim-perl'
 Bundle 'vimwiki/vimwiki'
 Bundle 'zchee/deoplete-go', { 'do': 'make' }
 Bundle 'zchee/deoplete-jedi'
-
 
 "+----------------- Basic Configurations ------------+
 " GUI Configuration
@@ -247,8 +247,12 @@ nnoremap <c-o> <c-o>zz
 nnoremap * *<c-o>
 
 " COLOR
+if (has("termguicolors"))
+ set termguicolors
+endif
 set background=dark
-color inkpot
+colorscheme tender
+let g:airline_theme = 'tender'
 
 " STATUS LINE
 set statusline=%<%f\ (%{&ft})\ %-4(%m%)%=%-19(%3l,%02c%03V%)
@@ -428,7 +432,7 @@ let g:tern_map_prefix = '<leader>'
 let g:tern_show_argument_hints='on_hold'
 
 " Neomake
-let g:neomake_python_enabled_makers = ['python']
+let g:neomake_python_enabled_makers = ['python', 'flake8']
 let g:neomake_javascript_enabled_makers = ['eslint', 'jshint']
 let g:neomake_error_sign = {
     \ 'text': 'E>',
@@ -438,6 +442,13 @@ let g:neomake_warning_sign = {
     \ 'text': 'W>',
     \ 'texthl': 'WarningMsg',
     \ }
+
+augroup my_neomake_highlights
+    au!
+    autocmd ColorScheme *
+        \ hi link NeomakeError SpellBad |
+        \ hi link NeomakeWarning SpellCap
+augroup END
 
 " Firefox refresh
 "let g:firefox_refresh_files = "*.js"
