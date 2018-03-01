@@ -20,7 +20,6 @@ alias sr="screen-reattach"
 export GIT_EDITOR="vim"
 export GOMAXPROCS=8
 export GOTRACEBACK="single"
-export TERM=xterm-256color
 export JAVA_HOME="/etc/alternatives/java_sdk"
 export GOROOT="$HOME/software/go"
 export GOPATH="$HOME/gocode"

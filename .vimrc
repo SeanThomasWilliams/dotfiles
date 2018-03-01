@@ -247,9 +247,6 @@ nnoremap <c-o> <c-o>zz
 nnoremap * *<c-o>
 
 " COLOR
-if (has("termguicolors"))
- set termguicolors
-endif
 set background=dark
 colorscheme tender
 let g:airline_theme = 'tender'
