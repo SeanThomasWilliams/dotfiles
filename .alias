@@ -38,8 +38,9 @@ fi
 export GIT_EDITOR="vim"
 export GOMAXPROCS=8
 export GOTRACEBACK="single"
-#export TERM=screen-256color
-#export JAVA_HOME="/etc/alternatives/java_sdk"
+if [[ -d /etc/alternatives/java_sdk ]]; then
+    export JAVA_HOME="/etc/alternatives/java_sdk"
+fi
 export GOROOT="$HOME/software/go"
 export GOPATH="$HOME/gocode"
 export NOVETTA="$HOME/gocode/src/github.com/Novetta"
