@@ -38,13 +38,9 @@ fi
 export GIT_EDITOR="vim"
 export GOMAXPROCS=8
 export GOTRACEBACK="single"
-<<<<<<< HEAD
 if [[ -d /etc/alternatives/java_sdk ]]; then
     export JAVA_HOME="/etc/alternatives/java_sdk"
 fi
-=======
-export JAVA_HOME="/etc/alternatives/java_sdk"
->>>>>>> aa1f56416e0c54b16ffd7508b22da475a0640106
 export GOROOT="$HOME/software/go"
 export GOPATH="$HOME/gocode"
 export NOVETTA="$HOME/gocode/src/github.com/Novetta"
