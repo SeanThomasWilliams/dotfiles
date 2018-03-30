@@ -78,6 +78,7 @@ if has('autocmd')
     autocmd BufNewFile,BufRead *.lua setlocal noet ts=4 sw=4 sts=4
     autocmd BufNewFile,BufRead *.js setlocal et ts=4 sw=4 sts=4
     autocmd BufNewFile,BufRead *.yml setlocal ft=ansible
+    autocmd BufNewFile,BufRead *.config setlocal ft=yaml et ts=2 sw=2 sts=2
 
     " Beautify
     autocmd FileType javascript nnoremap <leader>f :call JsBeautify()<cr>
