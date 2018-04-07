@@ -20,6 +20,7 @@ Bundle 'benmills/vimux'
 Bundle 'benmills/vimux-golang'
 Bundle 'bling/vim-airline'
 Bundle 'einars/js-beautify'
+Bundle 'ekalinin/Dockerfile.vim'
 Bundle 'fatih/vim-go'
 Bundle 'gagoar/StripWhiteSpaces'
 Bundle 'jacoborus/tender.vim'
@@ -37,6 +38,7 @@ Bundle 'vim-perl/vim-perl'
 Bundle 'vimwiki/vimwiki'
 Bundle 'zchee/deoplete-go', { 'do': 'make' }
 Bundle 'zchee/deoplete-jedi'
+
 
 "+----------------- Basic Configurations ------------+
 " GUI Configuration
