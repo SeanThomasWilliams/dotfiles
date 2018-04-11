@@ -55,7 +55,7 @@
     reflg = %C(red)%h%C(reset) %C(green)%ci%C(reset) %s %C(bold blue)-- %an%C(reset) %C(yellow)(%gd)%C(reset)
 
 [merge]
-    tool = vimdiff
+    tool = nvim -d
 
 [push]
     default = current

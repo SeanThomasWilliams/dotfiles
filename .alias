@@ -60,6 +60,7 @@ alias cm="cd $NOVETTA/common"
 alias dos='export PS1=$C_COLON_BACKSLASH'
 alias dstatall='dstat -larm --top-io --top-latency'
 alias fgrep="find . -type f | awk '!/CVS|\.class|\.jar|\.war|\.git|\.svn|_Stub|\.#/  {print \$0;}' | sed 's/\ /\\\ /g' | xargs grep --color=always -n "
+which ag &> /dev/null && alias fgrep="ag"
 alias gitpp="git pull --rebase && git push"
 alias grepc="grep --color=always -i"
 alias htop="TERM=screen htop"
