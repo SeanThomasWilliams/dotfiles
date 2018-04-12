@@ -89,14 +89,15 @@ alias docker="sudo docker"
 which nvim &> /dev/null && alias vim="nvim"
 which gtimeout &> /dev/null && alias timeout="gtimeout"
 
-if [[ -f "$HOME/.videx.env" ]]; then
-    source $HOME/.videx.env
-fi
+SOURCEFILES="
+$HOME/.videx.env
+$HOME/.local.alias
+/usr/local/etc/profile.d/autojump.sh
+/usr/share/autojump/autojump.bash
+"
 
-if [[ -f "$HOME/.local.alias" ]]; then
-    source $HOME/.local.alias
-fi
-
-if [[ -f /usr/local/etc/profile.d/autojump.sh ]]; then
-    source /usr/local/etc/profile.d/autojump.sh
-fi
+for f in $SOURCEFILES; do
+    if [[ -f $f ]]; then
+       source $f
+    fi
+done
