@@ -468,3 +468,8 @@ let g:vimwiki_list = [{
   \ 'path': '$HOME/vimwiki',
   \ 'path_html': '/var/www/html',
   \ }]
+
+
+let g:autopep8_max_line_length=120
+
+"let g:python3_host_prog = '/home/williamss/anaconda3/bin/python3'
