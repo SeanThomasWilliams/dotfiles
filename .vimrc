@@ -14,12 +14,12 @@ Bundle 'gmarik/vundle'
 "
 Bundle 'SeanThomasWilliams/dwm.vim'
 Bundle 'Shougo/deoplete.nvim'
-Bundle 'airblade/vim-gitgutter'
 Bundle 'benekastah/neomake'
 Bundle 'benmills/vimux'
 Bundle 'benmills/vimux-golang'
 Bundle 'bling/vim-airline'
 Bundle 'einars/js-beautify'
+Bundle 'ekalinin/Dockerfile.vim'
 Bundle 'fatih/vim-go'
 Bundle 'gagoar/StripWhiteSpaces'
 Bundle 'jacoborus/tender.vim'
@@ -38,6 +38,7 @@ Bundle 'vim-perl/vim-perl'
 Bundle 'vimwiki/vimwiki'
 Bundle 'zchee/deoplete-go', { 'do': 'make' }
 Bundle 'zchee/deoplete-jedi'
+
 
 "+----------------- Basic Configurations ------------+
 " GUI Configuration
@@ -74,40 +75,83 @@ nnoremap <silent> <Leader>C :copen<CR>
 
 " Autocommands that cant live in after/filetypes
 if has('autocmd')
-    autocmd BufNewFile,Bufread *.wsgi set ft=python
-    autocmd BufNewFile,Bufread *.spect set ft=spec
-    autocmd BufNewFile,BufRead *.lua setlocal noet ts=4 sw=4 sts=4
-    autocmd BufNewFile,BufRead *.js setlocal et ts=4 sw=4 sts=4
-    autocmd BufNewFile,BufRead *.yml setlocal ft=ansible
-    autocmd BufNewFile,BufRead *.config setlocal ft=yaml et ts=2 sw=2 sts=2
+    augroup EditVim
+        autocmd!
 
-    " Beautify
-    autocmd FileType javascript nnoremap <leader>f :call JsBeautify()<CR>
-    autocmd FileType html nnoremap <leader>f :call HtmlBeautify()<CR>
-    autocmd FileType css nnoremap <leader>f :call CSSBeautify()<CR>
-    autocmd FileType python noremap <leader>f :call Autopep8()<CR>
+        " Save when losing focus
+        " autocmd FocusLost * :silent! wall
 
-    " Make
-    autocmd! BufWritePost,BufEnter * Neomake
+        " Show absolute numbers when in insert mode
+        autocmd InsertEnter * :setlocal norelativenumber
+        autocmd InsertLeave * :setlocal relativenumber
+
+        " Only use relative numbers when the window is active
+        autocmd BufEnter * :setlocal relativenumber
+        autocmd WinEnter * :setlocal relativenumber
+        autocmd BufLeave * :setlocal norelativenumber
+        autocmd WinLeave * :setlocal norelativenumber
+
+        " Only show cursorline in the current window and in normal mode.
+        autocmd WinLeave,InsertEnter * set nocursorline
+        autocmd WinEnter,InsertLeave * set cursorline
+
+        " Resize splits when the window is resized
+        autocmd VimResized * :wincmd =
+
+        " Filetypes
+        autocmd BufNewFile,Bufread *.wsgi set ft=python
+        autocmd BufNewFile,Bufread *.spect set ft=spec
+        autocmd BufNewFile,BufRead *.lua setlocal noet ts=4 sw=4 sts=4
+        autocmd BufNewFile,BufRead *.js setlocal et ts=4 sw=4 sts=4
+        autocmd BufNewFile,BufRead *.yml setlocal ft=ansible
+        autocmd BufNewFile,BufRead *.config setlocal ft=yaml et ts=2 sw=2 sts=2
+
+        " Beautify
+        autocmd FileType javascript nnoremap <leader>f :call JsBeautify()<cr>
+        autocmd FileType html nnoremap <leader>f :call HtmlBeautify()<cr>
+        autocmd FileType css nnoremap <leader>f :call CSSBeautify()<cr>
+        autocmd FileType python noremap <leader>f :call Autopep8()<CR>
+
+        " VimWIKI
+        autocmd FileType vimwiki map <Leader>p :VimwikiAll2HTML<CR>
+
+        " Golang
+        autocmd BufNewFile,BufRead *.go setlocal noet ts=4 sw=4 sts=4
+        autocmd FileType go map <Leader>gi :wa<CR> :GoImports<CR>
+        autocmd FileType go map <Leader>b :wa<CR> :GoBuild<CR>
+        autocmd FileType go map <Leader>ra :wa<CR> :GolangTestCurrentPackage<CR>
+        autocmd FileType go map <Leader>rf :wa<CR> :GolangTestFocused<CR>
+        autocmd FileType go nmap <Leader>ds <Plug>(go-def-vertical)
+        autocmd FileType go nmap <Leader>dv <Plug>(go-def-vertical)
+        autocmd FileType go nmap <Leader>i <Plug>(go-info)
+        autocmd FileType go nmap <Leader>r <Plug>(go-rename)
+        autocmd FileType go nmap gd <Plug>(go-def)
+        autocmd FileType go nmap <leader>rt <Plug>(go-run-tab)
+        autocmd FileType go nmap <Leader>rs <Plug>(go-run-split)
+        autocmd FileType go nmap <Leader>rv <Plug>(go-run-vertical)
+        "autocmd FileTYpe go nnoremap <silent><Leader>d :Godoc<CR>
+
+        " Tern
+        autocmd FileType javascript nmap gd :TernDef<CR>
+        autocmd FileType javascript nmap <Leader>d :TernDefSplit<CR>
+        autocmd FileType javascript nmap <Leader>i :TernDoc<CR>
+
+        autocmd ColorScheme *
+            \ hi link NeomakeError SpellBad |
+            \ hi link NeomakeWarning SpellCap
+
+        " Neomake options
+        " When writing a buffer (no delay).
+        "call neomake#configure#automake('w')
+        " When writing a buffer (no delay), and on normal mode changes (after 750ms).
+        call neomake#configure#automake('rnw', 750)
+        " When reading a buffer (after 1s), and when writing (no delay).
+        "call neomake#configure#automake('rw', 1000)
+        " Full config: when writing or reading a buffer, and on changes in insert and
+        " normal mode (after 1s; no delay when writing).
+        "call neomake#configure#automake('nrwi')
+    augroup END
 endif
-
-" Show absolute numbers when in insert mode
-augroup toggle_relative_number
-    autocmd!
-    autocmd InsertEnter * :setlocal norelativenumber
-    autocmd InsertLeave * :setlocal relativenumber
-augroup END
-
-" Only use relative numbers when the window is active
-augroup active_relative_number
-  au!
-  au BufEnter * :setlocal relativenumber
-  au WinEnter * :setlocal relativenumber
-  au BufLeave * :setlocal norelativenumber
-  au WinLeave * :setlocal norelativenumber
-augroup END
-
-au VimResized * :wincmd = " Resize splits when the window is resized
 
 " Don't lose selection when shifting text in visual mode
 xnoremap < <gv
@@ -123,7 +167,7 @@ map <Esc>[B <Down>
 
 " If there is a vimrc.local source that before current
 if filereadable(expand("~/.vimrc.local"))
-      source ~/.vimrc.local
+    source ~/.vimrc.local
 endif
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -219,19 +263,6 @@ set winwidth=79
 syntax case match
 syntax sync minlines=256
 syntax on " Enable highlighting for syntax
-
-" Save when losing focus
-au FocusLost * :silent! wall
-
-" Resize splits when the window is resized
-au VimResized * :wincmd =
-
-" Only show cursorline in the current window and in normal mode.
-augroup cline
-    au!
-    au WinLeave,InsertEnter * set nocursorline
-    au WinEnter,InsertLeave * set cursorline
-augroup END
 
 " Make directories automatically if they don't already exist.
 if !isdirectory(expand(&backupdir))
@@ -394,28 +425,6 @@ let g:deoplete#sources#go#sort_class = ['package', 'func', 'type', 'var', 'const
 let g:deoplete#sources#go#use_cache = 1
 let g:deoplete#sources#go#json_directory = $HOME . '.vim/deocache'
 
-" Golang
-au BufNewFile,BufRead *.go setlocal noet ts=4 sw=4 sts=4
-au FileType go map <Leader>gi :wa<CR> :GoImports<CR>
-au FileType go map <Leader>b :wa<CR> :GoBuild<CR>
-au FileType go map <Leader>ra :wa<CR> :GolangTestCurrentPackage<CR>
-au FileType go map <Leader>rf :wa<CR> :GolangTestFocused<CR>
-au FileType go nmap <Leader>ds <Plug>(go-def-vertical)
-au FileType go nmap <Leader>dv <Plug>(go-def-vertical)
-au FileType go nmap <Leader>i <Plug>(go-info)
-au FileType go nmap <Leader>r <Plug>(go-rename)
-au FileType go nmap gd <Plug>(go-def)
-au FileType go nmap <leader>rt <Plug>(go-run-tab)
-au FileType go nmap <Leader>rs <Plug>(go-run-split)
-au FileType go nmap <Leader>rv <Plug>(go-run-vertical)
-"au FileTYpe go nnoremap <silent><Leader>d :Godoc<CR>
-
-
-" Tern
-au FileType javascript nmap gd :TernDef<CR>
-au FileType javascript nmap <Leader>d :TernDefSplit<CR>
-au FileType javascript nmap <Leader>i :TernDoc<CR>
-
 " Go settings
 let g:go_auto_type_info = 1
 let g:go_dispatch_enabled = 1
@@ -444,13 +453,6 @@ let g:neomake_warning_sign = {
     \ 'texthl': 'WarningMsg',
     \ }
 
-augroup my_neomake_highlights
-    au!
-    autocmd ColorScheme *
-        \ hi link NeomakeError SpellBad |
-        \ hi link NeomakeWarning SpellCap
-augroup END
-
 " Firefox refresh
 "let g:firefox_refresh_files = "*.js"
 "let $firefox_refresh_host = "webclient"
@@ -466,4 +468,3 @@ let g:vimwiki_list = [{
   \ 'path': '$HOME/vimwiki',
   \ 'path_html': '/var/www/html',
   \ }]
-au FileType vimwiki map <Leader>p :VimwikiAll2HTML<CR>
