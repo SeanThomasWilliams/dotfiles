@@ -27,6 +27,7 @@ Bundle 'jelera/vim-javascript-syntax'
 Bundle 'kien/ctrlp.vim'
 Bundle 'maksimr/vim-jsbeautify'
 Bundle 'marijnh/tern_for_vim'
+Bundle 'tell-k/vim-autopep8'
 Bundle 'mileszs/ack.vim'
 Bundle 'pearofducks/ansible-vim'
 Bundle 'tpope/vim-dispatch'
@@ -81,9 +82,11 @@ if has('autocmd')
     autocmd BufNewFile,BufRead *.config setlocal ft=yaml et ts=2 sw=2 sts=2
 
     " Beautify
-    autocmd FileType javascript nnoremap <leader>f :call JsBeautify()<cr>
-    autocmd FileType html nnoremap <leader>f :call HtmlBeautify()<cr>
-    autocmd FileType css nnoremap <leader>f :call CSSBeautify()<cr>
+    autocmd FileType javascript nnoremap <leader>f :call JsBeautify()<CR>
+    autocmd FileType html nnoremap <leader>f :call HtmlBeautify()<CR>
+    autocmd FileType css nnoremap <leader>f :call CSSBeautify()<CR>
+    autocmd FileType python noremap <leader>f :call Autopep8()<CR>
+
     " Make
     autocmd! BufWritePost,BufEnter * Neomake
 endif
@@ -259,12 +262,12 @@ set statusline=%<%f\ (%{&ft})\ %-4(%m%)%=%-19(%3l,%02c%03V%)
 
 " Clear the search buffer when hitting return
 function! MapCR()
-  nnoremap <cr> :nohlsearch<cr>
+  nnoremap <CR> :nohlsearch<CR>
 endfunction
 call MapCR()
 
 " Insert the current time
-command! InsertTime :normal a<c-r>=strftime('%F %H:%M:%S.0 %z')<cr>
+command! InsertTime :normal a<c-r>=strftime('%F %H:%M:%S.0 %z')<CR>
 
 cabbrev hsplit split
 cabbrev new vnew
@@ -372,7 +375,7 @@ nnoremap <silent> <C-n> :cn<CR>
 nnoremap <silent> <C-m> :cp<CR>
 
 " fix syntax hl:
-nnoremap U :syntax sync fromstart<cr>:redraw!<cr>
+nnoremap U :syntax sync fromstart<CR>:redraw!<CR>
 
 " ------------------------------------------"
 " Plugin Settings
