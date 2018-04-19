@@ -8,3 +8,4 @@ vim/bundle/*
 .png
 .jpg
 vim/init.vim
+init.vim
