@@ -361,10 +361,6 @@ nnoremap <Leader>w :tabc<CR>
 "make Y behave more like C and D
 nmap Y y$
 
-" Ack/ag features
-nnoremap <Leader>a :Ack --%:e
-nnoremap <Leader>A :Ack --%:e "\b<C-r><C-w>\b"<CR>
-
 " CtrlP
 "let g:ctrlp_working_path_mode = 2
 "let g:ctrlp_extensions = ['dir']
@@ -386,10 +382,15 @@ let g:ctrlp_buftag_types = {
             \ 'rc'         : '--language-force=rust --rust-types=fTm'
             \ }
 
-if executable('ag')
-  let g:ackprg = 'ag --nogroup --nocolor --column'
 
-      " Use ag over grep
+" Ack/ag features
+nnoremap <Leader>a :Ack -t
+nnoremap <Leader>A :Ack -t "\b<C-r><C-w>\b"<CR>
+
+if executable('ag')
+  let g:ackprg = 'ag --vimgrep'
+
+  " Use ag over grep
   set grepprg=ag\ --nogroup\ --nocolor
 
   " Use ag in CtrlP for listing files. Lightning fast and respects .gitignore
@@ -417,10 +418,6 @@ let g:python3_host_skip_check = 1
 
 " Deoplete
 let g:deoplete#enable_at_startup = 1
-
-" Run deoplete.nvim automatically
-let g:deoplete#enable_at_startup = 1
-" deoplete-go settings
 let g:deoplete#sources#go#sort_class = ['package', 'func', 'type', 'var', 'const']
 let g:deoplete#sources#go#use_cache = 1
 let g:deoplete#sources#go#json_directory = $HOME . '.vim/deocache'
