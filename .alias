@@ -91,7 +91,6 @@ which nvim &> /dev/null && alias vim="nvim"
 which gtimeout &> /dev/null && alias timeout="gtimeout"
 
 SOURCEFILES="
-$HOME/.videx.env
 $HOME/.local.alias
 /usr/local/etc/profile.d/autojump.sh
 /usr/share/autojump/autojump.bash
