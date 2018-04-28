@@ -3,7 +3,7 @@
     email = seanthomaswilliams@gmail.com
 
 [core]
-    editor = vim
+    editor = nvim
 
 [color]
     ui = auto

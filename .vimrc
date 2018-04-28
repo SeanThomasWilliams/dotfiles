@@ -24,11 +24,13 @@ Bundle 'fatih/vim-go'
 Bundle 'gagoar/StripWhiteSpaces'
 Bundle 'jacoborus/tender.vim'
 Bundle 'jelera/vim-javascript-syntax'
+Bundle 'ervandew/supertab'
 Bundle 'kien/ctrlp.vim'
 Bundle 'maksimr/vim-jsbeautify'
 Bundle 'marijnh/tern_for_vim'
 Bundle 'mileszs/ack.vim'
 Bundle 'pearofducks/ansible-vim'
+Bundle 'tell-k/vim-autopep8'
 Bundle 'tpope/vim-dispatch'
 Bundle 'tpope/vim-fugitive'
 Bundle 'tpope/vim-surround'
@@ -37,7 +39,6 @@ Bundle 'vim-perl/vim-perl'
 Bundle 'vimwiki/vimwiki'
 Bundle 'zchee/deoplete-go', { 'do': 'make' }
 Bundle 'zchee/deoplete-jedi'
-
 
 "+----------------- Basic Configurations ------------+
 " GUI Configuration
@@ -104,11 +105,13 @@ if has('autocmd')
         autocmd BufNewFile,BufRead *.js setlocal et ts=4 sw=4 sts=4
         autocmd BufNewFile,BufRead *.yml setlocal ft=ansible
         autocmd BufNewFile,BufRead *.config setlocal ft=yaml et ts=2 sw=2 sts=2
+        autocmd BufNewFile,BufRead *.py setlocal ft=python et ts=4 sw=4 sts=4
 
         " Beautify
         autocmd FileType javascript nnoremap <leader>f :call JsBeautify()<cr>
         autocmd FileType html nnoremap <leader>f :call HtmlBeautify()<cr>
         autocmd FileType css nnoremap <leader>f :call CSSBeautify()<cr>
+        autocmd FileType python noremap <leader>f :call Autopep8()<CR>
 
         " VimWIKI
         autocmd FileType vimwiki map <Leader>p :VimwikiAll2HTML<CR>
@@ -460,6 +463,10 @@ let g:airline#extensions#tabline#enabled = 1
 let g:airline_detect_modified=1
 let g:airline_detect_paste=1
 let g:airline_mode_map = {} " see source for the defaults
+
+let g:autopep8_max_line_length=160
+
+let g:SuperTabDefaultCompletionType = "<c-n>"
 
 " Vimwiki
 let g:vimwiki_list = [{
