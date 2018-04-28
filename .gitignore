@@ -7,3 +7,5 @@ vim/bundle/*
 .netrwhist
 .png
 .jpg
+vim/init.vim
+init.vim

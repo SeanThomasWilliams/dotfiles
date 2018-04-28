@@ -60,6 +60,7 @@ alias cm="cd $NOVETTA/common"
 alias dos='export PS1=$C_COLON_BACKSLASH'
 alias dstatall='dstat -larm --top-io --top-latency'
 alias fgrep="find . -type f | awk '!/CVS|\.class|\.jar|\.war|\.git|\.svn|_Stub|\.#/  {print \$0;}' | sed 's/\ /\\\ /g' | xargs grep --color=always -n "
+which ag &> /dev/null && alias fgrep="ag"
 alias gitpp="git pull --rebase && git push"
 alias grepc="grep --color=always -i"
 alias htop="TERM=screen htop"
@@ -89,14 +90,14 @@ alias docker="sudo docker"
 which nvim &> /dev/null && alias vim="nvim"
 which gtimeout &> /dev/null && alias timeout="gtimeout"
 
-if [[ -f "$HOME/.videx.env" ]]; then
-    source $HOME/.videx.env
-fi
+SOURCEFILES="
+$HOME/.local.alias
+/usr/local/etc/profile.d/autojump.sh
+/usr/share/autojump/autojump.bash
+"
 
-if [[ -f "$HOME/.local.alias" ]]; then
-    source $HOME/.local.alias
-fi
-
-if [[ -f /usr/local/etc/profile.d/autojump.sh ]]; then
-    source /usr/local/etc/profile.d/autojump.sh
-fi
+for f in $SOURCEFILES; do
+    if [[ -f $f ]]; then
+       source $f
+    fi
+done

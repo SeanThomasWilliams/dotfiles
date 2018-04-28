@@ -28,6 +28,7 @@ Bundle 'ervandew/supertab'
 Bundle 'kien/ctrlp.vim'
 Bundle 'maksimr/vim-jsbeautify'
 Bundle 'marijnh/tern_for_vim'
+Bundle 'tell-k/vim-autopep8'
 Bundle 'mileszs/ack.vim'
 Bundle 'pearofducks/ansible-vim'
 Bundle 'tell-k/vim-autopep8'
@@ -294,12 +295,12 @@ set statusline=%<%f\ (%{&ft})\ %-4(%m%)%=%-19(%3l,%02c%03V%)
 
 " Clear the search buffer when hitting return
 function! MapCR()
-  nnoremap <cr> :nohlsearch<cr>
+  nnoremap <CR> :nohlsearch<CR>
 endfunction
 call MapCR()
 
 " Insert the current time
-command! InsertTime :normal a<c-r>=strftime('%F %H:%M:%S.0 %z')<cr>
+command! InsertTime :normal a<c-r>=strftime('%F %H:%M:%S.0 %z')<CR>
 
 cabbrev hsplit split
 cabbrev new vnew
@@ -362,10 +363,6 @@ nnoremap <Leader>w :tabc<CR>
 "make Y behave more like C and D
 nmap Y y$
 
-" Ack/ag features
-nnoremap <Leader>a :Ack --%:e
-nnoremap <Leader>A :Ack --%:e "\b<C-r><C-w>\b"<CR>
-
 " CtrlP
 "let g:ctrlp_working_path_mode = 2
 "let g:ctrlp_extensions = ['dir']
@@ -387,10 +384,15 @@ let g:ctrlp_buftag_types = {
             \ 'rc'         : '--language-force=rust --rust-types=fTm'
             \ }
 
-if executable('ag')
-  let g:ackprg = 'ag --nogroup --nocolor --column'
 
-      " Use ag over grep
+" Ack/ag features
+nnoremap <Leader>a :Ack -t
+nnoremap <Leader>A :Ack -t "\b<C-r><C-w>\b"<CR>
+
+if executable('ag')
+  let g:ackprg = 'ag --vimgrep'
+
+  " Use ag over grep
   set grepprg=ag\ --nogroup\ --nocolor
 
   " Use ag in CtrlP for listing files. Lightning fast and respects .gitignore
@@ -407,7 +409,7 @@ nnoremap <silent> <C-n> :cn<CR>
 nnoremap <silent> <C-m> :cp<CR>
 
 " fix syntax hl:
-nnoremap U :syntax sync fromstart<cr>:redraw!<cr>
+nnoremap U :syntax sync fromstart<CR>:redraw!<CR>
 
 " ------------------------------------------"
 " Plugin Settings
@@ -418,10 +420,6 @@ let g:python3_host_skip_check = 1
 
 " Deoplete
 let g:deoplete#enable_at_startup = 1
-
-" Run deoplete.nvim automatically
-let g:deoplete#enable_at_startup = 1
-" deoplete-go settings
 let g:deoplete#sources#go#sort_class = ['package', 'func', 'type', 'var', 'const']
 let g:deoplete#sources#go#use_cache = 1
 let g:deoplete#sources#go#json_directory = $HOME . '.vim/deocache'
@@ -443,7 +441,7 @@ let g:tern_map_prefix = '<leader>'
 let g:tern_show_argument_hints='on_hold'
 
 " Neomake
-let g:neomake_python_enabled_makers = ['python', 'flake8']
+let g:neomake_python_enabled_makers = ['python', 'pycodestyle']
 let g:neomake_javascript_enabled_makers = ['eslint', 'jshint']
 let g:neomake_error_sign = {
     \ 'text': 'E>',
@@ -473,3 +471,8 @@ let g:vimwiki_list = [{
   \ 'path': '$HOME/vimwiki',
   \ 'path_html': '/var/www/html',
   \ }]
+
+
+let g:autopep8_max_line_length=120
+
+"let g:python3_host_prog = '/home/williamss/anaconda3/bin/python3'
