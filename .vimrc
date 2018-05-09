@@ -18,13 +18,14 @@ Bundle 'benekastah/neomake'
 Bundle 'benmills/vimux'
 Bundle 'benmills/vimux-golang'
 Bundle 'bling/vim-airline'
+Bundle 'davidhalter/jedi-vim'
 Bundle 'einars/js-beautify'
 Bundle 'ekalinin/Dockerfile.vim'
+Bundle 'ervandew/supertab'
 Bundle 'fatih/vim-go'
 Bundle 'gagoar/StripWhiteSpaces'
 Bundle 'jacoborus/tender.vim'
 Bundle 'jelera/vim-javascript-syntax'
-Bundle 'ervandew/supertab'
 Bundle 'kien/ctrlp.vim'
 Bundle 'maksimr/vim-jsbeautify'
 Bundle 'marijnh/tern_for_vim'
@@ -193,7 +194,7 @@ set backup " Store temporary files in a central spot
 set backupdir=~/.vim/tmp/backup// " backups
 set cmdheight=2
 set complete=.,w,b,u,t " Better Completion
-set completeopt=longest,menuone,preview,noinsert,noselect " Better Completion Options
+set completeopt=menuone,preview,noinsert " Better Completion Options
 set cursorline " Show highlight on the cursor line
 set diffopt+=iwhite
 set directory=~/.vim/tmp/swap//   " swap files
@@ -422,6 +423,11 @@ let g:deoplete#enable_at_startup = 1
 let g:deoplete#sources#go#sort_class = ['package', 'func', 'type', 'var', 'const']
 let g:deoplete#sources#go#use_cache = 1
 let g:deoplete#sources#go#json_directory = $HOME . '.vim/deocache'
+let g:deoplete#sources#jedi#show_docstring = 1
+let g:deoplete#auto_complete_delay = 0
+let g:jedi#show_call_signatures = "2"
+let g:jedi#use_splits_not_buffers = "right"
+
 
 " Go settings
 let g:go_auto_type_info = 1
@@ -474,4 +480,14 @@ let g:vimwiki_list = [{
 
 let g:autopep8_max_line_length=120
 
-"let g:python3_host_prog = '/home/williamss/anaconda3/bin/python3'
+if has('python') " if dynamic py|py3, this line already activates python2.
+  let s:python_version = 2
+elseif has('python3')
+  let s:python_version = 3
+else
+  let s:python_version = 0
+endif
+
+if !empty(glob('/home/williamss/anaconda3/bin/python3'))
+  let g:python3_host_prog = '/home/williamss/anaconda3/bin/python3'
+endif

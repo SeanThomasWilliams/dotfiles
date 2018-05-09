@@ -7,7 +7,7 @@ screenreattach(){
         which tmux &> /dev/null
         if [ $? -eq 0 ]
         then
-            tmux -2 new -A -s $SESSIONNAME
+            tmux -u -2 new -A -s $SESSIONNAME
         else
             screen -R -d $SESSIONNAME
         fi
@@ -35,6 +35,15 @@ export GIT_EDITOR="nvim"
 if [[ -d /etc/alternatives/java_sdk ]]; then
     export JAVA_HOME="/etc/alternatives/java_sdk"
 fi
+
+export LANG=en_us.UTF-8
+export LC_ALL=en_US.UTF-8
+export LC_COLLATE="en_US.UTF-8"
+export LC_CTYPE="en_US.UTF-8"
+export LC_MESSAGES="en_US.UTF-8"
+export LC_MONETARY="en_US.UTF-8"
+export LC_NUMERIC="en_US.UTF-8"
+export LC_TIME="en_US.UTF-8"
 export GOROOT="$HOME/software/go"
 export GOPATH="$HOME/gocode"
 export NOVETTA="$HOME/gocode/src/github.com/Novetta"
@@ -83,7 +92,6 @@ alias xe="cd $GOPATH/src/github.com/xeedio"
 alias docker="sudo docker"
 which nvim &> /dev/null && alias vim="nvim"
 which gtimeout &> /dev/null && alias timeout="gtimeout"
-
 which direnv &> /dev/null && eval "$(direnv hook bash)"
 
 SOURCEFILES="
