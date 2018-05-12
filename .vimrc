@@ -194,7 +194,7 @@ set backup " Store temporary files in a central spot
 set backupdir=~/.vim/tmp/backup// " backups
 set cmdheight=2
 set complete=.,w,b,u,t " Better Completion
-set completeopt=menuone,preview,noinsert " Better Completion Options
+set completeopt=menuone,preview " Better Completion Options
 set cursorline " Show highlight on the cursor line
 set diffopt+=iwhite
 set directory=~/.vim/tmp/swap//   " swap files
