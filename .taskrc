@@ -1,0 +1,69 @@
+# [Created by task 2.5.1 5/10/2018 09:32:10]
+# Taskwarrior program configuration file.
+# For more documentation, see http://taskwarrior.org or try 'man task', 'man task-color',
+# 'man task-sync' or 'man taskrc'
+
+# Here is an example of entries that use the default, override and blank values
+#   variable=foo   -- By specifying a value, this overrides the default
+#   variable=      -- By specifying no value, this means no default
+#   #variable=foo  -- By commenting out the line, or deleting it, this uses the default
+
+# Use the command 'task show' to see all defaults and overrides
+
+# Files
+data.location=~/sync/task
+
+# Color theme (uncomment one to use)
+#include /usr/local/Cellar/task/2.5.1/share/doc/task/rc/light-16.theme
+#include /usr/local/Cellar/task/2.5.1/share/doc/task/rc/light-256.theme
+#include /usr/local/Cellar/task/2.5.1/share/doc/task/rc/dark-16.theme
+#include /usr/local/Cellar/task/2.5.1/share/doc/task/rc/dark-256.theme
+#include /usr/local/Cellar/task/2.5.1/share/doc/task/rc/dark-red-256.theme
+#include /usr/local/Cellar/task/2.5.1/share/doc/task/rc/dark-green-256.theme
+#include /usr/local/Cellar/task/2.5.1/share/doc/task/rc/dark-blue-256.theme
+#include /usr/local/Cellar/task/2.5.1/share/doc/task/rc/dark-violets-256.theme
+#include /usr/local/Cellar/task/2.5.1/share/doc/task/rc/dark-yellow-green.theme
+#include /usr/local/Cellar/task/2.5.1/share/doc/task/rc/dark-gray-256.theme
+#include /usr/local/Cellar/task/2.5.1/share/doc/task/rc/dark-gray-blue-256.theme
+#include /usr/local/Cellar/task/2.5.1/share/doc/task/rc/solarized-dark-256.theme
+#include /usr/local/Cellar/task/2.5.1/share/doc/task/rc/solarized-light-256.theme
+#include /usr/local/Cellar/task/2.5.1/share/doc/task/rc/no-color.theme
+#include /usr/local/Cellar/task/2.5.1/share/doc/task/rc/holidays.en-US.rc
+
+color=on
+
+# default.due=tom
+default.priority=M
+
+due=1
+monthsperline=3
+calendar.holidays=full
+
+report.list.description=Lists all tasks matching the specified criteria
+report.list.columns=id,project,priority,due.relative,due,depends,recur,urgency,tags,description
+report.list.labels=ID,Project,Pri,Rel,Due,Depends,Recur,Score,Tags,Description & Annotation
+report.list.sort=urgency-
+# report.list.sort=due+,priority-,project+
+report.list.filter=status:pending
+report.list.dateformat= a M-D
+alias.ls=list
+
+default.command=(due.before:4d or due: ) and status:pending list
+
+#urgency.next.coefficient=15.0                   # +next tag
+#urgency.due.coefficient=100.0                   # overdue or near due date
+#urgency.blocking.coefficient=8.0                # blocking other tasks
+#urgency.priority.coefficient=6.0                # priority
+#urgency.active.coefficient=4.0                  # already started tasks
+#urgency.scheduled.coefficient=4.0               # scheduled tasks
+#urgency.age.coefficient=0.0                     # Urgency coefficient for age
+#urgency.annotations.coefficient=1.0             # has annotations
+#urgency.tags.coefficient=1.0                    # has tags
+#urgency.project.coefficient=1.0                 # assigned to any project
+#urgency.blocked.coefficient=-50.0               # blocked by other tasks
+#urgency.waiting.coefficient=-100.0                # waiting task
+#urgency.user.tag.waiting.coefficient=-20.0       # specific project
+
+# urgency.user.project.<project>.coefficient=5.0  # specific project
+# urgency.user.tag.<tag>.coefficient=5.0          # specific tag
+# urgency.uda.<name>.coefficient=5.0              # specific UDA
