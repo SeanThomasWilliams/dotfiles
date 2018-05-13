@@ -40,8 +40,8 @@ monthsperline=3
 calendar.holidays=full
 
 report.list.description=Lists all tasks matching the specified criteria
-report.list.columns=id,project,priority,due.relative,due,depends,recur,urgency,tags,description
-report.list.labels=ID,Project,Pri,Rel,Due,Depends,Recur,Score,Tags,Description & Annotation
+report.list.columns=id,project,priority,due,depends,recur,urgency,tags,description
+report.list.labels=ID,Project,Pri,Due,Depends,Recur,Score,Tags,Description & Annotation
 report.list.sort=urgency-
 # report.list.sort=due+,priority-,project+
 report.list.filter=status:pending
