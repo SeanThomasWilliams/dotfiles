@@ -1,13 +1,22 @@
 #/bin/bash
 
-set -e
 set -x
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-#sudo yum -y install automake gcc gcc-c++ kernel-devel cmake
+debianinstall(){
+    which apt &> /dev/null && \
+        sudo apt-get install automake autoconf libtool libtool-bin
+}
+
+rhelinstall(){
+    which yum &> /dev/null && \
+        sudo yum -y install libtool automake autoconf cmake gcc-c++ gcc kernel-devel
+}
+
 mkdir -p $HOME/software
 cd $HOME/software
+
 if [[ ! -d neovim ]]; then
     git clone https://github.com/neovim/neovim
     cd neovim
@@ -17,19 +26,9 @@ else
     git pull
 fi
 
-sudo yum -y install libtool automake autoconf cmake gcc-c++ gcc
+# Install packages
+debianinstall
+rhelinstall
 
-rm -rf .deps
-mkdir -p .deps
-cd .deps
-cmake ../third-party
-make -j $(nproc)
-
-cd ..
-mkdir -p build
-cd build
-cmake ..
-make -j $(nproc)
-
+make
 sudo make install
-make clean
