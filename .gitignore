@@ -9,3 +9,4 @@ vim/bundle/*
 .jpg
 vim/init.vim
 init.vim
+Anaconda*.sh
