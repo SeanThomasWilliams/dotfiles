@@ -99,6 +99,10 @@ $HOME/.local.alias
 $HOME/bin/git-completion.bash
 /usr/local/etc/profile.d/autojump.sh
 /usr/share/autojump/autojump.bash
+/usr/local/etc/bash_completion.d/brew
+/usr/local/etc/bash_completion.d/task.sh
+/usr/local/etc/bash_completion.d/ag.bashcomp.sh
+/usr/local/etc/bash_completion.d/tmux
 "
 
 for f in $SOURCEFILES; do
