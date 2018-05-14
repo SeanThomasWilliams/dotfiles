@@ -473,7 +473,7 @@ let g:SuperTabDefaultCompletionType = "<c-n>"
 
 " Vimwiki
 let g:vimwiki_list = [{
-  \ 'path': '$HOME/vimwiki',
+  \ 'path': '$HOME/sync/vimwiki',
   \ 'path_html': '/var/www/html',
   \ }]
 
