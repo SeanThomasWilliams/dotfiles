@@ -17,6 +17,7 @@ Bundle 'Shougo/deoplete.nvim'
 Bundle 'benekastah/neomake'
 Bundle 'benmills/vimux'
 Bundle 'benmills/vimux-golang'
+Bundle 'blindFS/vim-taskwarrior'
 Bundle 'bling/vim-airline'
 Bundle 'davidhalter/jedi-vim'
 Bundle 'einars/js-beautify'
@@ -59,7 +60,7 @@ let g:indent_guides_start_level = 2 " Start on the second level o
 
 " Keymappings
 " Quick write, write quit and quit key mappings for normal mode
-nmap <leader>w :write<CR>
+"nmap <leader>w :write<CR>
 nmap <leader>wq :write <bar> :quit<CR>
 nmap <leader>q :quit<CR>
 
@@ -328,6 +329,8 @@ nnoremap <c-k> <c-w>k
 nnoremap <c-h> <c-w>h
 nnoremap <c-l> <c-w>l
 
+nnoremap <leader>w :tabnew<CR>:TW<CR>
+
 " Insert a hash rocket with <c-l>
 imap <c-l> <space>=><space>
 
@@ -358,7 +361,7 @@ map [] k$][%?}<CR>
 
 "tab handling
 nnoremap <Leader>t :tab sp<CR>
-nnoremap <Leader>w :tabc<CR>
+nnoremap <Leader>c :tabc<CR>
 
 "make Y behave more like C and D
 nmap Y y$
