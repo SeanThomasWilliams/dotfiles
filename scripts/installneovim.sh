@@ -30,5 +30,5 @@ fi
 debianinstall
 rhelinstall
 
-make
+make -j $(nproc)
 sudo make install
