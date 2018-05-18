@@ -1,10 +1,12 @@
 #!/bin/bash
 
-set -eu
+set -u
 
 SAFE_OPTS="--max-delete 0"
 REMOTE="drive:work"
 LOCAL="$HOME/sync"
+
+mkdir -p $LOCAL
 
 safesync(){
     syncpush
