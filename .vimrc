@@ -101,12 +101,12 @@ if has('autocmd')
         autocmd VimResized * :wincmd =
 
         " Filetypes
-        autocmd BufNewFile,Bufread *.wsgi set ft=python
-        autocmd BufNewFile,Bufread *.spect set ft=spec
+        autocmd BufNewFile,Bufread *.wsgi setlocal ft=python
+        autocmd BufNewFile,Bufread *.spect setlocal ft=spec
         autocmd BufNewFile,BufRead *.lua setlocal noet ts=4 sw=4 sts=4
         autocmd BufNewFile,BufRead *.js setlocal et ts=4 sw=4 sts=4
-        autocmd BufNewFile,BufRead *.yml setlocal ft=ansible
-        autocmd BufNewFile,BufRead *.config setlocal ft=yaml et ts=2 sw=2 sts=2
+        autocmd BufNewFile,BufRead *.yml setlocal ft=ansible et ts=2 sw=2 sts=2
+        autocmd BufNewFile,BufRead *.config setlocal ft=ansible et ts=2 sw=2 sts=2
         autocmd BufNewFile,BufRead *.py setlocal ft=python et ts=4 sw=4 sts=4
 
         " Beautify
