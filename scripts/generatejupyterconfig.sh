@@ -2,6 +2,10 @@
 
 set -ex
 
+if [[ -d $HOME/anaconda3 ]]; then
+    source $HOME/anaconda3/bin/activate
+fi
+
 jupyter notebook --generate-config
 
 jupyter notebook password
