@@ -10,3 +10,4 @@ vim/bundle/*
 vim/init.vim
 init.vim
 Anaconda*.sh
+.vim-go/*
