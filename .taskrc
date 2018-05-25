@@ -33,7 +33,7 @@ data.location=~/sync/task
 color=on
 
 # default.due=tom
-default.priority=M
+default.priority=L
 
 due=1
 monthsperline=3
