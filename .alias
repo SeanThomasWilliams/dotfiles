@@ -60,6 +60,7 @@ export EDITOR="/usr/bin/vim"
 export C_COLON_BACKSLASH='C:${PWD//\//\\\}>'
 export LD_LIBRARY_PATH="/usr/local/lib:/usr/local/cuda/lib64:$HOME/anaconda3/lib:$LD_LIBRARY_PATH"
 export TERM="${TERM:-screen-256color}"
+alias c="column -t -n -s ',' | less -S -R"
 alias cm="cd $NOVETTA/common"
 alias dos='export PS1=$C_COLON_BACKSLASH'
 alias dstatall='dstat -larm --top-io --top-latency'
@@ -90,8 +91,9 @@ alias hydraserver="source $HYDRA/dev/hydra_dev.env && source ~/.hydra && ~/bin/w
 alias fis="cd $FISSION"
 alias hy="cd $HYDRA"
 alias xe="cd $GOPATH/src/github.com/xeedio"
-alias docker="sudo docker"
+#alias docker="sudo docker"
 which nvim &> /dev/null && alias vim="nvim"
+which nvim &> /dev/null && alias vimdiff="nvim -d"
 which gtimeout &> /dev/null && alias timeout="gtimeout"
 which direnv &> /dev/null && eval "$(direnv hook bash)"
 
