@@ -11,7 +11,7 @@
 # Use the command 'task show' to see all defaults and overrides
 
 # Files
-data.location=~/sync/task
+#data.location=~/sync/task
 
 # Color theme (uncomment one to use)
 #include /usr/local/Cellar/task/2.5.1/share/doc/task/rc/light-16.theme
@@ -40,8 +40,8 @@ monthsperline=3
 calendar.holidays=full
 
 report.list.description=Lists all tasks matching the specified criteria
-report.list.columns=id,project,priority,due,depends,recur,urgency,tags,description
-report.list.labels=ID,Project,Pri,Due,Depends,Recur,Score,Tags,Description & Annotation
+report.list.columns=id,project,priority,due.relative,due,depends,recur,urgency,tags,description
+report.list.labels=ID,Project,Pri,Rel,Due,Depends,Recur,Score,Tags,Description & Annotation
 report.list.sort=urgency-
 # report.list.sort=due+,priority-,project+
 report.list.filter=status:pending
@@ -67,3 +67,9 @@ default.command=(due.before:4d or due: ) and status:pending list
 # urgency.user.project.<project>.coefficient=5.0  # specific project
 # urgency.user.tag.<tag>.coefficient=5.0          # specific tag
 # urgency.uda.<name>.coefficient=5.0              # specific UDA
+taskd.certificate=~/sync/task/private.certificate.pem
+taskd.key=~/sync/task/private.key.pem
+taskd.ca=~/sync/task/ca.cert.pem
+taskd.credentials=inthe_am/seanthomaswilliams/150193cd-ee7e-4362-922d-aa5bef2cdd2a
+taskd.server=taskwarrior.inthe.am:53589
+taskd.trust=ignore hostname
