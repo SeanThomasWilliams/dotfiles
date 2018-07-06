@@ -39,6 +39,7 @@ Bundle 'tpope/vim-surround'
 Bundle 'veegee/cql-vim'
 Bundle 'vim-perl/vim-perl'
 Bundle 'vimwiki/vimwiki'
+Bundle 'will133/vim-dirdiff'
 Bundle 'zchee/deoplete-go', { 'do': 'make' }
 Bundle 'zchee/deoplete-jedi'
 
