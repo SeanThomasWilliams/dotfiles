@@ -76,6 +76,13 @@ nmap  S  :%s//g<LEFT><LEFT>
 nnoremap <silent> <Leader>c :cclose<CR>
 nnoremap <silent> <Leader>C :copen<CR>
 
+
+function MakeScriptExecuteable()
+    if getline(1) =~ "^#!.*/bin/"
+        silent !chmod +x %:p
+    endif
+endfunction
+
 " Autocommands that cant live in after/filetypes
 if has('autocmd')
     augroup EditVim
@@ -83,6 +90,7 @@ if has('autocmd')
 
         " Save when losing focus
         " autocmd FocusLost * :silent! wall
+        au BufWritePost * call MakeScriptExecuteable()
 
         " Show absolute numbers when in insert mode
         autocmd InsertEnter * :setlocal norelativenumber
@@ -106,8 +114,8 @@ if has('autocmd')
         autocmd BufNewFile,Bufread *.spect setlocal ft=spec
         autocmd BufNewFile,BufRead *.lua setlocal noet ts=4 sw=4 sts=4
         autocmd BufNewFile,BufRead *.js setlocal et ts=4 sw=4 sts=4
-        autocmd BufNewFile,BufRead *.yml setlocal ft=ansible et ts=2 sw=2 sts=2
-        autocmd BufNewFile,BufRead *.config setlocal ft=ansible et ts=2 sw=2 sts=2
+        autocmd BufNewFile,BufRead *.yml setlocal ft=yaml et ts=2 sw=2 sts=2
+        autocmd BufNewFile,BufRead *.config setlocal ft=yaml et ts=2 sw=2 sts=2
         autocmd BufNewFile,BufRead *.py setlocal ft=python et ts=4 sw=4 sts=4
 
         " Beautify
@@ -304,11 +312,6 @@ call MapCR()
 " Insert the current time
 command! InsertTime :normal a<c-r>=strftime('%F %H:%M:%S.0 %z')<CR>
 
-cabbrev hsplit split
-cabbrev new vnew
-cabbrev right botright
-cabbrev sta vertical sta
-
 " MISC KEY MAPS
 nnoremap <silent> <F2> :set nonumber!<CR>:set foldcolumn=0<CR>
 nnoremap <F5> <ESC>:w<CR>:call CallInterpreter()<CR>
@@ -330,6 +333,20 @@ nnoremap <c-k> <c-w>k
 nnoremap <c-h> <c-w>h
 nnoremap <c-l> <c-w>l
 
+" switch tabs with Ctrl left and right
+nnoremap <C-right> :tabnext<CR>
+nnoremap <C-left> :tabprevious<CR>
+" switch buffers with Ctrl up and down
+nnoremap <C-up> :bn<CR>
+nnoremap <C-down> :bN<CR>
+" and whilst in insert mode
+inoremap <C-right> <Esc>:tabnext<CR>
+inoremap <C-left> <Esc>:tabprevious<CR>
+" switch buffers with Ctrl up and down in insert mode
+inoremap <C-up> <Esc>:bn<CR>
+inoremap <C-down> <Esc>:bN<CR>
+
+" New tab shortcut
 nnoremap <leader>w :tabnew<CR>:TW<CR>
 
 " Insert a hash rocket with <c-l>
@@ -339,12 +356,6 @@ nnoremap <leader><leader> <c-^>
 
 "omnicomplete
 inoremap <C-Space> <C-X><C-I>
-
-"Ctrl-ArrowKeys = move between splits
-nnoremap <C-Down> <C-W><down>
-nnoremap <C-Left> <C-W><left>
-nnoremap <C-Right> <C-W><right>
-nnoremap <C-Up> <C-W><up>
 
 nnoremap <C-\> :call DWM_New() <bar> :CtrlPCurWD<CR>
 nnoremap <C-C> :call DWM_Close()<CR>
@@ -377,7 +388,7 @@ let g:ctrlp_use_caching = 1
 let g:ctrlp_clear_cache_on_exit = 1
 let g:ctrlp_cache_dir = $HOME.'/.cache/ctrlp'
 let g:ctrlp_custom_ignore = {
-\ 'dir':  '\.git$\|\.hg$\|\.svn$\|ext$\|resources$\|project_files$\|test$',
+\ 'dir':  '\.git$\|\.hg$\|\.svn$\|ext$\|resources$\|project_files$\|export$',
 \ 'file': '\v\.(exe|so|dll|swp|swo|pyc|orig|jpg|png|tif|jpg|png|tiff)$',
 \ }
 let g:ctrlp_buftag_types = {
