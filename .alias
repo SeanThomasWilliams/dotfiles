@@ -1,115 +1,162 @@
 #!/bin/bash
-screenreattach(){
-    if [[ $1 == "ls" ]]; then
-        tmux list-sessions || screen -ls
-    else
-        SESSIONNAME=${1:-tmux}
-        which tmux &> /dev/null
-        if [ $? -eq 0 ]
-        then
-            tmux -u -2 new -A -s $SESSIONNAME
-        else
-            screen -R -d $SESSIONNAME
-        fi
-    fi
+
+# Workaround
+__vte_prompt_command() { true; }
+
+load_session_manager_settings(){
+  ### session managers
+  screenreattach(){
+      if [[ $1 == "ls" ]]; then
+          tmux list-sessions || screen -ls
+      else
+          SESSIONNAME=${1:-tmux}
+          which tmux &> /dev/null
+          if [ $? -eq 0 ]
+          then
+              tmux -u -2 new -A -s $SESSIONNAME
+          else
+              screen -R -d $SESSIONNAME
+          fi
+      fi
+  }
+  export -f screenreattach
+  alias sr="screenreattach"
+
+  # custom session manager settings
+  alias htop="TERM=screen htop"
+
+  # check the window size after each command and, if necessary, update the values of LINES and COLUMNS.
+  shopt -s checkwinsize
+
+  # term settings
+  export TERM="${TERM:-screen-256color}"
+  export TMUX_TMPDIR="$HOME/.local"
 }
-export -f screenreattach
-alias sr="screenreattach"
 
-# don't put duplicate lines or lines starting with space in the history.
-# See bash(1) for more options
-HISTCONTROL=ignoreboth
+load_vim_settings(){
+  ### 'vim' settings
+  export EDITOR="vim"
+  if command -v nvim > /dev/null; then
+    export EDITOR="nvim"
+  fi
+  export GIT_EDITOR="$EDITOR"
+  alias vim="$EDITOR"
+  alias vi="$EDITOR"
 
-# append to the history file, don't overwrite it
-shopt -s histappend
+  vimdirdiff(){
+    $EDITOR -c "DirDiff $1 $2"
+  }
+  export -f vimdirdiff
+}
 
-# for setting history length see HISTSIZE and HISTFILESIZE in bash(1)
-HISTSIZE=9000
-HISTFILESIZE=9000
+load_history_settings(){
+  ### history
+  shopt -s histappend              # append new history items to .bash_history
+  export HISTCONTROL=ignorespace   # leading space hides commands from history
+  export HISTFILESIZE=10000        # increase history file size (default is 500)
+  export HISTSIZE=${HISTFILESIZE}  # increase history size (default is 500)
+  export PROMPT_COMMAND="history -a; history -n; ${PROMPT_COMMAND}"
 
-# check the window size after each command and, if necessary,
-# update the values of LINES and COLUMNS.
-shopt -s checkwinsize
+  # HSTR configuration
+  if command -V hstr &> /dev/null; then
+    alias hh=hstr                    # hh to be alias for hstr
+    export HSTR_CONFIG=hicolor       # get more colors
 
-export GIT_EDITOR="nvim"
-if [[ -d /etc/alternatives/java_sdk ]]; then
-    export JAVA_HOME="/etc/alternatives/java_sdk"
-fi
-
-export LANG=en_us.UTF-8
-export LC_ALL=en_US.UTF-8
-export LC_COLLATE="en_US.UTF-8"
-export LC_CTYPE="en_US.UTF-8"
-export LC_MESSAGES="en_US.UTF-8"
-export LC_MONETARY="en_US.UTF-8"
-export LC_NUMERIC="en_US.UTF-8"
-export LC_TIME="en_US.UTF-8"
-export GOROOT="$HOME/software/go"
-export GOPATH="$HOME/gocode"
-export NOVETTA="$HOME/gocode/src/github.com/Novetta"
-export ARES="$HOME/gocode/src/github.com/Novetta/pwcop"
-export HYDRA="$HOME/gocode/src/github.com/Novetta/hydra"
-export FISSION="$HOME/gocode/src/github.com/Novetta/fission"
-export ITK="$HOME/gocode/src/github.com/Novetta/ITK"
-export VIDEX="$HOME/gocode/src/github.com/Novetta/VideoEnterprise"
-export GOBIN="$GOPATH/bin"
-export GO_LOGGING_CONFIG="$HOME/logging.ini"
-export PATH="$HOME/.npm-packages/bin:$HOME/anaconda3/bin:$HOME/bin/Sencha/Cmd:$JAVA_HOME/bin:/usr/local/bin:$HOME/bin:$GOROOT/bin:$GOBIN:$VIDEX/bin:$PATH"
-export PROMPT_COMMAND="history -a; history -c; history -r; ${PROMPT_COMMAND}"
-export EDITOR="/usr/bin/vim"
-export C_COLON_BACKSLASH='C:${PWD//\//\\\}>'
-export LD_LIBRARY_PATH="/usr/local/lib:/usr/local/cuda/lib64:$HOME/anaconda3/lib:$LD_LIBRARY_PATH"
-export TERM="${TERM:-screen-256color}"
-alias c="column -t -n -s ',' | less -S -R"
-alias cm="cd $NOVETTA/common"
-alias dos='export PS1=$C_COLON_BACKSLASH'
-alias dstatall='dstat -larm --top-io --top-latency'
-alias fgrep="find . -type f | awk '!/CVS|\.class|\.jar|\.war|\.git|\.svn|_Stub|\.#/  {print \$0;}' | sed 's/\ /\\\ /g' | xargs grep --color=always -n "
-which ag &> /dev/null && alias fgrep="ag"
-alias gitpp="git pull --rebase && git push"
-alias grepc="grep --color=always -i"
-alias htop="TERM=screen htop"
-alias itk="cd $ITK"
-alias itkappbuild="cd $ITK/itkweb && sencha app build"
-alias itkunittest="~/bin/watchcmd $ITK/itkserver $ITK/dev/rununittests.sh"
-alias itkserver="source $ITK/dev/itk_dev.env && ~/bin/watchcmd $ITK/itkserver go run $ITK/itkserver/server/server.go"
-ls --color &> /dev/null && alias ls="ls -hl --color" || alias ls="ls -lh -G"
-alias nov="cd $NOVETTA"
-alias pe="cd $NOVETTA/perseus"
-alias videxappbuild="cd $VIDEX/videxweb && source ui.env && sencha app build"
-alias videxunittest="~/bin/watchcmd $VIDEX/videxserver $VIDEX/dev/rununittests.sh"
-alias videxserver="~/bin/watchcmd $VIDEX/videxserver go run $VIDEX/videxserver/server/server.go"
-alias ve="cd $VIDEX"
-alias vx="$VIDEX/dev/dev-run-executor.sh"
-alias aresappbuild="cd $ARES/aresweb && sencha app build"
-alias aresunittest="~/bin/watchcmd $ARES/aresserver $ARES/dev/rununittests.sh"
-alias aresserver="source $ARES/dev/ares_dev.env && ~/bin/watchcmd $ARES/aresserver go run $ARES/aresserver/server/server.go"
-alias ar="cd $ARES"
-alias hydraappbuild="cd $HYDRA/hydraweb && sencha app build"
-alias hydraunittest="~/bin/watchcmd $HYDRA/hydraserver $HYDRA/dev/rununittests.sh"
-alias hydraserver="source $HYDRA/dev/hydra_dev.env && source ~/.hydra && ~/bin/watchcmd $HYDRA/hydraserver go run $HYDRA/hydraserver/server/server.go"
-alias fis="cd $FISSION"
-alias hy="cd $HYDRA"
-alias xe="cd $GOPATH/src/github.com/xeedio"
-#alias docker="sudo docker"
-which nvim &> /dev/null && alias vim="nvim"
-which nvim &> /dev/null && alias vimdiff="nvim -d"
-which gtimeout &> /dev/null && alias timeout="gtimeout"
-which direnv &> /dev/null && eval "$(direnv hook bash)"
-
-SOURCEFILES="
-$HOME/.local.alias
-$HOME/bin/git-completion.bash
-/usr/local/etc/profile.d/autojump.sh
-/usr/share/autojump/autojump.bash
-/usr/local/etc/bash_completion.d/brew
-/usr/local/etc/bash_completion.d/task.sh
-/usr/local/etc/bash_completion.d/ag.bashcomp.sh
-/usr/local/etc/bash_completion.d/tmux
-"
-
-for f in $SOURCEFILES; do
-    if [[ -f $f ]]; then
-       source $f
+    # if this is interactive shell, then bind hstr to Ctrl-r (for Vi mode check doc)
+    if [[ $- =~ .*i.* ]]; then
+      bind '"\C-r": "\C-a hstr -- \C-j"'
     fi
-done
+    # if this is interactive shell, then bind 'kill last command' to Ctrl-x k
+    if [[ $- =~ .*i.* ]]; then
+      bind '"\C-xk": "\C-a hstr -k \C-j"'
+    fi
+  fi
+}
+
+load_lang_settings(){
+  # LANG
+  export LANG=en_us.UTF-8
+  export LC_ALL=en_US.UTF-8
+  export LC_COLLATE="en_US.UTF-8"
+  export LC_CTYPE="en_US.UTF-8"
+  export LC_MESSAGES="en_US.UTF-8"
+  export LC_MONETARY="en_US.UTF-8"
+  export LC_NUMERIC="en_US.UTF-8"
+  export LC_TIME="en_US.UTF-8"
+}
+
+load_path_settings(){
+  # go
+  export GOROOT="$HOME/software/go"
+  export GOPATH="$HOME/gocode"
+  export GOBIN="$GOPATH/bin"
+
+  # Global PATH, libs, tools
+  export PATH="$HOME/bin:$HOME/.npm-packages/bin:$HOME/anaconda3/bin:$HOME/bin/Sencha/Cmd:$JAVA_HOME/bin:/usr/local/bin:$HOME/bin:$GOROOT/bin:$GOBIN:$PATH"
+
+  # java settings
+  if [[ -d /etc/alternatives/java_sdk ]]; then
+      export JAVA_HOME="/etc/alternatives/java_sdk"
+  fi
+}
+
+load_alias_settings(){
+  ### alias
+  alias ansible-lint="ansible-lint -c $HOME/.ansible-lint"
+  alias c="column -t -n -s ',' | less -S -R"
+  alias dstat-all='dstat -larm --top-io --top-latency'
+
+  if command -v ag > /dev/null; then
+    alias fgrep="ag --ignore export"
+  else
+    alias fgrep="find . -type f | awk '!/CVS|\.class|\.jar|\.war|\.git|\.svn|_Stub|\.#/  {print \$0;}' | sed 's/\ /\\\ /g' | xargs grep --color=always -n "
+  fi
+
+  ## os-specific
+  if ls --color &> /dev/null; then
+    # We are on linux
+    alias ls="ls -lh --color"
+  else
+    # Mac OS settings
+    alias ls="ls -lh -G"
+    alias timeout="gtimeout"
+  fi
+
+  # clipboard copy/paste
+  if command -v xclip > /dev/null; then
+    alias pbcopy='xclip -selection clipboard'
+    alias pbpaste='xclip -selection clipboard -o'
+  fi
+
+  # Autoenable direnv
+  which direnv &> /dev/null && eval "$(direnv hook bash)"
+}
+
+load_extra_source_files(){
+  ### source workstation-specific
+  SOURCEFILES="
+  $HOME/.local.alias
+  $HOME/bin/git-completion.bash
+  $HOME/anaconda3/etc/profile.d/conda.sh
+  /usr/local/etc/profile.d/autojump.sh
+  /usr/share/autojump/autojump.bash
+  /usr/local/etc/bash_completion.d/brew
+  /usr/local/etc/bash_completion.d/task.sh
+  /usr/local/etc/bash_completion.d/ag.bashcomp.sh
+  /usr/local/etc/bash_completion.d/tmux
+  "
+
+  for f in $SOURCEFILES; do
+      if [[ -f $f ]]; then
+        source $f
+      fi
+  done
+}
+
+load_session_manager_settings
+load_vim_settings
+load_history_settings
+load_lang_settings
+load_path_settings
+load_alias_settings
+load_extra_source_files

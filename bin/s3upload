@@ -10,5 +10,5 @@ fi
 FILE=$1
 BUCKET=${2:-fbnc-rpms}
 
-aws s3 cp $FILE s3://$BUCKET/ --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
+time aws s3 cp $FILE s3://$BUCKET/ --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
 echo "$FILE available at https://s3.amazonaws.com/$BUCKET/$(basename $FILE)"

@@ -9,62 +9,81 @@
     ui = auto
 
 [alias]
-    st = status -s
+    aa = add --all
+    amend = commit --amend
+    b = branch
+    blg = branch --format '%(color:red)%(objectname:short)%(color:reset) %(color:green)%(committerdate:iso)%(color:reset) %(subject) %(color:bold blue)-- %(authorname)%(color:reset) %(color:yellow)(%(refname:short))%(color:reset)'
+    branch-status=!git-branch-status
     ci = commit
     co = checkout
-    di = diff
+    commit-url = !git-show-commit-url
     dc = diff --cached
-    amend = commit --amend
-    aa = add --all
-    ff = merge --ff-only
-    pullff = pull --ff-only
-    noff = merge --no-ff
-    fa = fetch --all
-    pom = push origin master
-    b = branch
-    ds = diff --stat=160,120
     dh1 = diff HEAD~1
-
-    # Fancy logging.
-    #   h = head
-    #   hp = head with patch
-    #   r = recent commits, only current branch
-    #   ra = recent commits, all reachable refs
-    #   l = all commits, only current branch
-    #   la = all commits, all reachable refs
-    head = !git l -1
+    di = diff
+    ds = diff --stat=160,120
+    fa = fetch --all
+    ff = merge --ff-only
+    file-url = !git-show-file-url
+    find-file = !git-find-file
+    glg = log --graph --pretty=lg
     h = !git head
+    head = !git l -1
     hp = "!source ~/.githelpers && show_git_head"
-    r = !git l -30
-    ra = !git r --all
     l = "!source ~/.githelpers && pretty_git_log"
     la = !git l --all
+    lg = log --pretty=lg
+    ls = log --author='Sean Williams' --no-merges --stat --pretty=medium
+    lsp = !git ls -p
+    new = !sh -c 'git log $1@{1}..$1@{0} "$@"'
+    noff = merge --no-ff
+    pom = push origin master
+    pp = !sh -c \"git pull --rebase && git pushall\"
+    prune-all = !git remote | xargs -n 1 git remote prune
+    pullff = pull --ff-only
+    pushall = !git remote | xargs -n 1 git push
+    r = !git l -30
+    ra = !git r --all
+    slg = stash list --pretty=reflg
+    st = status -s
+    undo=reset --hard
     up = !sh -c \"git commit -a -m \"Before rebase\" && git pull --rebase && git reset head^\"
     wu = log --stat origin..@{0}
     wup = log -p origin..@{0}
-    lg = log --pretty=lg
-    glg = log --graph --pretty=lg
-    slg = stash list --pretty=reflg
-    blg = branch --format '%(color:red)%(objectname:short)%(color:reset) %(color:green)%(committerdate:iso)%(color:reset) %(subject) %(color:bold blue)-- %(authorname)%(color:reset) %(color:yellow)(%(refname:short))%(color:reset)'
-    ls = log --author='Sean Williams' --no-merges --stat --pretty=medium
-    lsp = !git ls -p
+
+[difftool]
+    prompt = false
+
+[diff]
+    tool = nvimdiff
+
+[difftool "nvimdiff"]
+    cmd = "nvim -d -u ~/.vimrc \"$LOCAL\" \"$REMOTE\""
+
+[merge]
+    tool = nvimdiff
+
+[mergetool "nvimdiff"]
+    cmd = "nvim -d -u ~/.vimrc \"$MERGED\" \"$LOCAL\""
+
+[mergetool]
+    prompt = false
+    keepBackup = false
 
 [pretty]
     lg = %C(red)%h%C(reset) %C(green)%ci%C(reset) %s %C(bold blue)-- %an%C(reset)%C(yellow)%d%C(reset)
     lge = %C(red)%h%C(reset) %C(green)%ci%C(reset) %s %C(bold blue)-- %an <%ae>%C(reset)%C(yellow)%d%C(reset)
     reflg = %C(red)%h%C(reset) %C(green)%ci%C(reset) %s %C(bold blue)-- %an%C(reset) %C(yellow)(%gd)%C(reset)
 
-[merge]
-    tool = nvim -d
-
 [push]
     default = current
 
 [filter "lfs"]
     clean = git-lfs clean -- %f
-	smudge = git-lfs smudge -- %f
-	process = git-lfs filter-process
+    smudge = git-lfs smudge -- %f
+    process = git-lfs filter-process
     required = true
 
 [url "git@github.com:Novetta"]
     insteadOf = https://github.com/Novetta
+[http]
+    sslVerify = false

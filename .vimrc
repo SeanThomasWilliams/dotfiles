@@ -1,10 +1,4 @@
 " ======================== Vundle Config =================
-
-filetype off
-set rtp+=~/.vim/bundle/vundle/
-call vundle#rc()
-Bundle 'gmarik/vundle'
-
 "          _ __  __          __
 "   ____ _(_) /_/ /_  __  __/ /_
 "  / __ `/ / __/ __ \/ / / / __ \
@@ -12,47 +6,68 @@ Bundle 'gmarik/vundle'
 " \__, /_/\__/_/ /_/\__,_/_.___/
 "/____/ ----- Vim Bundles -------
 "
-Bundle 'SeanThomasWilliams/dwm.vim'
-Bundle 'Shougo/deoplete.nvim'
-Bundle 'benekastah/neomake'
-Bundle 'benmills/vimux'
-Bundle 'benmills/vimux-golang'
-Bundle 'blindFS/vim-taskwarrior'
-Bundle 'bling/vim-airline'
-Bundle 'davidhalter/jedi-vim'
-Bundle 'einars/js-beautify'
-Bundle 'ekalinin/Dockerfile.vim'
-Bundle 'ervandew/supertab'
-Bundle 'fatih/vim-go'
-Bundle 'gagoar/StripWhiteSpaces'
-Bundle 'jacoborus/tender.vim'
-Bundle 'jelera/vim-javascript-syntax'
-Bundle 'kien/ctrlp.vim'
-Bundle 'maksimr/vim-jsbeautify'
-Bundle 'marijnh/tern_for_vim'
-Bundle 'mileszs/ack.vim'
-Bundle 'pearofducks/ansible-vim'
-Bundle 'tell-k/vim-autopep8'
-Bundle 'tpope/vim-dispatch'
-Bundle 'tpope/vim-fugitive'
-Bundle 'tpope/vim-surround'
-Bundle 'veegee/cql-vim'
-Bundle 'vim-perl/vim-perl'
-Bundle 'vimwiki/vimwiki'
-Bundle 'will133/vim-dirdiff'
-Bundle 'zchee/deoplete-go', { 'do': 'make' }
-Bundle 'zchee/deoplete-jedi'
+
+set nocompatible " Required
+filetype off
+set rtp+=~/.vim/bundle/vundle/
+call vundle#begin()
+" Vundle plugin manager
+Plugin 'gmarik/vundle'
+" Other plugins
+Plugin 'Ivo-Donchev/vim-react-goto-definition'
+Plugin 'RRethy/vim-illuminate'
+Plugin 'SeanThomasWilliams/dwm.vim'
+Plugin 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
+Plugin 'Shougo/neosnippet'
+Plugin 'Shougo/neosnippet-snippets'
+Plugin 'benekastah/neomake'
+Plugin 'benmills/vimux'
+Plugin 'benmills/vimux-golang'
+Plugin 'bling/vim-airline'
+Plugin 'carlitux/deoplete-ternjs', { 'do': 'npm install -g tern' }
+Plugin 'davidhalter/jedi-vim'
+Plugin 'einars/js-beautify'
+Plugin 'ekalinin/Dockerfile.vim'
+Plugin 'ervandew/supertab'
+Plugin 'fatih/vim-go'
+Plugin 'gagoar/StripWhiteSpaces'
+Plugin 'honza/vim-snippets'
+Plugin 'jacoborus/tender.vim'
+Plugin 'jelera/vim-javascript-syntax'
+Plugin 'lilydjwg/colorizer'
+Plugin 'luochen1990/rainbow'
+Plugin 'maksimr/vim-jsbeautify'
+Plugin 'marijnh/tern_for_vim'
+Plugin 'mileszs/ack.vim'
+Plugin 'numirias/semshi', {'do': ':UpdateRemotePlugins'}
+Plugin 'pearofducks/ansible-vim'
+Plugin 'sbdchd/neoformat'
+Plugin 'shmup/vim-sql-syntax'
+Plugin 'tpope/vim-dispatch'
+Plugin 'tpope/vim-fugitive'
+Plugin 'tpope/vim-surround'
+Plugin 'vim-perl/vim-perl'
+Plugin 'vimwiki/vimwiki'
+Plugin 'will133/vim-dirdiff'
+Plugin 'zchee/deoplete-go', { 'do': 'make' }
+Plugin 'zchee/deoplete-jedi'
+Plugin 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
+Plugin 'junegunn/fzf.vim'
+
+" Required, plugins available after.
+call vundle#end()
+filetype plugin indent on
 
 "+----------------- Basic Configurations ------------+
 " GUI Configuration
 if has('gui_running')
-    set spell " Spelling looks ugly in command line mode
-    set spelllang=en_us " We speak amuurican
-    set guioptions-=T
-    "set guioptions=+M "Turn off annoying bars
-    set guioptions+=LlRrb "Some kind of hack for scrollbars
-    set guioptions-=LlRrb
-    set guifont=Terminus\ 10
+  set spell " Spelling looks ugly in command line mode
+  set spelllang=en_us " We speak amuurican
+  set guioptions-=T
+  "set guioptions=+M "Turn off annoying bars
+  set guioptions+=LlRrb "Some kind of hack for scrollbars
+  set guioptions-=LlRrb
+  set guifont=Terminus\ 10
 endif
 
 " Vim-Script Configurations
@@ -61,9 +76,11 @@ let g:indent_guides_start_level = 2 " Start on the second level o
 
 " Keymappings
 " Quick write, write quit and quit key mappings for normal mode
-"nmap <leader>w :write<CR>
 nmap <leader>wq :write <bar> :quit<CR>
 nmap <leader>q :quit<CR>
+
+" Reload current file
+nmap <leader>r :e! %<CR>
 
 " Location list mappings
 nmap <silent><leader>lc :lcl<CR>
@@ -73,96 +90,119 @@ nmap <silent><leader>lo :lw<CR>
 nmap  S  :%s//g<LEFT><LEFT>
 
 " Quick copen/cclose
-nnoremap <silent> <Leader>c :cclose<CR>
-nnoremap <silent> <Leader>C :copen<CR>
+nnoremap <silent> <leader>c :cclose<CR>
+nnoremap <silent> <leader>C :copen<CR>
 
+" Map hotkey for make
+nnoremap <silent> <leader>m :make<CR><C-w><Up>
 
-function MakeScriptExecuteable()
+" Make sure shebang-scripts can be run
+if !exists('*MakeScriptExecuteable')
+  function MakeScriptExecuteable()
     if getline(1) =~ "^#!.*/bin/"
-        silent !chmod +x %:p
+      silent !chmod +x %:p
     endif
-endfunction
+  endfunction
+endif
 
 " Autocommands that cant live in after/filetypes
 if has('autocmd')
-    augroup EditVim
-        autocmd!
+  augroup EditVim
+    autocmd!
 
-        " Save when losing focus
-        " autocmd FocusLost * :silent! wall
-        au BufWritePost * call MakeScriptExecuteable()
+    " Save when losing focus
+    " autocmd FocusLost * :silent! wall
+    au BufWritePost * call MakeScriptExecuteable()
 
-        " Show absolute numbers when in insert mode
-        autocmd InsertEnter * :setlocal norelativenumber
-        autocmd InsertLeave * :setlocal relativenumber
+    " CWD to file dir
+    "autocmd BufEnter * silent! lcd %:p:h
 
-        " Only use relative numbers when the window is active
-        autocmd BufEnter * :setlocal relativenumber
-        autocmd WinEnter * :setlocal relativenumber
-        autocmd BufLeave * :setlocal norelativenumber
-        autocmd WinLeave * :setlocal norelativenumber
+    " Show absolute numbers when in insert mode
+    autocmd InsertEnter * :setlocal norelativenumber
+    autocmd InsertLeave * :setlocal relativenumber
 
-        " Only show cursorline in the current window and in normal mode.
-        autocmd WinLeave,InsertEnter * set nocursorline
-        autocmd WinEnter,InsertLeave * set cursorline
+    " Only use relative numbers when the window is active
+    autocmd BufEnter * :setlocal relativenumber
+    autocmd WinEnter * :setlocal relativenumber
+    autocmd BufLeave * :setlocal norelativenumber
+    autocmd WinLeave * :setlocal norelativenumber
 
-        " Resize splits when the window is resized
-        autocmd VimResized * :wincmd =
+    " Only show cursorline in the current window and in normal mode.
+    autocmd WinLeave,InsertEnter * set nocursorline
+    autocmd WinEnter,InsertLeave * set cursorline
 
-        " Filetypes
-        autocmd BufNewFile,Bufread *.wsgi setlocal ft=python
-        autocmd BufNewFile,Bufread *.spect setlocal ft=spec
-        autocmd BufNewFile,BufRead *.lua setlocal noet ts=4 sw=4 sts=4
-        autocmd BufNewFile,BufRead *.js setlocal et ts=4 sw=4 sts=4
-        autocmd BufNewFile,BufRead *.yml setlocal ft=yaml et ts=2 sw=2 sts=2
-        autocmd BufNewFile,BufRead *.config setlocal ft=yaml et ts=2 sw=2 sts=2
-        autocmd BufNewFile,BufRead *.py setlocal ft=python et ts=4 sw=4 sts=4
+    " Fold shell scripts
+    autocmd FileType sh let g:sh_fold_enabled=3
+    autocmd FileType sh let g:is_bash=1
+    autocmd FileType sh set foldmethod=syntax
 
-        " Beautify
-        autocmd FileType javascript nnoremap <leader>f :call JsBeautify()<cr>
-        autocmd FileType html nnoremap <leader>f :call HtmlBeautify()<cr>
-        autocmd FileType css nnoremap <leader>f :call CSSBeautify()<cr>
-        autocmd FileType python noremap <leader>f :call Autopep8()<CR>
+    " Resize splits when the window is resized
+    autocmd VimResized * :wincmd =
 
-        " VimWIKI
-        autocmd FileType vimwiki map <Leader>p :VimwikiAll2HTML<CR>
+    " Filetypes
+    autocmd BufNewFile,BufRead *.config setlocal ft=yaml et ts=2 sw=2 sts=2
+    autocmd BufNewFile,BufRead *.js setlocal et ts=2 sw=2 sts=2
+    autocmd BufNewFile,BufRead *.lua setlocal noet ts=4 sw=4 sts=4
+    autocmd BufNewFile,BufRead *.py setlocal et ts=4 sw=4 sts=4
+    autocmd BufNewFile,BufRead *.sh setlocal et ts=2 sw=2 sts=2
+    autocmd BufNewFile,BufRead */aws/jenkins/* setlocal ft=groovy et ts=4 sw=4 sts=4
+    autocmd BufNewFile,BufRead */playbooks/vars/*.yml setlocal filetype=yaml.ansible et ts=2 sw=2 sts=2
+    autocmd BufNewFile,BufRead */tasks/*.yml setlocal filetype=yaml.ansible et ts=2 sw=2 sts=2
+    autocmd BufNewFile,BufRead Jenkinsfile* setlocal ft=groovy et ts=4 sw=4 sts=4
+    autocmd BufNewFile,Bufread *.spect setlocal ft=spec
+    autocmd BufNewFile,Bufread *.wsgi setlocal ft=python
+    autocmd BufNewFile,BufRead *.go setlocal noet ts=4 sw=4 sts=4
 
-        " Golang
-        autocmd BufNewFile,BufRead *.go setlocal noet ts=4 sw=4 sts=4
-        autocmd FileType go map <Leader>gi :wa<CR> :GoImports<CR>
-        autocmd FileType go map <Leader>b :wa<CR> :GoBuild<CR>
-        autocmd FileType go map <Leader>ra :wa<CR> :GolangTestCurrentPackage<CR>
-        autocmd FileType go map <Leader>rf :wa<CR> :GolangTestFocused<CR>
-        autocmd FileType go nmap <Leader>ds <Plug>(go-def-vertical)
-        autocmd FileType go nmap <Leader>dv <Plug>(go-def-vertical)
-        autocmd FileType go nmap <Leader>i <Plug>(go-info)
-        autocmd FileType go nmap <Leader>r <Plug>(go-rename)
-        autocmd FileType go nmap gd <Plug>(go-def)
-        autocmd FileType go nmap <leader>rt <Plug>(go-run-tab)
-        autocmd FileType go nmap <Leader>rs <Plug>(go-run-split)
-        autocmd FileType go nmap <Leader>rv <Plug>(go-run-vertical)
-        "autocmd FileTYpe go nnoremap <silent><Leader>d :Godoc<CR>
+    " Python
+    " Jedi defaults <leader>d to goto
+    autocmd FileType python nmap <leader>D :split<CR>:call jedi#goto()<CR>
 
-        " Tern
-        autocmd FileType javascript nmap gd :TernDef<CR>
-        autocmd FileType javascript nmap <Leader>d :TernDefSplit<CR>
-        autocmd FileType javascript nmap <Leader>i :TernDoc<CR>
+    " Beautify
+    autocmd FileType javascript nnoremap <leader>f :call JsBeautify()<CR>
+    autocmd FileType html nnoremap <leader>f :call HtmlBeautify()<CR>
+    autocmd FileType css nnoremap <leader>f :call CSSBeautify()<CR>
+    autocmd FileType python nnoremap <leader>f :Neoformat<CR>
 
-        autocmd ColorScheme *
-            \ hi link NeomakeError SpellBad |
-            \ hi link NeomakeWarning SpellCap
+    " VimWIKI
+    autocmd FileType vimwiki nnoremap <silent><leader>m :VimwikiAll2HTML<CR>
 
-        " Neomake options
-        " When writing a buffer (no delay).
-        "call neomake#configure#automake('w')
-        " When writing a buffer (no delay), and on normal mode changes (after 750ms).
-        call neomake#configure#automake('rnw', 750)
-        " When reading a buffer (after 1s), and when writing (no delay).
-        "call neomake#configure#automake('rw', 1000)
-        " Full config: when writing or reading a buffer, and on changes in insert and
-        " normal mode (after 1s; no delay when writing).
-        "call neomake#configure#automake('nrwi')
-    augroup END
+    " Golang
+    autocmd FileType go map <leader>gi :wa<CR> :GoImports<CR>
+    autocmd FileType go map <leader>b :wa<CR> :GoBuild<CR>
+    autocmd FileType go map <leader>ra :wa<CR> :GolangTestCurrentPackage<CR>
+    autocmd FileType go map <leader>rf :wa<CR> :GolangTestFocused<CR>
+    autocmd FileType go nmap <leader>i <Plug>(go-info)
+    autocmd FileType go nmap <leader>r <Plug>(go-rename)
+    autocmd FileType go nmap <leader>d <Plug>(go-def)
+    autocmd FileType go nmap <leader>D <Plug>(go-def-split)
+    autocmd FileType go nmap <leader>rt <Plug>(go-run-tab)
+    autocmd FileType go nmap <leader>rs <Plug>(go-run-split)
+    autocmd FileType go nmap <leader>rv <Plug>(go-run-vertical)
+
+    " JavaScript
+    " React-goto-definition
+    autocmd FileType javascript nmap <leader>rd :call ReactGotoDef()<CR>
+    " Tern
+    autocmd FileType javascript nmap <leader>d :TernDefSplit<CR>
+    autocmd FileType javascript nmap <leader>D :TernDef<CR>
+    autocmd FileType javascript nmap <leader>i :TernDoc<CR>
+
+    " Neomake
+    autocmd ColorScheme *
+          \ hi link NeomakeError SpellBad |
+          \ hi link NeomakeWarning SpellCap
+
+    " Neomake options
+    " When writing a buffer (no delay).
+    "call neomake#configure#automake('w')
+    " When writing a buffer (no delay), and on normal mode changes (after 750ms).
+    "call neomake#configure#automake('rnw', 750)
+    " When reading a buffer (after 1s), and when writing (no delay).
+    "call neomake#configure#automake('rw', 1000)
+    " Full config: when writing or reading a buffer, and on changes in insert and
+    " normal mode (after 1s; no delay when writing).
+    call neomake#configure#automake('nrwi', 1000)
+  augroup END
 endif
 
 " Don't lose selection when shifting text in visual mode
@@ -179,26 +219,31 @@ map <Esc>[B <Down>
 
 " If there is a vimrc.local source that before current
 if filereadable(expand("~/.vimrc.local"))
-    source ~/.vimrc.local
+  source ~/.vimrc.local
 endif
+
+" Edit vimrc configuration file
+nnoremap <Leader>ve :e $MYVIMRC<CR>
+" " Reload vimrc configuration file
+nnoremap <Leader>vr :source $MYVIMRC<CR>
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " BASIC EDITING CONFIGURATION
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-filetype plugin indent on
 if exists('+relativenumber')
-	set relativenumber
+  set relativenumber
 endif
 
 if has('persistent_undo')
-    set undolevels=5000
-    set undodir=~/.vim/tmp/undo//     " undo files
-    set undofile
+  set undolevels=5000
+  set undodir=~/.vim/tmp/undo//     " undo files
+  set undofile
 endif
 
 set autoindent
 set autoread                    " Automatically reread changed files without asking me anything
 set autowrite                   " Automatically save before :next, :make etc.
+set background=dark
 set backspace=indent,eol,start " allow backspacing over everything in insert mode
 set backup " Store temporary files in a central spot
 set backupdir=~/.vim/tmp/backup// " backups
@@ -211,6 +256,9 @@ set directory=~/.vim/tmp/swap//   " swap files
 set encoding=utf8 " We write unicode so use utf8
 set errorbells
 set expandtab " Always use soft tabs
+set foldenable
+set foldmethod=syntax
+set foldlevelstart=20
 set fileformats=unix,dos,mac    " Prefer Unix over Windows over OS 9 formats
 set hidden "If I close a buffer dont delete the changes
 set history=10000
@@ -230,24 +278,26 @@ set noshowmode " Always show mode
 set noswapfile                    " it's 2013, Vim.
 set number
 set numberwidth=5
+set omnifunc=syntaxcomplete#Complete
 set pastetoggle=<F4>
 set scrolloff=3 " keep moreiabbrev lmis ಠ‿ಠearch matches in the middle of the window.
 set shell=bash " This makes RVM work inside Vim. I have no idea why.
 set shiftround " Round intentations to the nearest shiftwidth
-set shiftwidth=4
+set shiftwidth=2
 set showbreak=↪
 set showcmd " display incomplete commands
 set showmatch
 set showtabline=2
 set smartcase
 set smartindent " Be smart when indenting
-set softtabstop=4
+set softtabstop=2
 set splitbelow                  " Split horizontal windows below to the current windows
 set splitright                  " Split vertical windows right to the current windows
 set switchbuf=useopen
-set synmaxcol=200 " Don't try to highlight lines longer than X characters.
+set synmaxcol=500 " Don't try to highlight lines longer than X characters.
 set t_Co=256 " If in terminal use 256 colors
-set t_ti= t_te= " Prevent Vim from clobbering the scrollback buffer. See
+set t_te= " Prevent Vim from clobbering the scrollback buffer.
+set t_ti= " Prevent Vim from clobbering the scrollback buffer.
 set tabstop=4
 set tags=~/.tags,./tags " Look for tags in this file
 set textwidth=120
@@ -260,12 +310,12 @@ set wildignore+=*.DS_Store                       " OSX bullshit
 set wildignore+=.hg,.git,.svn                    " Version control
 set wildignore+=*.jpg,*.bmp,*.gif,*.png,*.jpeg   " binary images
 set wildignore+=*.luac                           " Lua byte code
-set wildignore+=migrations                       " Django migrations
 set wildignore+=*.o,*.obj,*.exe,*.dll,*.manifest " compiled object files
 set wildignore+=*.orig                           " Merge resolution files
 set wildignore+=*.pyc                            " Python byte code
+set wildignore+=__pycache__                      " Python cache
 set wildignore+=*.spl                            " compiled spelling word lists
-set wildignore=*.swp,*.bak,*.pyc " Set wildignore to hid swp, bak and pyc files
+set wildignore+=*.swp,*.bak,*.pyc                " Set wildignore to hid swp, bak and pyc files
 set wildignore+=*.sw?                            " Vim swap files
 set wildmenu " make tab completion for files/buffers act like bash
 set wildmode=list:full
@@ -273,28 +323,24 @@ set winminheight=0
 set winwidth=79
 
 syntax case match
-syntax sync minlines=256
+syntax sync minlines=1024
 syntax on " Enable highlighting for syntax
 
 " Make directories automatically if they don't already exist.
 if !isdirectory(expand(&backupdir))
-    call mkdir(expand(&backupdir), "p")
+  call mkdir(expand(&backupdir), "p")
 endif
 if !isdirectory(expand(&directory))
-    call mkdir(expand(&directory), "p")
+  call mkdir(expand(&directory), "p")
 endif
 if !isdirectory(expand(&undodir))
-    call mkdir(expand(&undodir), "p")
+  call mkdir(expand(&undodir), "p")
 endif
 
 " Center on c-o
 nnoremap <c-o> <c-o>zz
 
-" Don't auto-jump on *
-nnoremap * *<c-o>
-
 " COLOR
-set background=dark
 colorscheme tender
 let g:airline_theme = 'tender'
 
@@ -303,26 +349,21 @@ set statusline=%<%f\ (%{&ft})\ %-4(%m%)%=%-19(%3l,%02c%03V%)
 
 " MISC FUNCTIONS
 
-" Clear the search buffer when hitting return
-function! MapCR()
-  nnoremap <CR> :nohlsearch<CR>
-endfunction
-call MapCR()
-
 " Insert the current time
 command! InsertTime :normal a<c-r>=strftime('%F %H:%M:%S.0 %z')<CR>
 
 " MISC KEY MAPS
-nnoremap <silent> <F2> :set nonumber!<CR>:set foldcolumn=0<CR>
+nnoremap <silent> <F2> :set nonumber!<CR>:set relativenumber!<CR>:set foldcolumn=0<CR>
 nnoremap <F5> <ESC>:w<CR>:call CallInterpreter()<CR>
 
 map <F11> :!ctags -R -f ./tags . &<CR>
 
 "omnicomplete
 inoremap <C-Space> <C-X><C-I>
+inoremap <C-Space> <C-X><C-I>
 
 " Resize splits
-nnoremap <silent> = :exe "vertical resize " . (winwidth(0) * 4/3)<CR>
+nnoremap <silent> + :exe "vertical resize " . (winwidth(0) * 4/3)<CR>
 nnoremap <silent> - :exe "vertical resize " . (winwidth(0) * 3/4)<CR>
 
 map <leader>y "*y
@@ -349,21 +390,15 @@ inoremap <C-down> <Esc>:bN<CR>
 " New tab shortcut
 nnoremap <leader>w :tabnew<CR>:TW<CR>
 
-" Insert a hash rocket with <c-l>
-imap <c-l> <space>=><space>
-
+" Swap files
 nnoremap <leader><leader> <c-^>
 
-"omnicomplete
-inoremap <C-Space> <C-X><C-I>
-
-nnoremap <C-\> :call DWM_New() <bar> :CtrlPCurWD<CR>
 nnoremap <C-C> :call DWM_Close()<CR>
 nnoremap <C-A> :call DWM_Focus()<CR>
 
 "clear highlight search
 nmap <silent> <leader><space> :nohlsearch<CR>
-nnoremap <silent> <Leader>s :StripWhiteSpaces<CR>
+nnoremap <silent> <leader>s :StripWhiteSpaces<CR>
 
 "Fix shell expansion with putty
 map [[ ?{<CR>w99[{
@@ -372,56 +407,80 @@ map ]] j0[[%/{<CR>
 map [] k$][%?}<CR>
 
 "tab handling
-nnoremap <Leader>t :tab sp<CR>
-nnoremap <Leader>c :tabc<CR>
+nnoremap <leader>t :tab sp<CR>
+nnoremap <leader>c :tabc<CR>
 
 "make Y behave more like C and D
 nmap Y y$
 
 " CtrlP
-"let g:ctrlp_working_path_mode = 2
-"let g:ctrlp_extensions = ['dir']
-let g:ctrlp_switch_buffer = 'et'    " jump to a file if it's open already
-let g:ctrlp_mruf_max=450        " number of recently opened files
-let g:ctrlp_max_files=0         " do not limit the number of searchable files
-let g:ctrlp_use_caching = 1
-let g:ctrlp_clear_cache_on_exit = 1
-let g:ctrlp_cache_dir = $HOME.'/.cache/ctrlp'
-let g:ctrlp_custom_ignore = {
-\ 'dir':  '\.git$\|\.hg$\|\.svn$\|ext$\|resources$\|project_files$\|export$',
-\ 'file': '\v\.(exe|so|dll|swp|swo|pyc|orig|jpg|png|tif|jpg|png|tiff)$',
-\ }
-let g:ctrlp_buftag_types = {
-            \ 'go'         : '--language-force=go --golang-types=ftv',
-            \ 'coffee'     : '--language-force=coffee --coffee-types=cmfvf',
-            \ 'markdown'   : '--language-force=markdown --markdown-types=hik',
-            \ 'objc'       : '--language-force=objc --objc-types=mpci',
-            \ 'rc'         : '--language-force=rust --rust-types=fTm'
-            \ }
+"let g:ctrlp_working_path_mode = 'ra'
+""let g:ctrlp_extensions = ['dir']
+"let g:ctrlp_switch_buffer = 'et'    " jump to a file if it's open already
+"let g:ctrlp_mruf_max=450        " number of recently opened files
+"let g:ctrlp_max_files=10000         " do not limit the number of searchable files
+"let g:ctrlp_use_caching = 0
+"let g:ctrlp_clear_cache_on_exit = 1
+"let g:ctrlp_cache_dir = $HOME.'/.cache/ctrlp'
+"let g:ctrlp_custom_ignore = {
+"      \ 'dir':  '\.git$\|\.hg$\|\.svn$\|ext$\|resources$\|project_files$\|export$',
+"      \ 'file': '\v\.(exe|so|dll|swp|swo|pyc|orig|jpg|png|tif|jpg|png|tiff)$',
+"      \ }
+"let g:ctrlp_buftag_types = {
+"      \ 'go'         : '--language-force=go --golang-types=ftv',
+"      \ 'coffee'     : '--language-force=coffee --coffee-types=cmfvf',
+"      \ 'markdown'   : '--language-force=markdown --markdown-types=hik',
+"      \ 'objc'       : '--language-force=objc --objc-types=mpci',
+"      \ 'rc'         : '--language-force=rust --rust-types=fTm'
+"      \ }
+"let g:ctrlp_by_filename = 0
+"let g:ctrlp_lazy_update = 1
 
 
-" Ack/ag features
-nnoremap <Leader>a :Ack -t
-nnoremap <Leader>A :Ack -t "\b<C-r><C-w>\b"<CR>
+"if executable('ag')
+"  "let g:ackprg = 'ag --vimgrep'
+"
+"  " Use ag over grep
+"  "set grepprg=ag\ --nocolor\ --nogroup\ --vimgrep
+"
+"  " Use ag in CtrlP for listing files. Lightning fast and respects .gitignore
+""  let g:ctrlp_user_command = {
+""      \ 'types': {
+""        \ 1: ['.git', 'cd %s && git ls-files']
+""        \ },
+""      \ 'fallback': 'ag %s -l --nocolor -g "" ' . $CONDA_PREFIX
+""      \ }
+"
+"  "NOTE: --ignore option use wildcard PATTERN instead of regex PATTERN,and
+"  "it does not support {}
+"  "--hidden:enable seach hidden dirs and files
+"  "-g <regex PATTERN>:search file name that match the PATTERN
+"  let g:ctrlp_user_command = 'ag %s -l --nocolor --nogroup
+"              \ --ignore "*.exe"
+"              \ --ignore "*.out"
+"              \ --ignore "*.hex"
+"              \ --ignore "cscope*"
+"              \ --ignore "*.so"
+"              \ --ignore "*.dll"
+"              \ --ignore ".git"
+"              \ -g "" '.$CONDA_PREFIX .'/'
+"
+"  " ag is fast enough that CtrlP doesn't need to cache
+"  "let g:ctrlp_use_caching = 0
+"endif
+"
+let $SITE_PACKAGES=expand("$CONDA_PREFIX") . '/lib/python3.7/site-packages'
+nnoremap <C-t> :FZF<CR>
+nnoremap <C-p> :Files $SITE_PACKAGES<CR>
+nnoremap <C-\> :split<CR> :FZF<CR>
 
-if executable('ag')
-  let g:ackprg = 'ag --vimgrep'
-
-  " Use ag over grep
-  set grepprg=ag\ --nogroup\ --nocolor
-
-  " Use ag in CtrlP for listing files. Lightning fast and respects .gitignore
-  let g:ctrlp_user_command = 'ag %s -l --nocolor -g ""'
-
-  " ag is fast enough that CtrlP doesn't need to cache
-  let g:ctrlp_use_caching = 0
-endif
-
-nnoremap <C-t> :CtrlPCurWD<CR>
+nnoremap <leader>a :Ag<CR>
+nnoremap <leader>A :Ag <C-r><C-w><CR>
+nnoremap <leader>l :execute 'Locate "'.input('Locate: ').'"'<CR>
 
 " ctrl-n/m to jump between 'compiler' messages
-nnoremap <silent> <C-n> :cn<CR>
-nnoremap <silent> <C-m> :cp<CR>
+"nnoremap <silent> <C-n> :cn<CR>
+"nnoremap <silent> <C-m> :cp<CR>
 
 " fix syntax hl:
 nnoremap U :syntax sync fromstart<CR>:redraw!<CR>
@@ -430,19 +489,46 @@ nnoremap U :syntax sync fromstart<CR>:redraw!<CR>
 " Plugin Settings
 " ----------------------------------------- "
 
+" ansible-vim
+let g:ansible_unindent_after_newline = 1
+let g:ansible_extra_keywords_highlight = 1
+
 " Skip the check of neovim module
 let g:python3_host_skip_check = 1
 
 " Deoplete
+let g:deoplete#auto_complete_delay = 50
+let g:deoplete#min_pattern_length = 1
+let g:deoplete#max_list = 100
+let g:deoplete#smart_case = 1
 let g:deoplete#enable_at_startup = 1
-let g:deoplete#sources#go#sort_class = ['package', 'func', 'type', 'var', 'const']
-let g:deoplete#sources#go#use_cache = 1
-let g:deoplete#sources#go#json_directory = $HOME . '.vim/deocache'
-let g:deoplete#sources#jedi#show_docstring = 1
-let g:deoplete#auto_complete_delay = 0
-let g:jedi#show_call_signatures = "2"
-let g:jedi#use_splits_not_buffers = "right"
+let g:deoplete#file#enable_buffer_path = 1
 
+" Deoplete Jedi/Python
+let g:deoplete#sources#jedi#show_docstring = 1
+let g:jedi#completions_command = "<C-Space>"
+let g:jedi#documentation_command = "K"
+let g:jedi#goto_assignments_command = "<leader>g"
+let g:jedi#goto_command = "<leader>d"
+let g:jedi#goto_definitions_command = ""
+let g:jedi#rename_command = "<leader>r"
+let g:jedi#show_call_signatures = "1"
+let g:jedi#usages_command = "<leader>n"
+
+" Deoplete Golang
+let g:deoplete#sources#go#sort_class = ['package', 'func', 'type', 'var', 'const']
+let g:deoplete#sources#go#json_directory = $HOME . '.vim/deocache'
+let g:deoplete#sources#go#use_cache = 1
+
+" Deoplete javascript/ternjs
+let g:deoplete#sources#ternjs#timeout = 1
+" Whether to include the types of the completions in the result data. Default: 0
+let g:deoplete#sources#ternjs#types = 1
+let g:deoplete#sources#ternjs#case_insensitive = 1
+
+" tern_for_vim.
+let g:tern#command = ["tern"]
+let g:tern#arguments = ["--persistent"]
 
 " Go settings
 let g:go_auto_type_info = 1
@@ -460,17 +546,34 @@ let g:tern_map_keys = 1
 let g:tern_map_prefix = '<leader>'
 let g:tern_show_argument_hints='on_hold'
 
+" vim-illuminate
+hi link illuminatedWord Visual
+
+" Rainbow
+let g:rainbow_active = 1
+
+" Neoformat
+let g:neoformat_enabled_python = ['yapf', 'isort', 'docformatter']
+" Enable tab to spaces conversion
+let g:neoformat_basic_format_retab = 1
+" Enable trimmming of trailing whitespace
+let g:neoformat_basic_format_trim = 1
+" Run all enabled formatters (by default Neoformat stops after the first formatter succeeds)
+let g:neoformat_run_all_formatters = 1
+" Have Neoformat only msg when there is an error
+let g:neoformat_only_msg_on_error = 1
+
 " Neomake
 let g:neomake_python_enabled_makers = ['python', 'pycodestyle']
 let g:neomake_javascript_enabled_makers = ['eslint', 'jshint']
 let g:neomake_error_sign = {
-    \ 'text': 'E>',
-    \ 'texthl': 'ErrorMsg',
-    \ }
+      \ 'text': 'E>',
+      \ 'texthl': 'ErrorMsg',
+      \ }
 let g:neomake_warning_sign = {
-    \ 'text': 'W>',
-    \ 'texthl': 'WarningMsg',
-    \ }
+      \ 'text': 'W>',
+      \ 'texthl': 'WarningMsg',
+      \ }
 
 " Firefox refresh
 "let g:firefox_refresh_files = "*.js"
@@ -482,16 +585,69 @@ let g:airline_detect_modified=1
 let g:airline_detect_paste=1
 let g:airline_mode_map = {} " see source for the defaults
 
-let g:autopep8_max_line_length=160
+let g:autopep8_max_line_length=120
+let g:autopep8_pep8_passes=100
+let g:autopep8_aggressive=2
+let g:autopep8_indent_size=4
+let g:autopep8_disable_show_diff=1
+let g:autopep8_on_save = 1
 
+" vim-dirdiff
+let g:DirDiffExcludes = "certs,images,plm*,prps*,one*,ammo*,pmrt*,ccar*,cie*,*test*.yml,*lab*.yml,*prod*.yml,README.md,*.war,*.rpm"
+let g:DirDiffIgnore = "Id:"
+" ignore white space in diff
+let g:DirDiffAddArgs = "-w"
+let g:DirDiffEnableMappings = 1
+
+" supertab
 let g:SuperTabDefaultCompletionType = "<c-n>"
 
-" Vimwiki
-let g:vimwiki_list = [{
-  \ 'path': '$HOME/sync/vimwiki',
-  \ 'path_html': '/var/www/html',
-  \ }]
+" snippets / neosnippet
+let g:neosnippet#enable_snipmate_compatibility = 1
+let g:neosnippet#snippets_directory='~/.vim/bundle/vim-snippets/snippets'
 
+" C-k to execute snippet
+imap <C-s>     <Plug>(neosnippet_expand)
+imap <C-k>     <Plug>(neosnippet_expand_or_jump)
+smap <C-k>     <Plug>(neosnippet_expand_or_jump)
+xmap <C-k>     <Plug>(neosnippet_expand_target)
+
+"" Expand the completed snippet trigger by <CR>.
+imap <expr><CR>
+      \ (pumvisible() && neosnippet#expandable()) ?
+      \ "\<Plug>(neosnippet_expand)" : "\<CR>"
+
+" For conceal markers.
+if has('conceal')
+  set conceallevel=2 concealcursor=niv
+endif
+
+" Thyme pormordio timer
+nmap <silent><leader>p :silent !thyme -d<CR>
+
+" Vimwiki
+" Turn off URL shortening
+let g:vimwiki_url_maxsave=0
+" Wiki export config
+let g:vimwiki_list = [{
+      \ 'path': '$HOME/sync/vimwiki/',
+      \ 'path_html': '$HOME/wiki/',
+      \ 'diary_index': 'index',
+      \ 'diary_rel_path': 'diary/',
+      \ 'template_path': '$HOME/wiki/vimwiki-assets/',
+      \ 'template_default': 'default',
+      \ 'template_ext': '.tmpl',
+      \ 'auto_export': 0,
+      \ 'automatic_nested_syntaxes': 0,
+      \ 'nested_syntaxes': {
+      \ 'js':'javascript',
+      \ 'json':'javascript',
+      \ 'java':'java',
+      \ 'yaml':'yaml',
+      \ 'bash':'bash',
+      \ 'sh':'shell',
+      \ 'python':'python'
+      \ }}]
 
 let g:autopep8_max_line_length=120
 

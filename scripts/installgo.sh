@@ -1,11 +1,16 @@
-#!/bin/bash
-
-set -e
+#!/bin/bash -e
 
 mkdir -p $HOME/software/
+
+GO_VERSION="1.12.4"
+
+GO_DL="https://dl.google.com/go/go${GO_VERSION}.linux-amd64.tar.gz"
+
+rm -rf "$HOME/software/go.back"
+if [[ -d "$HOME/software/go" ]]; then
+  mv $HOME/software/go{,.bak}
+fi
+
 cd $HOME/software
-
-GODL="https://dl.google.com/go/go1.10.linux-amd64.tar.gz"
-
-wget $GODL -O go.tar.gz
+wget "$GO_DL" -O go.tar.gz
 tar -xvf go.tar.gz
