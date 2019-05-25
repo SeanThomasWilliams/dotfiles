@@ -1,11 +1,41 @@
 #!/bin/bash
 
-sudo apt-get update
+export DEBIAN_FRONTEND=noninteractive
+#docker.io
+PACKAGES="
+autoconf
+autojump
+automake
+bzip2
+cmake
+cmake
+curl
+direnv
+dstat
+fuse
+gawk
+gawk
+gcc
+gnupg
+grep
+htop
+jq
+libfuse2
+make
+maven
+net-tools
+openjdk-8-jdk
+openssh-server
+sed
+silversearcher-ag
+taskwarrior
+tcpdump
+tmux
+wget
+"
 
-sudo apt-get install -y openjdk-8-jdk make cmake gcc automake autoconf \
-    curl wget tmux bzip2 taskwarrior cmake gnupg \
-    gawk openssh-server tcpdump net-tools maven htop \
-    dstat docker.io autojump jq sed gawk grep silversearcher-ag direnv \
-    bash-completion libaio1
+sudo apt-get update -yq
 
-sudo apt autoremove
+echo "$PACKAGES" | sudo -E xargs apt-get install -yq
+
+sudo apt autoremove -yq
