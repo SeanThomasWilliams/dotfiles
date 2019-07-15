@@ -490,13 +490,24 @@ nmap Y y$
 "  " ag is fast enough that CtrlP doesn't need to cache
 "  "let g:ctrlp_use_caching = 0
 "endif
-"
+
+if !empty(glob($HOME . '/anaconda3/bin/python3'))
+  let g:python3_host_prog = $HOME . '/anaconda3/bin/python3'
+endif
+if has('python') " if dynamic py|py3, this line already activates python2.
+  let s:python_version = 2
+elseif has('python3')
+  let s:python_version = 3
+else
+  let s:python_version = 0
+endif
+
 let $SITE_PACKAGES=expand("$CONDA_PREFIX") . '/lib/python3.7/site-packages'
 nnoremap <C-t> :FZF<CR>
 nnoremap <C-p> :Files $SITE_PACKAGES<CR>
 nnoremap <C-\> :split<CR> :FZF<CR>
 
-nnoremap <leader>a :Ag<CR>
+nnoremap <leader>a :execute 'Ag '.input('Ag: ')<CR>
 nnoremap <leader>A :Ag <C-r><C-w><CR>
 nnoremap <leader>l :execute 'Locate "'.input('Locate: ').'"'<CR>
 
@@ -683,18 +694,6 @@ let g:vimwiki_list = [{
       \ }}]
 
 let g:autopep8_max_line_length=120
-
-if has('python') " if dynamic py|py3, this line already activates python2.
-  let s:python_version = 2
-elseif has('python3')
-  let s:python_version = 3
-else
-  let s:python_version = 0
-endif
-
-if !empty(glob('/home/williamss/anaconda3/bin/python3'))
-  let g:python3_host_prog = '/home/williamss/anaconda3/bin/python3'
-endif
 
 " Vimux Config
 let g:VimuxHeight = "33"

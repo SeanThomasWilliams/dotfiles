@@ -100,7 +100,7 @@ load_path_settings(){
   export GOBIN="$GOPATH/bin"
 
   # Global PATH, libs, tools
-  export PATH="$HOME/bin:$HOME/.npm-packages/bin:$HOME/anaconda3/bin:$HOME/bin/Sencha/Cmd:$JAVA_HOME/bin:/usr/local/bin:$HOME/bin:$GOROOT/bin:$GOBIN:$PATH"
+  export PATH="$HOME/bin:$HOME/.local/bin:$HOME/.npm-packages/bin:$HOME/anaconda3/bin:$HOME/bin/Sencha/Cmd:$JAVA_HOME/bin:/usr/local/bin:$GOROOT/bin:$GOBIN:$PATH"
 
   # java settings
   if [[ -d /etc/alternatives/java_sdk ]]; then
