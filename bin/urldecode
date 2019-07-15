@@ -1,0 +1,12 @@
+#!/bin/bash
+
+# Decode URL string
+
+infile="${1:-/dev/stdin}"
+outfile="${2:-/dev/stdout}"
+
+python -c "
+import sys
+import urllib.parse
+print(urllib.parse.unquote_plus(sys.stdin.read()))
+" < "$infile" > "$outfile"

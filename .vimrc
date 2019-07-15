@@ -26,21 +26,24 @@ Plugin 'benmills/vimux-golang'
 Plugin 'bling/vim-airline'
 Plugin 'carlitux/deoplete-ternjs', { 'do': 'npm install -g tern' }
 Plugin 'davidhalter/jedi-vim'
-Plugin 'einars/js-beautify'
 Plugin 'ekalinin/Dockerfile.vim'
 Plugin 'ervandew/supertab'
 Plugin 'fatih/vim-go'
 Plugin 'gagoar/StripWhiteSpaces'
 Plugin 'honza/vim-snippets'
 Plugin 'jacoborus/tender.vim'
-Plugin 'jelera/vim-javascript-syntax'
+Plugin 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
+Plugin 'junegunn/fzf.vim'
+Plugin 'leafgarland/typescript-vim'
 Plugin 'lilydjwg/colorizer'
 Plugin 'luochen1990/rainbow'
-Plugin 'maksimr/vim-jsbeautify'
 Plugin 'marijnh/tern_for_vim'
 Plugin 'mileszs/ack.vim'
 Plugin 'numirias/semshi', {'do': ':UpdateRemotePlugins'}
+Plugin 'pangloss/vim-javascript'
 Plugin 'pearofducks/ansible-vim'
+Plugin 'peitalin/vim-jsx-typescript'
+Plugin 'prettier/vim-prettier', { 'do': 'yarn install' }
 Plugin 'sbdchd/neoformat'
 Plugin 'shmup/vim-sql-syntax'
 Plugin 'tpope/vim-dispatch'
@@ -51,8 +54,6 @@ Plugin 'vimwiki/vimwiki'
 Plugin 'will133/vim-dirdiff'
 Plugin 'zchee/deoplete-go', { 'do': 'make' }
 Plugin 'zchee/deoplete-jedi'
-Plugin 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
-Plugin 'junegunn/fzf.vim'
 
 " Required, plugins available after.
 call vundle#end()
@@ -142,26 +143,30 @@ if has('autocmd')
     " Filetypes
     autocmd BufNewFile,BufRead *.config setlocal ft=yaml et ts=2 sw=2 sts=2
     autocmd BufNewFile,BufRead *.js setlocal et ts=2 sw=2 sts=2
+    autocmd BufNewFile,BufRead *.json setlocal et ts=2 sw=2 sts=2
     autocmd BufNewFile,BufRead *.lua setlocal noet ts=4 sw=4 sts=4
     autocmd BufNewFile,BufRead *.py setlocal et ts=4 sw=4 sts=4
     autocmd BufNewFile,BufRead *.sh setlocal et ts=2 sw=2 sts=2
     autocmd BufNewFile,BufRead */aws/jenkins/* setlocal ft=groovy et ts=4 sw=4 sts=4
     autocmd BufNewFile,BufRead */playbooks/vars/*.yml setlocal filetype=yaml.ansible et ts=2 sw=2 sts=2
     autocmd BufNewFile,BufRead */tasks/*.yml setlocal filetype=yaml.ansible et ts=2 sw=2 sts=2
-    autocmd BufNewFile,BufRead Jenkinsfile* setlocal ft=groovy et ts=4 sw=4 sts=4
+    autocmd BufNewFile,BufRead Jenkinsfile* setlocal ft=groovy et ts=2 sw=2 sts=2
     autocmd BufNewFile,Bufread *.spect setlocal ft=spec
     autocmd BufNewFile,Bufread *.wsgi setlocal ft=python
     autocmd BufNewFile,BufRead *.go setlocal noet ts=4 sw=4 sts=4
+    autocmd BufNewFile,BufRead Makefile setlocal noet ts=4 sw=4 sts=4
 
     " Python
     " Jedi defaults <leader>d to goto
     autocmd FileType python nmap <leader>D :split<CR>:call jedi#goto()<CR>
 
-    " Beautify
-    autocmd FileType javascript nnoremap <leader>f :call JsBeautify()<CR>
+    " Beeauetify
+    autocmd FileType json nnoremap <leader>f :Prettier<CR>
+    autocmd FileType javascript nnoremap <leader>f :Prettier<CR>
     autocmd FileType html nnoremap <leader>f :call HtmlBeautify()<CR>
     autocmd FileType css nnoremap <leader>f :call CSSBeautify()<CR>
     autocmd FileType python nnoremap <leader>f :Neoformat<CR>
+    autocmd FileType yaml nnoremap <leader>f :Neoformat<CR>
 
     " VimWIKI
     autocmd FileType vimwiki nnoremap <silent><leader>m :VimwikiAll2HTML<CR>
@@ -224,8 +229,11 @@ endif
 
 " Edit vimrc configuration file
 nnoremap <Leader>ve :e $MYVIMRC<CR>
-" " Reload vimrc configuration file
+" Reload vimrc configuration file
 nnoremap <Leader>vr :source $MYVIMRC<CR>
+
+" Show neovim health
+nnoremap <Leader>ch :checkhealth<CR>
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " BASIC EDITING CONFIGURATION
@@ -250,6 +258,7 @@ set backupdir=~/.vim/tmp/backup// " backups
 set cmdheight=2
 set complete=.,w,b,u,t " Better Completion
 set completeopt=menuone,preview " Better Completion Options
+set clipboard+=unnamedplus
 set cursorline " Show highlight on the cursor line
 set diffopt+=iwhite
 set directory=~/.vim/tmp/swap//   " swap files
@@ -340,6 +349,9 @@ endif
 " Center on c-o
 nnoremap <c-o> <c-o>zz
 
+" Don't jump on *
+nnoremap * *``
+
 " COLOR
 colorscheme tender
 let g:airline_theme = 'tender'
@@ -366,7 +378,17 @@ inoremap <C-Space> <C-X><C-I>
 nnoremap <silent> + :exe "vertical resize " . (winwidth(0) * 4/3)<CR>
 nnoremap <silent> - :exe "vertical resize " . (winwidth(0) * 3/4)<CR>
 
-map <leader>y "*y
+" " Copy to clipboard
+vnoremap  <leader>y "+y
+nnoremap  <leader>Y "+yg_
+nnoremap  <leader>y "+y
+nnoremap  <leader>yy "+yy
+
+" " Paste from clipboard
+nnoremap <leader>p "+p
+nnoremap <leader>P "+P
+vnoremap <leader>p "+p
+vnoremap <leader>P "+P
 
 " Move around splits with <c-hjkl>
 nnoremap <c-j> <c-w>j
@@ -478,6 +500,9 @@ nnoremap <leader>a :Ag<CR>
 nnoremap <leader>A :Ag <C-r><C-w><CR>
 nnoremap <leader>l :execute 'Locate "'.input('Locate: ').'"'<CR>
 
+" Change to directory of current file
+nnoremap <leader>cd :lcd%:p:h<CR>
+
 " ctrl-n/m to jump between 'compiler' messages
 "nnoremap <silent> <C-n> :cn<CR>
 "nnoremap <silent> <C-m> :cp<CR>
@@ -529,6 +554,7 @@ let g:deoplete#sources#ternjs#case_insensitive = 1
 " tern_for_vim.
 let g:tern#command = ["tern"]
 let g:tern#arguments = ["--persistent"]
+let g:tern_request_timeout = 6000
 
 " Go settings
 let g:go_auto_type_info = 1
@@ -553,7 +579,10 @@ hi link illuminatedWord Visual
 let g:rainbow_active = 1
 
 " Neoformat
+" Python formatters
 let g:neoformat_enabled_python = ['yapf', 'isort', 'docformatter']
+" YAML formatters
+let g:neoformat_enabled_yaml = ['pyyaml', 'prettier']
 " Enable tab to spaces conversion
 let g:neoformat_basic_format_retab = 1
 " Enable trimmming of trailing whitespace
@@ -574,6 +603,7 @@ let g:neomake_warning_sign = {
       \ 'text': 'W>',
       \ 'texthl': 'WarningMsg',
       \ }
+let g:neomake_tempfile_dir = '/tmp/neomake%:p:h'
 
 " Firefox refresh
 "let g:firefox_refresh_files = "*.js"
@@ -619,11 +649,14 @@ imap <expr><CR>
 
 " For conceal markers.
 if has('conceal')
-  set conceallevel=2 concealcursor=niv
+  set conceallevel=0 concealcursor=niv
 endif
 
 " Thyme pormordio timer
 nmap <silent><leader>p :silent !thyme -d<CR>
+
+" vim-javascript
+let g:javascript_plugin_jsdoc = 1
 
 " Vimwiki
 " Turn off URL shortening
@@ -662,3 +695,23 @@ endif
 if !empty(glob('/home/williamss/anaconda3/bin/python3'))
   let g:python3_host_prog = '/home/williamss/anaconda3/bin/python3'
 endif
+
+" Vimux Config
+let g:VimuxHeight = "33"
+" Doesn't seem to work
+let g:VimuxUseNearest = 1
+
+function! VimuxShebangSlime()
+  call VimuxOpenRunner()
+  if getline(1) =~ "^#!.*/bin/"
+    " Get the command after the shebang
+    let runcmd = strpart(getline(1), 2)
+    call VimuxSendText(runcmd . ' ' . @v)
+  else
+    call VimuxSendText(@v)
+    call VimuxSendKeys("Enter")
+  endif
+endfunction
+
+vmap <Leader>vs "vy :call VimuxShebangSlime()<CR>gv
+nmap <Leader>vo :call VimuxOpenRunner()<CR>

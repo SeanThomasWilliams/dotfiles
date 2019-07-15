@@ -13,31 +13,31 @@
     amend = commit --amend
     b = branch
     blg = branch --format '%(color:red)%(objectname:short)%(color:reset) %(color:green)%(committerdate:iso)%(color:reset) %(subject) %(color:bold blue)-- %(authorname)%(color:reset) %(color:yellow)(%(refname:short))%(color:reset)'
-    branch-status=!git-branch-status
+    branch-status = !git-branch-status
     ci = commit
     co = checkout
     commit-url = !git-show-commit-url
+    clean-branches = !git-clean-branches
     dc = diff --cached
     dh1 = diff HEAD~1
     di = diff
     ds = diff --stat=160,120
+    remove-tags = "!f() { git tag -l ${1} | xargs -I % echo \"git tag -d % && git push --delete origin %\" | sh; }; f"
+    add-tag = !sh -c \"git tag "$1" && git push origin --tags\"
     fa = fetch --all
     ff = merge --ff-only
     file-url = !git-show-file-url
     find-file = !git-find-file
     glg = log --graph --pretty=lg
     h = !git head
-    head = !git l -1
-    hp = "!source ~/.githelpers && show_git_head"
-    l = "!source ~/.githelpers && pretty_git_log"
-    la = !git l --all
+    head = !git log -1
     lg = log --pretty=lg
     ls = log --author='Sean Williams' --no-merges --stat --pretty=medium
     lsp = !git ls -p
     new = !sh -c 'git log $1@{1}..$1@{0} "$@"'
     noff = merge --no-ff
     pom = push origin master
-    pp = !sh -c \"git pull --rebase && git pushall\"
+    pp = !sh -c \"git fetch -p && git pull --rebase && git pushall\"
     prune-all = !git remote | xargs -n 1 git remote prune
     pullff = pull --ff-only
     pushall = !git remote | xargs -n 1 git push
@@ -45,7 +45,9 @@
     ra = !git r --all
     slg = stash list --pretty=reflg
     st = status -s
-    undo=reset --hard
+    show-ignored-files = ls-files . --ignored --exclude-standard --others
+    show-untracked-files = ls-files . --exclude-standard --others
+    undo = reset --hard
     up = !sh -c \"git commit -a -m \"Before rebase\" && git pull --rebase && git reset head^\"
     wu = log --stat origin..@{0}
     wup = log -p origin..@{0}
@@ -85,5 +87,6 @@
 
 [url "git@github.com:Novetta"]
     insteadOf = https://github.com/Novetta
+
 [http]
     sslVerify = false

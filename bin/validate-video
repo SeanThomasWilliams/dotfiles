@@ -1,0 +1,8 @@
+#!/bin/bash
+
+if [[ $# -ne 1 ]]; then
+  echo "Usage: $0 <video>"
+  exit 1
+fi
+
+ffmpeg -v error -i "$1" -f null -

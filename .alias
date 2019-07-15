@@ -33,7 +33,7 @@ load_session_manager_settings(){
   export TMUX_TMPDIR="$HOME/.local"
 }
 
-load_vim_settings(){
+load_editor_settings(){
   ### 'vim' settings
   export EDITOR="vim"
   if command -v nvim > /dev/null; then
@@ -43,10 +43,18 @@ load_vim_settings(){
   alias vim="$EDITOR"
   alias vi="$EDITOR"
 
+  export PAGER="less"
+  export LESS="-FRSX"
+
   vimdirdiff(){
     $EDITOR -c "DirDiff $1 $2"
   }
   export -f vimdirdiff
+}
+
+load_python_settings(){
+  # Skip writing pyc and __pycache__
+  export PYTHONDONTWRITEBYTECODE=1
 }
 
 load_history_settings(){
@@ -136,25 +144,21 @@ load_extra_source_files(){
   ### source workstation-specific
   SOURCEFILES="
   $HOME/.local.alias
-  $HOME/bin/git-completion.bash
   $HOME/anaconda3/etc/profile.d/conda.sh
   /usr/local/etc/profile.d/autojump.sh
   /usr/share/autojump/autojump.bash
-  /usr/local/etc/bash_completion.d/brew
-  /usr/local/etc/bash_completion.d/task.sh
-  /usr/local/etc/bash_completion.d/ag.bashcomp.sh
-  /usr/local/etc/bash_completion.d/tmux
   "
 
-  for f in $SOURCEFILES; do
-      if [[ -f $f ]]; then
-        source $f
-      fi
+  for sf in $SOURCEFILES; do
+    if [[ -f $sf ]]; then
+      source "$sf"
+    fi
   done
 }
 
 load_session_manager_settings
-load_vim_settings
+load_python_settings
+load_editor_settings
 load_history_settings
 load_lang_settings
 load_path_settings
