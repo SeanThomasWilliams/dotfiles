@@ -6,18 +6,11 @@ __vte_prompt_command() { true; }
 load_session_manager_settings(){
   ### session managers
   screenreattach(){
-      if [[ $1 == "ls" ]]; then
-          tmux list-sessions || screen -ls
-      else
-          SESSIONNAME=${1:-tmux}
-          which tmux &> /dev/null
-          if [ $? -eq 0 ]
-          then
-              tmux -u -2 new -A -s $SESSIONNAME
-          else
-              screen -R -d $SESSIONNAME
-          fi
-      fi
+    if [[ $1 == "ls" ]]; then
+      tmux list-sessions
+    else
+      tmux -u -2 new -A -s "${1:-tmux}"
+    fi
   }
   export -f screenreattach
   alias sr="screenreattach"
@@ -156,11 +149,11 @@ load_extra_source_files(){
   done
 }
 
+load_path_settings
 load_session_manager_settings
 load_python_settings
 load_editor_settings
 load_history_settings
 load_lang_settings
-load_path_settings
 load_alias_settings
 load_extra_source_files

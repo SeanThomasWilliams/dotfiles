@@ -1,5 +1,7 @@
 #!/bin/bash -ex
 
+sudo apt-get install fuse
+
 mkdir -p "$HOME/bin"
 curl -L "https://github.com/neovim/neovim/releases/download/nightly/nvim.appimage" -o "$HOME/bin/nvim.temp"
 chmod u+x "$HOME/bin/nvim.temp"

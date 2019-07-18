@@ -1,0 +1,9 @@
+---
+extends: default
+rules:
+  document-start:
+    level: warning
+  trailing-spaces: enable
+  truthy: enable
+  line-length: disable
+  indentation: disable

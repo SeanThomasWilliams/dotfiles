@@ -11,7 +11,7 @@ git submodule update --init --recursive
 for fname in "$DIR"/.*; do
     if [[ -f $fname ]]; then
         fname="$(basename "$fname")"
-        ln -sf "$DIR/$fname" "$HOME/$fname"
+        ln -snf "$DIR/$fname" "$HOME/$fname"
     fi
 done
 
@@ -19,18 +19,21 @@ done
 set -x
 mkdir -p "$HOME/.local/share/"
 rm -f "$HOME/.local/share/bash-completion"
-ln -sf "$DIR/.local/share/bash-completion" "$HOME/.local/share/"
+ln -sfn "$DIR/.local/share/bash-completion" "$HOME/.local/share/"
 
 # For neovim
 mkdir -p "$HOME"/.config
-rm -f "$HOME"/.config/nvim
-ln -sf "$DIR"/vim "$HOME"/.config/nvim
-ln -sf "$DIR"/.vimrc "$HOME"/.config/nvim/init.vim
+ln -sfn "$DIR"/vim "$HOME"/.config/nvim
+ln -sfn "$DIR"/.vimrc "$HOME"/.config/nvim/init.vim
 
+for d in "$DIR"/config/*; do
+  ln -sfn "$d" "$HOME"/.config/"$(basename "$d")"
+done
+exit
 mkdir -p "$HOME"/bin
-ln -sf "$DIR"/bin/* "$HOME"/bin/
+ln -sfn "$DIR"/bin/* "$HOME"/bin/
 rm -f "$HOME"/.vim
-ln -sf "$DIR"/vim "$HOME"/.vim
+ln -sfn "$DIR"/vim "$HOME"/.vim
 
 pip install neovim
 
