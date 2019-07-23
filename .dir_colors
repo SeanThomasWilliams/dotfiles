@@ -48,7 +48,7 @@ EIGHTBIT 1
 
 # Below are the color init strings for the basic file types. A color init
 # string consists of one or more of the following numeric codes:
-# Attribute codes: 
+# Attribute codes:
 # 0   = default colour
 # 1   = bold
 # 4   = underlined
@@ -87,7 +87,7 @@ EIGHTBIT 1
 
 NORMAL 00	# global default, although everything should be something.
 FILE 00 	# normal file
-DIR 01;94 	# directory
+DIR 01;69 	# directory - CornflowerBlue
 LINK 01;36 	# symbolic link
 FIFO 40;33	# pipe
 SOCK 01;35	# socket
@@ -97,7 +97,7 @@ ORPHAN 01;05;37;41  # orphaned syminks
 MISSING 01;05;37;41 # ... and the files they point to
 
 # This is for files with execute permission:
-EXEC 01;32 
+EXEC 01;32
 
 # List any file extensions like '.gz' or '.tar' that you would like ls
 # to colorize below. Put the extension, a space, and the color init string.
