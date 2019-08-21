@@ -1,0 +1,15 @@
+#!/bin/bash -eu
+
+COMMIT=${1:-$(git rev-parse --verify HEAD)}
+
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+. "$DIR/git-parse-remote-url"
+
+case "$GIT_HOST" in
+  *isobar.co*)
+    echo "https://keystone.isobar.co/bitbucket/projects/$GIT_GROUP/repos/$GIT_REPO/commits/$COMMIT"
+    ;;
+  *)
+    echo "https://$GIT_HOST/$GIT_GROUP/$GIT_REPO/commit/$COMMIT"
+    ;;
+esac

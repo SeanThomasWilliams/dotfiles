@@ -1,0 +1,45 @@
+#!/bin/bash -xue
+
+FILE_PREFIX="/var/tmp/aerc"
+BIN_FILE="/var/tmp/aerc"
+
+# Write stdin to temp file
+cat > "$BIN_FILE"
+
+# Get file type
+ftype=$(file "$BIN_FILE" | cut -d' ' -f2-)
+
+echo >&2 "ftype: $ftype"
+
+case "$ftype" in
+  *PNG\ image*)
+    EXT="png"
+    ;;
+  *JPEG\ image*)
+    EXT="jpg"
+    ;;
+  *PDF\ document*)
+    EXT="pdf"
+    ;;
+  *Composite\ Document\ File\ V2\ Document*)
+    EXT="xls"
+    ;;
+  *Microsoft\ Office\ PowerPoint*)
+    EXT="ppt"
+    ;;
+  *Microsoft\ PowerPoint\ 2007*)
+    EXT="pptx"
+    ;;
+  *Microsoft\ Excel\ 2007*)
+    EXT="xlsx"
+    ;;
+  *)
+    echo >&2 "Unmatched file type!"
+    exit 1
+    ;;
+esac
+
+mv -v "$BIN_FILE" "${FILE_PREFIX}.${EXT}"
+
+nohup xdg-open "${FILE_PREFIX}.${EXT}" &> /dev/null &
+sleep 1 # Wait for evince to bootstrap

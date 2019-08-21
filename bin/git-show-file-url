@@ -1,0 +1,33 @@
+#!/bin/bash -eu
+
+if [[ $# -ne 1 ]]; then
+  echo "Usage: $0 <file path>"
+  exit 1
+fi
+
+if [[ -f $1 ]]; then
+  # Get file url
+  GIT_FILE=$(git ls-files --full-name "$1")
+else
+  # Get directory url
+  GIT_FILE=$(dirname "$(git ls-files --full-name | head -n 1)")
+fi
+
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+. "$DIR/git-parse-remote-url"
+
+case "$GIT_HOST" in
+  *isobar.co*)
+    echo "https://keystone.isobar.co/bitbucket/projects/$GIT_GROUP/repos/$GIT_REPO/browse/$GIT_FILE"
+    ;;
+  *gitlab-lab.*.elasticbeanstalk.com*)
+    echo "https://$GIT_HOST/$GIT_GROUP/$GIT_REPO/blob/${GIT_BRANCH}/$GIT_FILE"
+    ;;
+  *bitbucket*)
+    echo "https://$GIT_HOST/projects/$GIT_GROUP/repos/$GIT_REPO/browse/$GIT_FILE"
+    ;;
+  *)
+    echo "https://$GIT_HOST/$GIT_GROUP/$GIT_REPO/blob/${GIT_BRANCH}/$GIT_FILE"
+    exit 1
+    ;;
+esac

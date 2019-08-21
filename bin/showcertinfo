@@ -1,0 +1,33 @@
+#!/bin/bash -e
+
+sslinfo(){
+  local cert
+  cert=${1}
+  suffix=${cert##*.}
+  echo >&2 "Information for $cert:"
+  case "$suffix" in
+    p7b)
+      openssl pkcs7 -print_certs -in "$cert"
+      ;;
+    pfx|p12)
+      openssl pkcs12 -info -in "$cert"
+      ;;
+    pem|crt)
+      openssl x509 -text -noout -in "$cert"
+      ;;
+    key)
+      openssl rsa -check -in "$cert"
+      ;;
+    csr)
+      openssl req -text -noout -verify -in "$cert"
+      ;;
+    *)
+      echo >&2 "Unknown extension: $suffix for $cert"
+      exit 1
+      ;;
+  esac
+}
+
+for fname in "$@"; do
+  sslinfo "$fname"
+done

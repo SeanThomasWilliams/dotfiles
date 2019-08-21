@@ -9,9 +9,10 @@ TAGS=""
 
 if git remote get-url origin &> /dev/null; then
   remote_url=$(git remote get-url origin | awk -F':' '{print tolower($NF)}' | sed 's/.git//g')
-  ORG=$(echo "$remote_url" | awk -F'/' '{print $NF}')
-  REPO=$(echo "$remote_url" | awk -F'/' '{print $(NF-1)}')
-  TAGS="+${ORG} +${REPO}"
+  ORG=$(echo "$remote_url" | awk -F'/' '{print $(NF-1)}')
+  REPO=$(echo "$remote_url" | awk -F'/' '{print $NF}')
+  #TAGS="+${ORG} +${REPO}"
+  TAGS="+${REPO}"
 fi
 
 task $TAGS $@

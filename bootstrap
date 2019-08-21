@@ -29,7 +29,6 @@ ln -sfn "$DIR"/.vimrc "$HOME"/.config/nvim/init.vim
 for d in "$DIR"/config/*; do
   ln -sfn "$d" "$HOME"/.config/"$(basename "$d")"
 done
-exit
 mkdir -p "$HOME"/bin
 ln -sfn "$DIR"/bin/* "$HOME"/bin/
 rm -f "$HOME"/.vim

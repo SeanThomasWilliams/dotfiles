@@ -1,0 +1,18 @@
+#!/bin/bash
+
+if [ $# -ne 1 ]; then
+    echo "Usage $0 <FILE>"
+    echo "FILE: File to restore. Uses last version"
+    exit 1
+fi
+
+f=$1
+
+COMMIT=$(git rev-list -n 1 HEAD -- "$f")
+
+if [ -z $COMMIT ]; then
+    echo "File $f not found in git commit history!"
+    exit 1
+fi
+
+git checkout ${COMMIT}^ -- "$f"

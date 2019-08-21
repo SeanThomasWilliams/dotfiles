@@ -1,44 +1,57 @@
-#!/bin/bash
+#!/bin/bash -eu
 
 if [[ $# -lt 2 ]]; then
-    echo "Usage $0 WATCHDIR COMMAND"
+    echo "Usage $0 WATCHDIR FILEGLOB COMMAND"
     echo "This script runs then given command on a change to the specified directory"
     echo
     exit 1
 fi
 
-trap 'cleanup' SIGINT SIGTERM EXIT
-
-JOBPID=()
 WATCHDIR=$1
-shift
-COMMAND=$@
+FILE_GLOB=$2
+shift 2
+
+COMMAND=$*
+
+kill_pid(){
+  for i in {1..10}; do
+    if kill -s TERM "$jpid" 2> /dev/null; then
+      echo >&2 "Killing $jpid..."
+      sleep 1
+    else
+      return 0
+    fi
+  done
+  kill -s KILL "$jpid" 2> /dev/null
+}
 
 function cleanup(){
-    for jpid in ${JOBPID[*]}; do
-        if ( kill -0 $jpid 2> /dev/null ); then
-            pkill -TERM -P $jpid && sleep 1
+  for jpid in $(jobs -p); do
+    kill_pid "$jpid"
+  done
+  wait
+}
+trap 'cleanup' SIGINT SIGTERM EXIT
 
-            if ( kill -0 $jpid 2> /dev/null ); then
-                echo "KILL $jpid" && pkill -KILL -P $jpid && sleep 1
-            fi
-        fi
-    done
+if [[ ! -d $WATCHDIR ]]; then
+  echo >&2 "WATCHDIR must exist!"
+  exit 1
+fi
+
+run(){
+  echo >&2 "Running: $COMMAND"
+  cleanup
+  $COMMAND &
+  sleep 1
 }
 
-function runcommand(){
-    echo "Running Command $COMMAND"
-    $COMMAND
-}
+run
 
-runcommand
-
-#the command before the pipe is a blocking command, i.e. it doesn't end
-inotifywait -q -m -r --format '%f' -e close_write $WATCHDIR | \
-    while read fname; do
-        if ( echo "$fname" | grep -E '.*(\.go|\.py)' > /dev/null ); then
-            echo "File $fname modified"
-            runcommand
-            sleep 1
-        fi
-    done
+# The command before the pipe is a blocking command, i.e. it doesn't end
+inotifywait -q -m -r --format '%f' -e close_write "$WATCHDIR" | \
+  while read -r fname; do
+    if echo "$fname" | grep -q -E "$FILE_GLOB"; then
+      echo >&2 "Change detected: $fname"
+      run
+    fi
+  done

@@ -1,0 +1,90 @@
+#!/bin/bash -eu
+# shellcheck disable=SC2016
+
+if [[ $# -lt 1 ]]; then
+    echo >&2 "SSH to the EC2 Resources for the given AWS CloudFormation Stack or AWS Elastic Beanstalk Environment"
+    echo >&2 "Usage: $0 ENVIRONMENT_OR_STACK_NAME"
+    echo >&2 "ENVIRONMENT_OR_STACK_NAME: AWS CloudFormation Stack or AWS Elastic Beanstalk Environment Name"
+    exit 1
+fi
+
+AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-us-gov-west-1}
+ENVIRONMENT_OR_STACK_NAME=$1
+
+generate_ssh_script(){
+  cat <<EOF
+  LOG_FILES="
+    /var/log/cloud-init-output.log
+    /var/log/cfn-init.log
+    /var/log/cfn-hup.log
+    /var/log/eb-activity.log
+    /var/log/eb-docker/containers/eb-current-app/*.*
+    /var/log/tomcat8/catalina/*.*
+    /one/PLT/plt_latest/tomcat/logs/*.*
+  "
+  for lf in \$LOG_FILES; do
+    export lf
+    sudo -E bash -c 'test -f \$lf && echo -e "\\n=== \$lf ===" && tail -n 30 \$lf'
+  done
+
+  if command -v docker &> /dev/null; then
+    sudo docker images
+    sudo docker ps -a
+  fi
+
+  cd /var/log && sudo -E bash
+EOF
+}
+
+ssh_to_instance(){
+  local ec2_instance_id
+  ec2_instance_id=$1
+  for instance_ip in $(get_ips_for_ec2_instance "$ec2_instance_id"); do
+    echo >&2 "Connecting to ${ec2_instance_id}: ${instance_ip}..."
+    sshj "$instance_ip" -t "$(generate_ssh_script)"
+  done
+}
+
+get_ips_for_ec2_instance(){
+  local ec2_instance_id
+  ec2_instance_id=$1
+  aws ec2 describe-instances \
+    --instance-ids "$ec2_instance_id" \
+    --query 'Reservations[*].Instances[*].NetworkInterfaces[*].PrivateIpAddresses[*].PrivateIpAddress[][][]' |\
+  jq -r '.[]'
+}
+
+get_beanstalk_instance_ids(){
+  local environment_name
+  environment_name=$1
+  aws elasticbeanstalk describe-environment-resources \
+    --environment-name "$environment_name" \
+    --query 'EnvironmentResources.Instances[*].Id' 2> /dev/null |\
+  jq -r '.[]'
+}
+
+get_cf_stack_instance_ids(){
+  local cf_stack_name
+  cf_stack_name=$1
+  aws cloudformation describe-stack-resources \
+    --stack-name "$cf_stack_name" \
+    --query 'StackResources[?ResourceType == `AWS::AutoScaling::AutoScalingGroup`].PhysicalResourceId' 2> /dev/null |\
+    jq -r '.[]' |\
+    parallel -r aws autoscaling describe-auto-scaling-groups \
+      --auto-scaling-group-name {} \
+      --query 'AutoScalingGroups[0].Instances[*].InstanceId' 2> /dev/null |\
+    jq -r '.[]'
+}
+
+get_instance_ids(){
+  local environment_or_stack_name
+  environment_or_stack_name=$1
+  # Run these commands in parallel. They provide no output if the breanstalk environment or stack is not found.
+  get_cf_stack_instance_ids "$environment_or_stack_name" &
+  get_beanstalk_instance_ids "$environment_or_stack_name" &
+  wait
+}
+
+for instance_id in $(get_instance_ids "$ENVIRONMENT_OR_STACK_NAME" | sort); do
+  ssh_to_instance "$instance_id"
+done

@@ -1,0 +1,4 @@
+#!/bin/bash
+
+key=${1:-/dev/stdin}
+openssl rsa -check -in "$key"

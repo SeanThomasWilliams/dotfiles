@@ -11,3 +11,5 @@ PS1="$(if [[ ${EUID} == 0 ]]; then echo '\[\033[01;31m\]\h'; else echo '\[\033[0
 if [ -f ~/.alias ]; then
   source ~/.alias
 fi
+
+"$HOME"/software/taoup/taoup-fortune

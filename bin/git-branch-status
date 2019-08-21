@@ -1,0 +1,27 @@
+#!/bin/bash
+# this prints out branch ahead/behind status vs current branch for each branch
+
+base=$(git rev-parse --abbrev-ref HEAD)
+
+{
+  echo "Behind,Ahead,Branch,Baseline Branch"
+  git for-each-ref --format="%(refname:short) %(upstream:short)" refs/ |\
+    while read -r local remote; do
+      if [[ -x $remote ]]; then
+        branches=("$local")
+      else
+        branches=("$local" "$remote")
+      fi
+
+      for branch in "${branches[@]}"; do
+        # Check that branch is not empty
+        [[ -n "${branch-}" ]] || continue
+        # Don't compare base current branch
+        [[ $branch != "$base" ]] || continue
+        git rev-list --left-right "${branch}"..."${base}" -- 2>/dev/null > /tmp/git_upstream_status_delta || continue
+        LEFT_AHEAD=$(grep -c '^<' /tmp/git_upstream_status_delta)
+        RIGHT_AHEAD=$(grep -c '^>' /tmp/git_upstream_status_delta)
+        echo "-${RIGHT_AHEAD},+${LEFT_AHEAD},$branch,$base"
+      done
+    done | sort -g -t ',' -k1 -k2 -k1 -u
+} | column -s, -t -x

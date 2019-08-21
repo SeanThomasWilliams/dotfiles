@@ -129,6 +129,8 @@ load_alias_settings(){
     alias pbpaste='xclip -selection clipboard -o'
   fi
 
+  alias pgpsql="psql -U postgres"
+
   # Autoenable direnv
   which direnv &> /dev/null && eval "$(direnv hook bash)"
 }

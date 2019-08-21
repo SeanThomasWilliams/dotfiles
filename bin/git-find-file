@@ -1,0 +1,55 @@
+#!/bin/bash -eu
+
+EXTRA_OPTS=''
+
+usage(){
+  echo >&2 "Usage: $0 [-h] [-d] [-s <string>]|[<filename>] path"
+  echo >&2 "  -h         Display this message."
+  echo >&2 "  -d         Look for a deleted file."
+  echo >&2 "  -s string  Find a file by content string."
+  echo >&2 "  filename   Name of the file to find in the git history."
+  echo >&2 "  path       Only inspect revisions involving this file path. Default: $PWD"
+}
+
+while getopts 'dhs' opt; do
+  case ${opt} in
+    d)
+      EXTRA_OPTS='--diff-filter=D'
+      ;;
+    s)
+      STRING_SERACH=1
+      ;;
+    h)
+      usage
+      exit 0
+      ;;
+    \?)
+      usage
+      exit 1
+      ;;
+  esac
+done
+
+shift $((OPTIND -1))
+
+if [[ $# -lt 1 ]]; then
+  usage
+  exit 1
+fi
+
+GIT_PATH=${2:-$PWD}
+
+# Match an exact file, otherwise match any file under the directory
+if [[ -f "$GIT_PATH" ]]; then
+  GIT_FILE="$GIT_PATH"
+else
+  GIT_FILE="${GIT_PATH}*"
+fi
+
+if [[ ${STRING_SERACH-} == 1 ]]; then
+  git log --pretty=format:"%h" "$GIT_PATH" |\
+    parallel --xargs -n 100 "git grep --color --heading -I $1 {} -- $GIT_FILE"
+else
+  # Strip leading ./ from filename pattern
+  git log --all --full-history -p $EXTRA_OPTS -- "*${1#./}*"
+fi
