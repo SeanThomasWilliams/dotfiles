@@ -1,0 +1,127 @@
+# [Created by task 2.5.1 5/10/2018 09:32:10]
+# Taskwarrior program configuration file.
+# For more documentation, see http://taskwarrior.org or try 'man task', 'man task-color',
+# 'man task-sync' or 'man taskrc'
+
+# Here is an example of entries that use the default, override and blank values
+#   variable=foo   -- By specifying a value, this overrides the default
+#   variable=      -- By specifying no value, this means no default
+#   #variable=foo  -- By commenting out the line, or deleting it, this uses the default
+
+# Use the command 'task show' to see all defaults and overrides
+
+# Files
+data.location=~/.task
+
+# Color theme
+include /usr/local/Cellar/task/2.5.1/share/doc/task/rc/dark-256.theme
+
+color=on
+
+# default.due=tom
+default.priority=M
+
+due=1
+monthsperline=3
+calendar.holidays=full
+
+report.list.description=Lists all tasks matching the specified criteria
+report.list.columns=id,project,priority,due.relative,due,depends,recur,urgency,tags,description
+report.list.labels=ID,Project,Pri,Rel,Due,Depends,Recur,Score,Tags,Description & Annotation
+report.list.sort=urgency-
+# report.list.sort=due+,priority-,project+
+report.list.filter=status:pending
+report.list.dateformat= a M-D
+alias.ls=list
+
+default.command=(due.before:7d or due: ) and status:pending list
+
+urgency.next.coefficient=25.0                   # +next tag
+urgency.due.coefficient=5.0                    # overdue or near due date
+urgency.blocking.coefficient=8.0                # blocking other tasks
+urgency.active.coefficient=4.0                  # already started tasks
+urgency.scheduled.coefficient=4.0               # scheduled tasks
+urgency.age.coefficient=0.0                     # Urgency coefficient for age
+urgency.annotations.coefficient=1.0             # has annotations
+urgency.tags.coefficient=1.0                    # has tags
+urgency.project.coefficient=1.0                 # assigned to any project
+urgency.blocked.coefficient=-50.0               # blocked by other tasks
+urgency.waiting.coefficient=-100.0              # waiting task
+
+editor=nvim
+
+uda.intheamtrelloboardid.type=string
+uda.intheamtrelloboardid.label=Inthe.AM Trello Board ID
+
+uda.intheamtrellourl.type=string
+uda.intheamtrellourl.label=Inthe.AM Trello URL
+
+uda.intheamtrelloid.type=string
+uda.intheamtrelloid.label=Inthe.AM Trello Object ID
+
+uda.intheamtrellolistid.type=string
+uda.intheamtrellolistid.label=Inthe.AM Trello List ID
+
+uda.intheamtrellodescription.type=string
+uda.intheamtrellodescription.label=Inthe.AM Trello Description
+
+uda.intheamoriginalemailsubject.type=string
+uda.intheamoriginalemailsubject.label=Inthe.AM E-mail Subject
+
+uda.intheammergedfrom.type=string
+uda.intheammergedfrom.label=Inthe.AM Duplicate Tasks Merged
+
+uda.intheamoriginalemailid.type=numeric
+uda.intheamoriginalemailid.label=Inthe.AM E-mail ID
+
+uda.intheamattachments.type=string
+uda.intheamattachments.label=Inthe.AM Attachments
+
+uda.intheamduplicateof.type=string
+uda.intheamduplicateof.label=Inthe.AM Duplicate of Task
+
+uda.intheamtrellolistname.type=string
+uda.intheamtrellolistname.label=Inthe.AM Trello List Name
+uda.intheamtrellolistname.values=To Do,Doing,Done
+
+# Incoming e-mail, SMS, etc
+urgency.user.tag.review.coefficient=99
+
+# Set case sensitive search
+search.case.sensitive=no
+
+# Regular expressions in pattern filters
+regex=on
+
+# Priority as UDA
+uda.priority.values=H,M,,L
+urgency.priority.coefficient=6.0
+
+# InThe.AM
+taskd.certificate=~/sync/task/private.certificate.pem
+taskd.key=~/sync/task/private.key.pem
+taskd.ca=~/sync/task/ca.cert.pem
+taskd.credentials=inthe_am/seanthomaswilliams/150193cd-ee7e-4362-922d-aa5bef2cdd2a
+taskd.server=taskwarrior.inthe.am:53589
+taskd.trust=ignore hostname
+
+# Jira UDA
+uda.jira.type=string
+uda.jira.label=JIRA Issue
+
+# Bugwarrior UDAs
+uda.trellocard.type=string
+uda.trellocard.label=Trello card name
+uda.trellocardid.type=string
+uda.trellocardid.label=Trello card ID
+uda.trelloboard.type=string
+uda.trelloboard.label=Trello board name
+uda.trellolist.type=string
+uda.trellolist.label=Trello list name
+uda.trelloshortlink.type=string
+uda.trelloshortlink.label=Trello shortlink
+uda.trelloshorturl.type=string
+uda.trelloshorturl.label=Trello short URL
+uda.trellourl.type=string
+uda.trellourl.label=Trello URL
+# END Bugwarrior UDAs

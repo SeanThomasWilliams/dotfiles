@@ -1,22 +1,29 @@
-#!/bin/bash
-
-set -e
+#!/bin/bash -eu
 
 DIR="$(cd "$(dirname "$0")" && pwd)"
-
 cd "$DIR"
+
+# Darwin/Linux
+UNAME_S=$(uname -s)
 
 git submodule update --init --recursive
 
 for fname in "$DIR"/.*; do
-    if [[ -f $fname ]]; then
-        fname="$(basename "$fname")"
-        ln -snf "$DIR/$fname" "$HOME/$fname"
-    fi
+  [[ ! -f $fname ]] && continue # Skip missing files
+
+  fname_base=$(basename "$fname")
+  fname_src="$fname"
+  fname_target="$HOME/$fname_base"
+
+  # Handle os-specific config files
+  if [[ -f "$fname.$UNAME_S" ]]; then
+    fname_src="$fname.$UNAME_S"
+  fi
+
+  ln -snf "$fname_src" "$fname_target"
 done
 
 # Bash-completion
-set -x
 mkdir -p "$HOME/.local/share/"
 rm -f "$HOME/.local/share/bash-completion"
 ln -sfn "$DIR/.local/share/bash-completion" "$HOME/.local/share/"
@@ -26,20 +33,28 @@ mkdir -p "$HOME"/.config
 ln -sfn "$DIR"/vim "$HOME"/.config/nvim
 ln -sfn "$DIR"/.vimrc "$HOME"/.config/nvim/init.vim
 
+# Config dir
 for d in "$DIR"/config/*; do
   ln -sfn "$d" "$HOME"/.config/"$(basename "$d")"
 done
+
+# Binaries
 mkdir -p "$HOME"/bin
 ln -sfn "$DIR"/bin/* "$HOME"/bin/
+
+# Vim dir
 rm -f "$HOME"/.vim
 ln -sfn "$DIR"/vim "$HOME"/.vim
 
+# Neovim pip
 pip install neovim
 
-echo "Installing bundles"
-vim +BundleInstall! +qall
-echo "Installing GO binaries"
-vim +GoInstallBinaries +qall
-vim +UpdateRemotePlugins +qall
+# Vim plugins
+nvim +PlugInstall! +qall
 
-echo "Done!"
+# Go binaries
+mkdir -p ~/gocode/src/github.com/
+nvim +GoInstallBinaries +qall
+
+# Vim Remote plugins
+nvim +UpdateRemotePlugins +qall

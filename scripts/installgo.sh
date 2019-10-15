@@ -1,16 +1,14 @@
-#!/bin/bash -e
+#!/bin/bash -eux
 
-mkdir -p $HOME/software/
+GO_VERSION="1.13.1"
+UNAME_S=$(uname -s | tr '[:upper:]' '[:lower:]')
 
-GO_VERSION="1.12.4"
-
-GO_DL="https://dl.google.com/go/go${GO_VERSION}.linux-amd64.tar.gz"
-
-rm -rf "$HOME/software/go.back"
+mkdir -p "$HOME/software"
+rm -rf "$HOME/software/go.bak" "$HOME/software/go.tar.gz"
 if [[ -d "$HOME/software/go" ]]; then
-  mv $HOME/software/go{,.bak}
+  mv "$HOME"/software/go{,.bak}
 fi
 
-cd $HOME/software
-wget "$GO_DL" -O go.tar.gz
+cd "$HOME/software"
+curl -L "https://dl.google.com/go/go${GO_VERSION}.${UNAME_S}-amd64.tar.gz" -o go.tar.gz
 tar -xvf go.tar.gz

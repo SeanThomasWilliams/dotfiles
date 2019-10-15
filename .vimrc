@@ -170,7 +170,7 @@ let g:airline_theme = 'tender'
 if exists('+termguicolors')
   let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"
   let &t_8b = "\<Esc>[48;2;%lu;%lu;%lum"
-  set termguicolors " Enables truecolor in neovim >= 0.1.5
+"  set termguicolors " Enables truecolor in neovim >= 0.1.5
 endif
 let $NVIM_TUI_ENABLE_TRUE_COLOR=1 " forces true color
 let $NVIM_TUI_ENABLE_CURSOR_SHAPE=1 " Changes cursor to a line on insert mode
@@ -386,7 +386,6 @@ if has('autocmd')
     autocmd FileType go nnoremap <silent> <leader>rs <Plug>(go-run-split)
     autocmd FileType go nnoremap <silent> <leader>rv <Plug>(go-run-vertical)
     autocmd BufWritePost *.go silent! GoBuild -i
-
   augroup end
 
   augroup Frontend
@@ -402,7 +401,6 @@ if has('autocmd')
     autocmd FileType javascript nmap <leader>d :TernDefSplit<CR>
     autocmd FileType javascript nmap <leader>D :TernDef<CR>
     autocmd FileType javascript nmap <leader>i :TernDoc<CR>
-
   augroup end
 
   augroup ConfigFiles
@@ -426,7 +424,6 @@ if has('autocmd')
     else
       autocmd FileType terraform silent! map <unique> <buffer> <Leader>rr :call terraformcomplete#Run()<CR>
     end
-
   augroup end
 
   augroup Completion
@@ -453,7 +450,6 @@ if has('autocmd')
     call neomake#configure#automake('nrwi', 1000)
   augroup end
 endif
-
 
 " Make directories automatically if they don't already exist.
 if !isdirectory(expand(&backupdir))
