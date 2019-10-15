@@ -3,13 +3,13 @@
 
 if [[ $# -lt 1 ]]; then
     echo >&2 "SSH to the EC2 Resources for the given AWS CloudFormation Stack or AWS Elastic Beanstalk Environment"
-    echo >&2 "Usage: $0 ENVIRONMENT_OR_STACK_NAME"
-    echo >&2 "ENVIRONMENT_OR_STACK_NAME: AWS CloudFormation Stack or AWS Elastic Beanstalk Environment Name"
+    echo >&2 "Usage: $0 RESOURCE_NAME"
+    echo >&2 "RESOURCE_NAME: AWS CloudFormation Stack or AWS Elastic Beanstalk Environment Name"
     exit 1
 fi
 
 AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-us-gov-west-1}
-ENVIRONMENT_OR_STACK_NAME=$1
+RESOURCE_NAME=$1
 
 generate_ssh_script(){
   cat <<EOF
@@ -40,7 +40,9 @@ ssh_to_instance(){
   local ec2_instance_id
   ec2_instance_id=$1
   for instance_ip in $(get_ips_for_ec2_instance "$ec2_instance_id"); do
-    echo >&2 "Connecting to ${ec2_instance_id}: ${instance_ip}..."
+    SSH_USER=$(get_ssh_user_for_ec2_instance "$ec2_instance_id")
+    export SSH_USER
+    echo >&2 "Connecting to ${ec2_instance_id}: ${SSH_USER}@${instance_ip}..."
     sshj "$instance_ip" -t "$(generate_ssh_script)"
   done
 }
@@ -52,6 +54,25 @@ get_ips_for_ec2_instance(){
     --instance-ids "$ec2_instance_id" \
     --query 'Reservations[*].Instances[*].NetworkInterfaces[*].PrivateIpAddresses[*].PrivateIpAddress[][][]' |\
   jq -r '.[]'
+}
+
+get_ssh_user_for_ec2_instance(){
+  local ec2_instance_id ssh_user
+  ec2_instance_id=$1
+  ssh_user=ec2-user
+  ami_id=$(aws ec2 describe-instances \
+    --instance-ids "$ec2_instance_id" \
+    --query 'Reservations[*].Instances[*].ImageId[][]' |\
+    jq -r '.[]' |\
+    head -n 1)
+  if aws ec2 describe-images \
+    --image-ids "$ami_id" \
+    --query 'Images[0].Description' \
+    --output text | grep -q -i -E "ubuntu|k8s"; then
+    ssh_user="ubuntu"
+  fi
+
+  echo "$ssh_user"
 }
 
 get_beanstalk_instance_ids(){
@@ -76,15 +97,35 @@ get_cf_stack_instance_ids(){
     jq -r '.[]'
 }
 
-get_instance_ids(){
-  local environment_or_stack_name
-  environment_or_stack_name=$1
+get_ec2_instance_ids(){
+  local ec2_name
+  ec2_name=$1
+  aws ec2 describe-instances \
+    --filters "Name=tag:Name,Values=${ec2_name}" \
+    --query 'Reservations[*].Instances[?State.Name == `running`].InstanceId[]' 2> /dev/null |\
+  jq -r '.[]'
+}
+
+get_stack_instance_ids(){
+  local resource_name
+  resource_name=$1
   # Run these commands in parallel. They provide no output if the breanstalk environment or stack is not found.
-  get_cf_stack_instance_ids "$environment_or_stack_name" &
-  get_beanstalk_instance_ids "$environment_or_stack_name" &
+  get_cf_stack_instance_ids "$resource_name" &
+  get_beanstalk_instance_ids "$resource_name" &
   wait
 }
 
-for instance_id in $(get_instance_ids "$ENVIRONMENT_OR_STACK_NAME" | sort); do
+# Whether a beanstalk or CF stack exists
+stack_exists=0
+for instance_id in $(get_stack_instance_ids "$RESOURCE_NAME" | sort); do
+  ssh_to_instance "$instance_id"
+  stack_exists=1
+done
+
+if [[ $stack_exists -eq 1 ]]; then
+  exit
+fi
+
+for instance_id in $(get_ec2_instance_ids "$RESOURCE_NAME" | sort); do
   ssh_to_instance "$instance_id"
 done

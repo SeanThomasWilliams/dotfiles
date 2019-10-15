@@ -72,12 +72,13 @@ endif
 
 " Commenting blocks of code.
 let b:comment_leader = '# '
-autocmd FileType terraform,c,cpp,java,scala   let b:comment_leader = '// '
-autocmd FileType yaml,sh,ruby,python          let b:comment_leader = '# '
-autocmd FileType conf,fstab                   let b:comment_leader = '# '
-autocmd FileType tex                          let b:comment_leader = '% '
-autocmd FileType mail                         let b:comment_leader = '> '
-autocmd FileType vim                          let b:comment_leader = '" '
+autocmd FileType c,cpp,go,java,scala    let b:comment_leader = '// '
+autocmd FileType yaml,sh,ruby,python    let b:comment_leader = '# '
+autocmd FileType terraform              let b:comment_leader = '# '
+autocmd FileType conf,fstab             let b:comment_leader = '# '
+autocmd FileType tex                    let b:comment_leader = '% '
+autocmd FileType mail                   let b:comment_leader = '> '
+autocmd FileType vim                    let b:comment_leader = '" '
 " Comment and uncomment
 noremap <silent> <leader>cc :<C-B>silent <C-E>s/^/<C-R>=escape(b:comment_leader,'\/')<CR>/<CR>:nohlsearch<CR>
 noremap <silent> <leader>cu :<C-B>silent <C-E>s/^\V<C-R>=escape(b:comment_leader,'\/')<CR>//e<CR>:nohlsearch<CR>
@@ -115,157 +116,6 @@ if !exists('*MakeScriptExecuteable')
       silent !chmod +x %:p
     endif
   endfunction
-endif
-
-" Autocommands that cant live in after/filetypes
-if has('autocmd')
-  filetype plugin indent on           " allow for individual indentations per file type
-
-  augroup Shell
-    autocmd!
-    " Make shell scripts executable
-    au BufWritePost * call MakeScriptExecuteable()
-
-    " Fold shell scripts
-    autocmd FileType sh let g:sh_fold_enabled=3
-    autocmd FileType sh let g:is_bash=1
-  augroup end
-
-  augroup Numbering
-    autocmd!
-
-    " After opening, jump to last known cursor position unless it's invalid or in an event handler
-    autocmd BufReadPost *
-      \ if line("'\"") > 0 && line("'\"") <= line("$") |
-      \   exe "normal g`\"" |
-      \ endif
-
-    if exists('+relativenumber')
-      " Show absolute numbers when in insert mode
-      autocmd InsertEnter * :setlocal norelativenumber
-      autocmd InsertLeave * :setlocal relativenumber
-
-      " Only use relative numbers when the window is active
-      autocmd BufEnter * :setlocal relativenumber
-      autocmd WinEnter * :setlocal relativenumber
-      autocmd BufLeave * :setlocal norelativenumber
-      autocmd WinLeave * :setlocal norelativenumber
-    endif
-
-    " Only show cursorline in the current window and in normal mode.
-    autocmd WinLeave,InsertEnter * set nocursorline
-    autocmd WinEnter,InsertLeave * set cursorline
-  augroup end
-
-  augroup Sizing
-    autocmd!
-
-    " Resize splits when the window is resized
-    autocmd VimResized * :wincmd =
-  augroup end
-
-  augroup Filetypes
-    autocmd!
-
-    " Filetypes
-    autocmd BufNewFile,BufRead *.config setlocal ft=yaml et ts=2 sw=2 sts=2
-    autocmd BufNewFile,BufRead *.j2 setlocal ft=yaml et ts=2 sw=2 sts=2
-    autocmd BufNewFile,BufRead *.js setlocal et ts=2 sw=2 sts=2
-    autocmd BufNewFile,BufRead *.json setlocal et ts=2 sw=2 sts=2
-    autocmd BufNewFile,BufRead *.lua setlocal noet ts=4 sw=4 sts=4
-    autocmd BufNewFile,BufRead *.py setlocal et ts=4 sw=4 sts=4
-    autocmd BufNewFile,BufRead *.sh setlocal et ts=2 sw=2 sts=2
-    autocmd BufNewFile,BufRead */aws/jenkins/* setlocal ft=groovy et ts=4 sw=4 sts=4
-    autocmd BufNewFile,BufRead */playbooks/vars/*.yml setlocal filetype=yaml.ansible et ts=2 sw=2 sts=2
-    autocmd BufNewFile,BufRead */tasks/*.yml setlocal filetype=yaml.ansible et ts=2 sw=2 sts=2
-    autocmd BufNewFile,BufRead Jenkinsfile* setlocal ft=groovy et ts=2 sw=2 sts=2
-    autocmd BufNewFile,Bufread *.spect setlocal ft=spec
-    autocmd BufNewFile,Bufread *.wsgi setlocal ft=python
-    autocmd BufNewFile,BufRead *.go setlocal noet ts=4 sw=4 sts=4
-    autocmd BufNewFile,BufRead Makefile setlocal noet ts=4 sw=4 sts=4
-  augroup end
-
-  augroup Python
-    autocmd!
-    " Python
-    " Jedi defaults <leader>d to goto
-    autocmd FileType python nnoremap <leader>sd :split<CR>:call jedi#goto()<CR>
-    autocmd FileType python nnoremap <leader>f :Neoformat<CR>
-  augroup end
-
-  augroup Golang
-    autocmd!
-
-    " Golang
-    autocmd FileType go nnoremap <leader>d  :GoDef<CR>
-    autocmd FileType go nnoremap <leader>sd :sp<CR> :GoDef<CR>
-    autocmd FileType go nnoremap <leader>gb :wa<CR> :GoBuild<CR>
-    autocmd FileType go nnoremap <leader>gi :wa<CR> :GoImports<CR>
-    autocmd FileType go nnoremap <leader>i  <Plug>(go-info)
-    autocmd FileType go nnoremap <leader>r  <Plug>(go-rename)
-    autocmd FileType go nnoremap <leader>tf :wa<CR> :GolangTestFocused<CR>
-    autocmd FileType go nnoremap <leader>tp :wa<CR> :GolangTestCurrentPackage<CR>
-    autocmd FileType go nnoremap <leader>rt <Plug>(go-run-tab)
-    autocmd FileType go nnoremap <leader>rs <Plug>(go-run-split)
-    autocmd FileType go nnoremap <leader>rv <Plug>(go-run-vertical)
-    autocmd BufWritePost *.go silent! GoBuild -i
-
-  augroup end
-
-  augroup Frontend
-    autocmd!
-
-    autocmd FileType javascript nnoremap <leader>f :Prettier<CR>
-    autocmd FileType html nnoremap <leader>f :call HtmlBeautify()<CR>
-    autocmd FileType css nnoremap <leader>f :call CSSBeautify()<CR>
-
-    " React-goto-definition
-    autocmd FileType javascript nmap <leader>rd :call ReactGotoDef()<CR>
-    " Tern
-    autocmd FileType javascript nmap <leader>d :TernDefSplit<CR>
-    autocmd FileType javascript nmap <leader>D :TernDef<CR>
-    autocmd FileType javascript nmap <leader>i :TernDoc<CR>
-
-  augroup end
-
-  augroup ConfigFiles
-    autocmd!
-
-    autocmd FileType json nnoremap <leader>f :Prettier<CR>
-    autocmd FileType yaml nnoremap <leader>f :Neoformat<CR>
-
-    " Terraform
-    autocmd FileType terraform noremap <buffer> <Leader>gd :call terraformcomplete#GetDoc()<CR>
-    autocmd FileType terraform noremap <buffer> <Leader>d  :call terraformcomplete#JumpRef()<CR>
-    autocmd FileType terraform noremap <buffer> <Leader>a  :call terraformcomplete#LookupAttr()<CR>
-    autocmd FileType terraform noremap <buffer> <Leader>od :call terraformcomplete#OpenDoc()<CR>
-    autocmd FileType terraform noremap <buffer> <Leader>e  :call terraformcomplete#EvalInter()<CR>
-
-    if has('nvim')
-      autocmd FileType terraform silent! map <unique> <buffer> <Leader>rr :call terraformcomplete#NeovimRun()<CR>
-    elseif v:version >= 800
-      autocmd FileType terraform silent! map <unique> <buffer> <Leader>rr :call terraformcomplete#AsyncRun()<CR>
-    else
-      autocmd FileType terraform silent! map <unique> <buffer> <Leader>rr :call terraformcomplete#Run()<CR>
-    end
-
-  augroup end
-
-  augroup Misc
-    autocmd!
-
-    " VimWIKI
-    autocmd FileType vimwiki nnoremap <silent><leader>m :VimwikiAll2HTML<CR>
-
-    " Neomake
-    autocmd ColorScheme *
-          \ hi link NeomakeError SpellBad |
-          \ hi link NeomakeWarning SpellCap
-
-    " Neomake options
-    " normal mode (after 1s; no delay when writing).
-    call neomake#configure#automake('nrwi', 1000)
-  augroup end
 endif
 
 " Don't lose selection when shifting text in visual or select mode
@@ -392,7 +242,6 @@ set incsearch   " incremental searching
 set inccommand= " incremental everything
 set ignorecase  " searches are case insensitive...
 set smartcase   " ... unless they contain at least one capital letter
-set gdefault    " by default, replace globally (you can ommit /g at the end of a search-and-replace
 " }}}
 
 " {{{ Whitespace settings
@@ -443,6 +292,168 @@ set matchtime=4   " Time to display matching parent, in tens of second
 syntax case match
 syntax sync minlines=1024
 syntax on " Enable highlighting for syntax
+
+" Autocommands that cant live in after/filetypes
+if has('autocmd')
+  filetype plugin indent on           " allow for individual indentations per file type
+
+  augroup Shell
+    autocmd!
+    " Make shell scripts executable
+    au BufWritePost * call MakeScriptExecuteable()
+
+    " Fold shell scripts
+    autocmd FileType sh let g:sh_fold_enabled=3
+    autocmd FileType sh let g:is_bash=1
+  augroup end
+
+  augroup Numbering
+    autocmd!
+
+    " After opening, jump to last known cursor position unless it's invalid or in an event handler
+    autocmd BufReadPost *
+      \ if line("'\"") > 0 && line("'\"") <= line("$") |
+      \   exe "normal g`\"" |
+      \ endif
+
+    if exists('+relativenumber')
+      " Show absolute numbers when in insert mode
+      autocmd InsertEnter * :setlocal norelativenumber
+      autocmd InsertLeave * :setlocal relativenumber
+
+      " Only use relative numbers when the window is active
+      autocmd BufEnter * :setlocal relativenumber
+      autocmd WinEnter * :setlocal relativenumber
+      autocmd BufLeave * :setlocal norelativenumber
+      autocmd WinLeave * :setlocal norelativenumber
+    endif
+
+    " Only show cursorline in the current window and in normal mode.
+    autocmd WinLeave,InsertEnter * set nocursorline
+    autocmd WinEnter,InsertLeave * set cursorline
+  augroup end
+
+  augroup Sizing
+    autocmd!
+
+    " Resize splits when the window is resized
+    autocmd VimResized * :wincmd =
+  augroup end
+
+  augroup Filetypes
+    autocmd!
+
+    " Filetypes
+    autocmd BufNewFile,BufRead *.config setlocal ft=yaml et ts=2 sw=2 sts=2
+    autocmd BufNewFile,BufRead *.j2 setlocal ft=yaml et ts=2 sw=2 sts=2
+    autocmd BufNewFile,BufRead *.js setlocal et ts=2 sw=2 sts=2
+    autocmd BufNewFile,BufRead *.json setlocal et ts=2 sw=2 sts=2
+    autocmd BufNewFile,BufRead *.lua setlocal noet ts=4 sw=4 sts=4
+    autocmd BufNewFile,BufRead *.py setlocal et ts=4 sw=4 sts=4
+    autocmd BufNewFile,BufRead *.sh setlocal et ts=2 sw=2 sts=2
+    autocmd BufNewFile,BufRead */aws/jenkins/* setlocal ft=groovy
+    autocmd BufNewFile,BufRead */playbooks/vars/*.yml setlocal filetype=yaml.ansible et ts=2 sw=2 sts=2
+    autocmd BufNewFile,BufRead */tasks/*.yml setlocal filetype=yaml.ansible et ts=2 sw=2 sts=2
+    autocmd BufNewFile,BufRead Jenkinsfile* setlocal ft=groovy
+    autocmd BufNewFile,Bufread *.spect setlocal ft=spec
+    autocmd BufNewFile,Bufread *.wsgi setlocal ft=python
+    autocmd BufNewFile,BufRead *.go setlocal noet ts=4 sw=4 sts=4
+    autocmd BufNewFile,BufRead Makefile setlocal noet ts=4 sw=4 sts=4
+    autocmd FileType markdown setlocal wrap
+  augroup end
+
+  augroup Python
+    autocmd!
+    " Python
+    " Jedi defaults <leader>d to goto
+    autocmd FileType python nnoremap <leader>sd :sp<CR>:call jedi#goto()<CR>
+    autocmd FileType python nnoremap <leader>f :Neoformat<CR>
+  augroup end
+
+  augroup Golang
+    autocmd!
+
+    " Golang
+    autocmd FileType go nnoremap <silent> <leader>d  :<C-u>call go#def#Jump('', 0)<CR>
+    autocmd FileType go nnoremap <silent> <leader>sd :sp<CR> :silent call go#def#Jump('', 0)<CR>
+    autocmd FileType go nnoremap <silent> <leader>gb :wa<CR> :GoBuild<CR>
+    autocmd FileType go nnoremap <silent> <leader>gi :wa<CR> :GoImports<CR>
+    autocmd FileType go nnoremap <silent> <leader>i  <Plug>(go-info)
+    autocmd FileType go nnoremap <silent> <leader>r  <Plug>(go-rename)
+    autocmd FileType go nnoremap <silent> <leader>tf :wa<CR> :GolangTestFocused<CR>
+    autocmd FileType go nnoremap <silent> <leader>tp :wa<CR> :GolangTestCurrentPackage<CR>
+    autocmd FileType go nnoremap <silent> <leader>rt <Plug>(go-run-tab)
+    autocmd FileType go nnoremap <silent> <leader>rs <Plug>(go-run-split)
+    autocmd FileType go nnoremap <silent> <leader>rv <Plug>(go-run-vertical)
+    autocmd BufWritePost *.go silent! GoBuild -i
+
+  augroup end
+
+  augroup Frontend
+    autocmd!
+
+    autocmd FileType javascript nnoremap <leader>f :Prettier<CR>
+    autocmd FileType html nnoremap <leader>f :call HtmlBeautify()<CR>
+    autocmd FileType css nnoremap <leader>f :call CSSBeautify()<CR>
+
+    " React-goto-definition
+    autocmd FileType javascript nmap <leader>rd :call ReactGotoDef()<CR>
+    " Tern
+    autocmd FileType javascript nmap <leader>d :TernDefSplit<CR>
+    autocmd FileType javascript nmap <leader>D :TernDef<CR>
+    autocmd FileType javascript nmap <leader>i :TernDoc<CR>
+
+  augroup end
+
+  augroup ConfigFiles
+    autocmd!
+
+    autocmd FileType json nnoremap <leader>f :Prettier<CR>
+    autocmd FileType yaml nnoremap <leader>f :Neoformat<CR>
+
+    " Terraform
+    autocmd FileType terraform nnoremap <buffer> <Leader>d  :call terraformcomplete#JumpRef()<CR>
+    autocmd FileType terraform nnoremap <buffer> <Leader>sd :sp<CR> :call terraformcomplete#JumpRef()<CR>
+    autocmd FileType terraform nnoremap <buffer> <Leader>gd :call terraformcomplete#GetDoc()<CR>
+    autocmd FileType terraform nnoremap <buffer> <Leader>la :call terraformcomplete#LookupAttr()<CR>
+    autocmd FileType terraform nnoremap <buffer> <Leader>o  :call terraformcomplete#OpenDoc()<CR>
+    autocmd FileType terraform nnoremap <buffer> <Leader>e  :call terraformcomplete#EvalInter()<CR>
+
+    if has('nvim')
+      autocmd FileType terraform silent! map <unique> <buffer> <Leader>rr :call terraformcomplete#NeovimRun()<CR>
+    elseif v:version >= 800
+      autocmd FileType terraform silent! map <unique> <buffer> <Leader>rr :call terraformcomplete#AsyncRun()<CR>
+    else
+      autocmd FileType terraform silent! map <unique> <buffer> <Leader>rr :call terraformcomplete#Run()<CR>
+    end
+
+  augroup end
+
+  augroup Completion
+    autocmd!
+
+    " (Optional)Hide Info(Preview) window after completions
+    autocmd CursorMovedI * if pumvisible() == 0|pclose|endif
+    autocmd InsertLeave * if pumvisible() == 0|pclose|endif
+  augroup end
+
+  augroup Misc
+    autocmd!
+
+    " VimWIKI
+    autocmd FileType vimwiki nnoremap <silent><leader>m :VimwikiAll2HTML<CR>
+
+    " Neomake
+    autocmd ColorScheme *
+          \ hi link NeomakeError SpellBad |
+          \ hi link NeomakeWarning SpellCap
+
+    " Neomake options
+    " normal mode (after 1s; no delay when writing).
+    call neomake#configure#automake('nrwi', 1000)
+  augroup end
+endif
+
 
 " Make directories automatically if they don't already exist.
 if !isdirectory(expand(&backupdir))
@@ -623,11 +634,12 @@ let g:deoplete#sources#ternjs#timeout = 1
 let g:deoplete#sources#ternjs#types = 1
 let g:deoplete#sources#ternjs#case_insensitive = 1
 
-let g:deoplete#omni_patterns.terraform = '[^ *\t"{=$]\w*'
+"let g:deoplete#omni_patterns.terraform = '[^ *\t"{=$]\w*'
+call deoplete#custom#option('omni_patterns', {
+\ 'complete_method': 'omnifunc',
+\ 'terraform': '[^ *\t"{=$]\w*',
+\})
 call deoplete#initialize()
-
-" vim-go
-let g:go_gocode_propose_source = 1
 
 " tern_for_vim.
 let g:tern#command = ["tern"]
@@ -635,6 +647,7 @@ let g:tern#arguments = ["--persistent"]
 let g:tern_request_timeout = 6000
 
 " Go settings
+let g:go_gocode_propose_source = 1
 let g:go_auto_type_info = 1
 let g:go_dispatch_enabled = 1
 let g:go_fmt_fail_silently = 0
@@ -643,7 +656,10 @@ let g:go_highlight_methods = 1
 let g:go_highlight_operators = 1
 let g:go_jump_to_error = 1
 let g:go_play_open_browser = 0
-let g:go_def_mapping_enabled=0
+let g:go_def_mapping_enabled = 0
+let g:go_def_reuse_buffer = 1
+let g:go_echo_commands_disabled = ['godef']
+let g:go_echo_command_info = 0
 
 " Tern
 let g:tern_map_keys = 1
@@ -690,6 +706,8 @@ let g:neomake_warning_sign = {
       \ 'texthl': 'NeomakeSign',
       \ }
 let g:neomake_tempfile_dir = '/tmp/neomake%:p:h'
+let g:neomake_terraform_tffilter_plan = 0
+"let g:neomake_terraform_enabled_makers = ['terraform_validate', 'tflint']
 " }}}
 
 " Firefox refresh
@@ -724,15 +742,17 @@ let g:neosnippet#enable_snipmate_compatibility = 1
 let g:neosnippet#snippets_directory='~/.vim/bundle/vim-snippets/snippets'
 
 " terraform
-let g:terraform_align=1
-let g:terraform_commentstring='//%s'
-let g:terraform_fmt_on_save=1
+let g:terraform_align = 1
+let g:terraform_commentstring = '//%s'
+let g:terraform_fmt_on_save = 1
+let g:terraform_completion_keys = 0
+let g:terraform_registry_module_completion = 1
 
 " C-k to execute snippet
-imap <C-s>     <Plug>(neosnippet_expand)
-imap <C-k>     <Plug>(neosnippet_expand_or_jump)
-smap <C-k>     <Plug>(neosnippet_expand_or_jump)
-xmap <C-k>     <Plug>(neosnippet_expand_target)
+imap <C-s> <Plug>(neosnippet_expand)
+imap <C-k> <Plug>(neosnippet_expand_or_jump)
+smap <C-k> <Plug>(neosnippet_expand_or_jump)
+xmap <C-k> <Plug>(neosnippet_expand_target)
 
 "" Expand the completed snippet trigger by <CR>.
 imap <expr><CR>

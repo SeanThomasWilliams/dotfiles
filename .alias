@@ -50,6 +50,10 @@ load_python_settings(){
   export PYTHONDONTWRITEBYTECODE=1
 }
 
+load_golang_settings(){
+  export GO111MODULE=on
+}
+
 load_history_settings(){
   ### history
   shopt -s histappend              # append new history items to .bash_history
@@ -94,6 +98,9 @@ load_path_settings(){
 
   # Global PATH, libs, tools
   export PATH="$HOME/bin:$HOME/.local/bin:$HOME/.npm-packages/bin:$HOME/anaconda3/bin:$HOME/bin/Sencha/Cmd:$JAVA_HOME/bin:/usr/local/bin:$GOROOT/bin:$GOBIN:$PATH"
+
+  # Shorten prompt
+  export PROMPT_DIRTRIM=3
 
   # java settings
   if [[ -d /etc/alternatives/java_sdk ]]; then
@@ -154,6 +161,7 @@ load_extra_source_files(){
 load_path_settings
 load_session_manager_settings
 load_python_settings
+load_golang_settings
 load_editor_settings
 load_history_settings
 load_lang_settings

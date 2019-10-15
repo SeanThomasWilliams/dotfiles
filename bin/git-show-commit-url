@@ -9,6 +9,9 @@ case "$GIT_HOST" in
   *isobar.co*)
     echo "https://keystone.isobar.co/bitbucket/projects/$GIT_GROUP/repos/$GIT_REPO/commits/$COMMIT"
     ;;
+  *di2e.net*)
+    echo "https://$GIT_HOST/projects/$GIT_GROUP/repos/$GIT_REPO/commits/$COMMIT"
+    ;;
   *)
     echo "https://$GIT_HOST/$GIT_GROUP/$GIT_REPO/commit/$COMMIT"
     ;;

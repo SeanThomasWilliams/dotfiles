@@ -1,6 +1,6 @@
 [user]
     name = Sean Williams
-    email = seanthomaswilliams@gmail.com
+    email = sean@xeed.io
 
 [core]
     editor = nvim
@@ -51,6 +51,7 @@
     up = !sh -c \"git commit -a -m \"Before rebase\" && git pull --rebase && git reset head^\"
     wu = log --stat origin..@{0}
     wup = log -p origin..@{0}
+    change-commits = "!f() { VAR=$1; OLD=$2; NEW=$3; shift 3; git filter-branch -f --env-filter \"if [ \\\"$`echo $VAR`\\\" = '$OLD' ]; then export $VAR='$NEW'; fi\" $@; }; f "
 
 [difftool]
     prompt = false
