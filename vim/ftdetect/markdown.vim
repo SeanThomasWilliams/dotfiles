@@ -1,3 +1,1 @@
-au! BufRead,BufNewFile *.md set filetype=markdown makeprg=pandoc\ --css=/home/williamss/.config/pandoc/github.css\ --from\ markdown_github\ --to\ html5\ --highlight-style=haddock\ --self-contained\ %\ >%<.html
-au! BufRead,BufNewFile *.md.j2 set filetype=markdown makeprg=pandoc\ --css=/home/williamss/.config/pandoc/github.css\ --from\ markdown_github\ --to\ html5\ --highlight-style=haddock\ --self-contained\ %\ >%<.html
-au! BufRead,BufNewFile *.markdown set filetype=markdown makeprg=pandoc\ --css=/home/williamss/.config/pandoc/github.css\ --from\ markdown_github\ --to\ html5\ --highlight-style=haddock\ --self-contained\ %\ >%<.html
+au! BufRead,BufNewFile *.md set filetype=markdown makeprg=pandoc\ --from\ gfm\ --to\ html5\ --highlight-style=haddock\ --self-contained\ --metadata\ title=%:r\ %\ >%<.html

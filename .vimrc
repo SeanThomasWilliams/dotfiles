@@ -9,8 +9,6 @@
 
 set nocompatible " Required
 call plug#begin('~/.vim/plugged')
-" Vundle plugin manager
-Plug 'gmarik/vundle'
 " Other plugins
 Plug 'Ivo-Donchev/vim-react-goto-definition'
 Plug 'RRethy/vim-illuminate'

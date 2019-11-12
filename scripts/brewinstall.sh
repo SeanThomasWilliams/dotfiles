@@ -1,17 +1,33 @@
-#!/bin/bash -eux
+#!/bin/bash -eu
 
-brew install cowsay
-brew install ag
-brew install fortune
-brew install gcc
-brew install htop
-brew install kubectl
-brew install npm
-brew install prettier
-brew install task
-brew install terraform
-brew install tflint
-brew install tmux
-brew install watch
-brew install yarn
-brew install wget
+install_brew(){
+  /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+}
+
+command -v brew || install_brew
+
+cat <<EOF | xargs brew install
+bash-completion@2
+docker-completion
+open-completion
+pip-completion
+ag
+autojump
+cowsay
+coreutils
+direnv
+fortune
+gcc
+htop
+jq
+kubectl
+npm
+prettier
+task
+terraform
+tflint
+tmux
+watch
+wget
+yarn
+EOF

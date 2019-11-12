@@ -1,21 +1,7 @@
 #!/bin/bash -eux
 
-pip install --ignore-installed PyYAML \
-  awscli \
-  boto \
-  boto3 \
-  botocore \
-  pyopenssl \
-  awslogs \
-  netaddr \
-  setuptools \
-  ansible-lint \
-  yamllint \
-  pre-commit \
-  docformatter \
-  isort \
-  yapf \
-  pycodestyle \
-  flake8
+DIR=$(cd "$(dirname "$0")" && pwd)
 
 pip install --upgrade pip
+
+pip install --ignore-installed PyYAML -r "$DIR/requirements.txt"

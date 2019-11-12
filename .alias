@@ -31,7 +31,9 @@ load_editor_settings(){
   export EDITOR="vim"
   if command -v nvim > /dev/null; then
     export EDITOR="nvim"
+    alias vimdiff="nvim -d"
   fi
+
   export GIT_EDITOR="$EDITOR"
   alias vim="$EDITOR"
   alias vi="$EDITOR"
@@ -116,6 +118,7 @@ load_alias_settings(){
 
   if command -v ag > /dev/null; then
     alias fgrep="ag --ignore export"
+    export FZF_DEFAULT_COMMAND='ag --hidden --ignore .git -g ""'
   else
     alias fgrep="find . -type f | awk '!/CVS|\.class|\.jar|\.war|\.git|\.svn|_Stub|\.#/  {print \$0;}' | sed 's/\ /\\\ /g' | xargs grep --color=always -n "
   fi

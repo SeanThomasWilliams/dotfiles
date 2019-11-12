@@ -2,12 +2,16 @@
 
 set -o pipefail
 
+DEFAULT_BRANCH=$(git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@')
+
 git fetch --prune
 
 # Prune branches that have already been merged with master
-git branch --merged | grep -v -E "\*|master|dev" | xargs -n 1 git branch -d
+git branch --merged | grep -v -E "\*|master|$DEFAULT_BRANCH" | xargs -n 1 echo git branch -d
 
 # Rebased branches
-exec git for-each-ref refs/heads/ "--format=%(refname:short)" | grep -v master | xargs -P 4 -I {} bash -c "( ! git cherry master {} | grep -q '^[^-]' ) && git branch -D {}"
+git for-each-ref refs/heads/ "--format=%(refname:short)" |\
+  grep -v "$DEFAULT_BRANCH" |\
+  xargs -P 4 -I {} bash -c "( ! git cherry $DEFAULT_BRANCH {} | grep -q '^[^-]' ) && git branch -D {}"
 
 git gc
