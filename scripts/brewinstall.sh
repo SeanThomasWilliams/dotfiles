@@ -7,14 +7,11 @@ install_brew(){
 command -v brew || install_brew
 
 cat <<EOF | xargs brew install
-bash-completion@2
-docker-completion
-open-completion
-pip-completion
 ag
 autojump
-cowsay
+bash-completion@2
 coreutils
+cowsay
 direnv
 fortune
 gcc
@@ -22,6 +19,8 @@ htop
 jq
 kubectl
 npm
+open-completion
+pip-completion
 prettier
 task
 terraform

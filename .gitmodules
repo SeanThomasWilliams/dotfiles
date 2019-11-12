@@ -1,3 +1,6 @@
 [submodule "vim/bundle/YouCompleteMe"]
 	path = vim/bundle/YouCompleteMe
 	url = https://github.com/Valloric/YouCompleteMe
+[submodule "bash-it"]
+	path = bash-it
+	url = ./bash-it/

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Workaround
 __vte_prompt_command() { true; }
@@ -50,10 +50,28 @@ load_editor_settings(){
 load_python_settings(){
   # Skip writing pyc and __pycache__
   export PYTHONDONTWRITEBYTECODE=1
+  load_ansible_settings
+}
+
+load_ansible_settings(){
+  if command -v ansible &> /dev/null; then
+    export ANSIBLE_ACTION_WARNINGS=0
+    export ANSIBLE_ANY_ERRORS_FATAL=1
+    export ANSIBLE_CALLBACK_WHITELIST="timer,profile_roles,profile_tasks,aws_resource_actions,counter_enabled"
+    export ANSIBLE_COMMAND_WARNINGS=0
+    export ANSIBLE_COW_SELECTION=random
+    export ANSIBLE_DEPRECATION_WARNINGS=0
+    export ANSIBLE_LOAD_CALLBACK_PLUGINS=1
+    export ANSIBLE_PIPELINING=1
+    export ANSIBLE_SSH_ARGS="-C -o ControlMaster=auto -o ControlPersist=60s"
+    export ANSIBLE_SYSTEM_WARNINGS=0
+  fi
 }
 
 load_golang_settings(){
-  export GO111MODULE=on
+  if command -v go &> /dev/null; then
+    export GO111MODULE=on
+  fi
 }
 
 load_history_settings(){
@@ -117,8 +135,8 @@ load_alias_settings(){
   alias dstat-all='dstat -larm --top-io --top-latency'
 
   if command -v ag > /dev/null; then
-    alias fgrep="ag --ignore export"
-    export FZF_DEFAULT_COMMAND='ag --hidden --ignore .git -g ""'
+    alias fgrep="ag --ignore export --ignore .git --ignore logs"
+    export FZF_DEFAULT_COMMAND='ag --hidden --ignore .git -g "" --skip-vcs-ignores'
   else
     alias fgrep="find . -type f | awk '!/CVS|\.class|\.jar|\.war|\.git|\.svn|_Stub|\.#/  {print \$0;}' | sed 's/\ /\\\ /g' | xargs grep --color=always -n "
   fi
@@ -149,9 +167,10 @@ load_extra_source_files(){
   ### source workstation-specific
   SOURCEFILES="
   $HOME/.local.alias
-  $HOME/anaconda3/etc/profile.d/conda.sh
+  $HOME/anaconda3/etc/profile.d/*.sh
+  $HOME/.local/share/bash-completion/*.bash
   /usr/local/etc/profile.d/autojump.sh
-  /usr/share/autojump/autojump.bash
+  /usr/share/autojump/*.bash
   "
 
   for sf in $SOURCEFILES; do
