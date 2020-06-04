@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# .bashrc -> .bash_profile -> .alias
+
 # Exit if non-interactive
 [[ -z "$PS1" ]] && return
 

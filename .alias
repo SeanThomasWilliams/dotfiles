@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # shellcheck disable=SC1090,SC2086,SC2139,SC2142
 
+# .bashrc -> .bash_profile -> .alias
+
 # Workaround
 __vte_prompt_command() { true; }
 
