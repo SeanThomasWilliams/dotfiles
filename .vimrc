@@ -8,6 +8,7 @@
 "
 
 set nocompatible " Required
+
 call plug#begin('~/.vim/plugged')
 " Other plugins
 Plug 'Ivo-Donchev/vim-react-goto-definition'
@@ -42,6 +43,7 @@ Plug 'numirias/semshi', {'do': ':UpdateRemotePlugins'}
 Plug 'pangloss/vim-javascript'
 Plug 'pearofducks/ansible-vim'
 Plug 'peitalin/vim-jsx-typescript'
+Plug 'powerman/vim-plugin-AnsiEsc'
 Plug 'prettier/vim-prettier', { 'do': 'yarn install' }
 Plug 'sbdchd/neoformat'
 Plug 'shmup/vim-sql-syntax'
@@ -60,8 +62,6 @@ call plug#end()
 "+----------------- Basic Configurations ------------+
 " GUI Configuration
 if has('gui_running')
-  set spell " Spelling looks ugly in command line mode
-  set spelllang=en_us " We speak amuurican
   set guioptions-=T
   set guioptions+=LlRrb "Some kind of hack for scrollbars
   set guioptions-=LlRrb
@@ -357,7 +357,7 @@ if has('autocmd')
     autocmd BufNewFile,Bufread *.wsgi setlocal ft=python
     autocmd BufNewFile,BufRead *.go setlocal noet ts=4 sw=4 sts=4
     autocmd BufNewFile,BufRead Makefile setlocal noet ts=4 sw=4 sts=4
-    autocmd FileType markdown setlocal wrap
+    autocmd FileType markdown setlocal wrap spell spelllang=en_us
   augroup end
 
   augroup Python
@@ -413,6 +413,7 @@ if has('autocmd')
     autocmd FileType terraform nnoremap <buffer> <Leader>gd :call terraformcomplete#GetDoc()<CR>
     autocmd FileType terraform nnoremap <buffer> <Leader>la :call terraformcomplete#LookupAttr()<CR>
     autocmd FileType terraform nnoremap <buffer> <Leader>o  :call terraformcomplete#OpenDoc()<CR>
+    autocmd FileType terraform nnoremap <buffer> <Leader>e  :call terraformcomplete#EvalInter()<CR>
     autocmd FileType terraform nnoremap <buffer> <Leader>e  :call terraformcomplete#EvalInter()<CR>
 
     if has('nvim')
@@ -488,7 +489,8 @@ set statusline=%<%f\ (%{&ft})\ %-4(%m%)%=%-19(%3l,%02c%03V%)
 " MISC FUNCTIONS
 
 " Insert the current time
-command! InsertTime :normal a<c-r>=strftime('%F %H:%M:%S.0 %z')<CR>
+command! InsertTime :normal o<CR><c-r>=strftime('%c')<CR>
+nnoremap <silent> <leader>n :e ~/notes.txt<CR>G:InsertTime<CR>o
 
 " MISC KEY MAPS
 nnoremap <silent> <F2> :set nonumber!<CR>:set relativenumber!<CR>:set foldcolumn=0<CR>
@@ -599,12 +601,12 @@ let g:ansible_extra_keywords_highlight = 1
 
 " Deoplete
 let g:deoplete#omni_patterns = {}
-let g:deoplete#auto_complete_delay = 50
+"let g:deoplete#auto_complete_delay = 50
 let g:deoplete#min_pattern_length = 1
-let g:deoplete#max_list = 100
+"let g:deoplete#max_list = 100
 let g:deoplete#smart_case = 1
 let g:deoplete#enable_at_startup = 1
-let g:deoplete#file#enable_buffer_path = 1
+"let g:deoplete#file#enable_buffer_path = 1
 
 " Deoplete Jedi/Python
 let g:deoplete#sources#jedi#show_docstring = 1
@@ -691,6 +693,7 @@ let g:neoformat_only_msg_on_error = 1
 :highlight NeomakeSign guifg=Yellow guibg=#dc322f gui=bold
 let g:neomake_python_enabled_makers = ['pycodestyle', 'flake8', 'python']
 let g:neomake_javascript_enabled_makers = ['eslint', 'jshint']
+let g:neomake_dockerfile_enabled_makers = []
 let g:neomake_error_sign = {
       \ 'text': '•',
       \ 'texthl': 'NeomakeSign',

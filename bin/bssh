@@ -40,8 +40,10 @@ ssh_to_instance(){
   local ec2_instance_id
   ec2_instance_id=$1
   for instance_ip in $(get_ips_for_ec2_instance "$ec2_instance_id"); do
-    SSH_USER=$(get_ssh_user_for_ec2_instance "$ec2_instance_id")
-    export SSH_USER
+    if [[ -z ${SSH_USER-} ]]; then
+      SSH_USER=$(get_ssh_user_for_ec2_instance "$ec2_instance_id")
+      export SSH_USER
+    fi
     echo >&2 "Connecting to ${ec2_instance_id}: ${SSH_USER}@${instance_ip}..."
     sshj "$instance_ip" -t "$(generate_ssh_script)"
   done
@@ -59,17 +61,23 @@ get_ips_for_ec2_instance(){
 get_ssh_user_for_ec2_instance(){
   local ec2_instance_id ssh_user
   ec2_instance_id=$1
-  ssh_user=ec2-user
+
   ami_id=$(aws ec2 describe-instances \
     --instance-ids "$ec2_instance_id" \
     --query 'Reservations[*].Instances[*].ImageId[][]' |\
     jq -r '.[]' |\
     head -n 1)
-  if aws ec2 describe-images \
+  ami_desc=$(aws ec2 describe-images \
     --image-ids "$ami_id" \
     --query 'Images[0].Description' \
-    --output text | grep -q -i -E "ubuntu|k8s"; then
+    --output text)
+
+  if echo "$ami_desc" | grep -q -i -E "ubuntu|k8s"; then
     ssh_user="ubuntu"
+  elif echo "$ami_desc" | grep -q -i -E "rancher"; then
+    ssh_user="rancher"
+  else
+    ssh_user="ec2-user"
   fi
 
   echo "$ssh_user"

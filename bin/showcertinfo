@@ -31,3 +31,8 @@ sslinfo(){
 for fname in "$@"; do
   sslinfo "$fname"
 done
+
+if [[ ! -t 0 ]]; then
+  echo >&2 "Reading from stdin"
+  openssl x509 -text -noout -in -
+fi

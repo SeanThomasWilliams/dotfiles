@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC1090,SC2086,SC2139,SC2142
 
 # Workaround
 __vte_prompt_command() { true; }
@@ -69,6 +70,21 @@ load_ansible_settings(){
 }
 
 load_golang_settings(){
+  # Go Settings
+  GOROOT="$HOME/software/go"; export GOROOT
+  GOPATH="$HOME/gocode"; export GOPATH
+  GOBIN="$GOPATH/bin"; export GOBIN
+
+  # PATH Options. Reverse order of importance since they are prepended.
+  PATH_PARTS=(
+    "$GOBIN"
+    "$GOROOT/bin"
+  )
+
+  for path_part in "${PATH_PARTS[@]}"; do
+    add_to_path_if_exists "$path_part"
+  done
+
   if command -v go &> /dev/null; then
     export GO111MODULE=on
   fi
@@ -110,22 +126,43 @@ load_lang_settings(){
   export LC_TIME="en_US.UTF-8"
 }
 
-load_path_settings(){
-  # go
-  export GOROOT="$HOME/software/go"
-  export GOPATH="$HOME/gocode"
-  export GOBIN="$GOPATH/bin"
+add_to_path_if_exists(){
+  local path_dir
+  path_dir="$1"
+  if [[ -d "$path_dir" ]]; then
+    if ! echo "${PATH}" | grep -q "${path_dir}:"; then
+      PATH="${path_dir}:${PATH}"; export PATH
+    fi
+  fi
+}
 
-  # Global PATH, libs, tools
-  export PATH="$HOME/bin:$HOME/.local/bin:$HOME/.npm-packages/bin:$HOME/anaconda3/bin:$HOME/bin/Sencha/Cmd:$JAVA_HOME/bin:/usr/local/bin:$GOROOT/bin:$GOBIN:$PATH"
+load_path_settings(){
+  local java_home_options
+  java_home_options="/etc/alternatives/java_sdk /usr/local/opt/openjdk"
+
+  for jh in $java_home_options; do
+    if [[ -d "$jh" ]]; then
+      JAVA_HOME="$jh"; export JAVA_HOME
+      add_to_path_if_exists "$JAVA_HOME/bin"
+    fi
+  done
+
+  # PATH Options. Reverse order of importance since they are prepended.
+  PATH_PARTS=(
+    /usr/local/bin
+    "$HOME/bin/Sencha/Cmd"
+    "$HOME/.local/bin"
+    "$HOME/.npm-packages/bin"
+    "$HOME/anaconda3/bin"
+    "$HOME/bin"
+  )
+
+  for path_part in "${PATH_PARTS[@]}"; do
+    add_to_path_if_exists "$path_part"
+  done
 
   # Shorten prompt
   export PROMPT_DIRTRIM=3
-
-  # java settings
-  if [[ -d /etc/alternatives/java_sdk ]]; then
-      export JAVA_HOME="/etc/alternatives/java_sdk"
-  fi
 }
 
 load_alias_settings(){
@@ -135,8 +172,9 @@ load_alias_settings(){
   alias dstat-all='dstat -larm --top-io --top-latency'
 
   if command -v ag > /dev/null; then
-    alias fgrep="ag --ignore export --ignore .git --ignore logs"
-    export FZF_DEFAULT_COMMAND='ag --hidden --ignore .git -g "" --skip-vcs-ignores'
+    AG_CMD='ag --ignore export --ignore .git --ignore logs --skip-vcs-ignores --hidden'
+    export FZF_DEFAULT_COMMAND="$AG_CMD -g \"\""
+    alias fgrep="$AG_CMD"
   else
     alias fgrep="find . -type f | awk '!/CVS|\.class|\.jar|\.war|\.git|\.svn|_Stub|\.#/  {print \$0;}' | sed 's/\ /\\\ /g' | xargs grep --color=always -n "
   fi
@@ -144,11 +182,11 @@ load_alias_settings(){
   ## os-specific
   if ls --color &> /dev/null; then
     # We are on linux
-    alias ls="ls -lh --color"
+    alias ls='ls -lh --color'
   else
     # Mac OS settings
-    alias ls="ls -lh -G"
-    alias timeout="gtimeout"
+    alias ls='ls -lh -G'
+    alias timeout='gtimeout'
   fi
 
   # clipboard copy/paste
@@ -157,29 +195,53 @@ load_alias_settings(){
     alias pbpaste='xclip -selection clipboard -o'
   fi
 
-  alias pgpsql="psql -U postgres"
+  alias pgpsql='psql -U postgres'
 
   # Autoenable direnv
-  which direnv &> /dev/null && eval "$(direnv hook bash)"
+  command -v direnv &> /dev/null && eval "$(direnv hook bash)"
 }
 
 load_extra_source_files(){
   ### source workstation-specific
-  SOURCEFILES="
-  $HOME/.local.alias
-  $HOME/anaconda3/etc/profile.d/*.sh
-  $HOME/.local/share/bash-completion/*.bash
-  /usr/local/etc/profile.d/autojump.sh
-  /usr/share/autojump/*.bash
-  "
+  SOURCEFILES=(
+    "$HOME/.local.alias"
+    "$HOME/.fzf.bash"
+    "$HOME/.local/share/bash-completion/*.bash"
+    "$HOME/anaconda3/etc/profile.d/*.sh"
+    "$HOME/software/taoup/taoup-fortune"
+    "/usr/local/etc/profile.d/autojump.sh"
+    "/usr/share/autojump/*.bash"
+  )
 
-  for sf in $SOURCEFILES; do
-    if [[ -f $sf ]]; then
-      source "$sf"
+  local sf glob_sf
+
+  # This actually works because
+  for sf in "${SOURCEFILES[@]}"; do
+    if compgen -G "$sf" &> /dev/null; then
+      for glob_sf in $(compgen -G "$sf"); do
+        source "$glob_sf"
+      done
     fi
   done
 }
 
+load_ps1_settings(){
+  if [[ -z "${PS1-}" ]]; then
+    return
+  fi
+
+  PS1="$(if [[ ${EUID} == 0 ]]; then
+    echo '\[\033[01;31m\]\h'
+  else
+    echo '\[\033[01;32m\]\u@\h'
+  fi)\[\033[01;34m\] \w \$([[ \$? != 0 ]] && echo \"\[\033[01;31m\]:(\[\033[01;34m\] \")\$\[\033[00m\] "
+}
+
+load_shell_settings(){
+  unset MAILCHECK # Don't check mail when opening terminal.
+}
+
+load_shell_settings
 load_path_settings
 load_session_manager_settings
 load_python_settings
@@ -189,3 +251,4 @@ load_history_settings
 load_lang_settings
 load_alias_settings
 load_extra_source_files
+load_ps1_settings
