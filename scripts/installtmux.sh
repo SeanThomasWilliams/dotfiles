@@ -1,28 +1,10 @@
-#!/bin/bash
+#!/bin/bash -ex
 
-set -e
+mkdir -p "$HOME/bin"
 
-sudo yum -y install ncurses-devel gcc kernel-devel make
+curl -sL "https://github.com/nelsonenzo/tmux-appimage/releases/download/3.0a-appimage0.1.0/tmux-3.0a-x86_64.AppImage" \
+  -o "$HOME/bin/tmux.temp"
 
-mkdir -p $HOME/software
-cd $HOME/software
-
-# Get libevent
-wget https://github.com/libevent/libevent/releases/download/release-2.0.22-stable/libevent-2.0.22-stable.tar.gz
-tar -xvf libevent-2.0.22-stable.tar.gz
-cd libevent-2.0.22-stable
-./configure --prefix=/usr/local
-make -j
-sudo make install
-
-# Get tmux
-cd $HOME/software
-wget -O tmux.tar.gz https://github.com/tmux/tmux/releases/download/2.1/tmux-2.1.tar.gz
-tar -xvf tmux.tar.gz
-cd tmux*
-make configure
-./configure --prefix=/usr/
-make -j
-sudo make install
-
-tmux -V
+chmod u+x "$HOME/bin/tmux.temp"
+mv -v "$HOME/bin/tmux.temp" "$HOME/bin/tmux"
+"$HOME/bin/tmux" -V
