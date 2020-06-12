@@ -130,8 +130,11 @@ for instance_id in $(get_stack_instance_ids "$RESOURCE_NAME" | sort); do
   stack_exists=1
 done
 
+# Exit if stack was found
 if [[ $stack_exists -eq 1 ]]; then
   exit
+else
+  echo >&2 "No CF or EB stack exists... trying matching instances"
 fi
 
 for instance_id in $(get_ec2_instance_ids "$RESOURCE_NAME" | sort); do

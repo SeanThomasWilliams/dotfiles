@@ -29,7 +29,7 @@ Plug 'ervandew/supertab'
 Plug 'fatih/vim-go', { 'tag': '*' }
 Plug 'gagoar/StripWhiteSpaces'
 Plug 'hashivim/vim-terraform'
-Plug 'honza/vim-snippets'
+Plug 'SeanThomasWilliams/vim-snippets'
 Plug 'jacoborus/tender.vim'
 Plug 'juliosueiras/vim-terraform-completion'
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
@@ -39,6 +39,7 @@ Plug 'lilydjwg/colorizer'
 Plug 'luochen1990/rainbow'
 Plug 'marijnh/tern_for_vim'
 Plug 'mileszs/ack.vim'
+Plug 'mustache/vim-mustache-handlebars'
 Plug 'numirias/semshi', {'do': ':UpdateRemotePlugins'}
 Plug 'pangloss/vim-javascript'
 Plug 'pearofducks/ansible-vim'
@@ -47,6 +48,7 @@ Plug 'powerman/vim-plugin-AnsiEsc'
 Plug 'prettier/vim-prettier', { 'do': 'yarn install' }
 Plug 'sbdchd/neoformat'
 Plug 'shmup/vim-sql-syntax'
+Plug 'towolf/vim-helm'
 Plug 'tpope/vim-dispatch'
 Plug 'tpope/vim-fugitive'
 Plug 'tpope/vim-surround'
@@ -345,7 +347,7 @@ if has('autocmd')
     autocmd BufNewFile,BufRead *.config setlocal ft=yaml et ts=2 sw=2 sts=2
     autocmd BufNewFile,BufRead *.j2 setlocal ft=yaml et ts=2 sw=2 sts=2
     autocmd BufNewFile,BufRead *.js setlocal et ts=2 sw=2 sts=2
-    autocmd BufNewFile,BufRead *.json setlocal et ts=2 sw=2 sts=2
+    autocmd BufNewFile,BufRead *.json setlocal et ts=2 sw=2 sts=2 conceallevel=0
     autocmd BufNewFile,BufRead *.lua setlocal noet ts=4 sw=4 sts=4
     autocmd BufNewFile,BufRead *.py setlocal et ts=4 sw=4 sts=4
     autocmd BufNewFile,BufRead *.sh setlocal et ts=2 sw=2 sts=2
@@ -412,7 +414,7 @@ if has('autocmd')
     autocmd FileType terraform nnoremap <buffer> <Leader>sd :sp<CR> :call terraformcomplete#JumpRef()<CR>
     autocmd FileType terraform nnoremap <buffer> <Leader>gd :call terraformcomplete#GetDoc()<CR>
     autocmd FileType terraform nnoremap <buffer> <Leader>la :call terraformcomplete#LookupAttr()<CR>
-    autocmd FileType terraform nnoremap <buffer> <Leader>o  :call terraformcomplete#OpenDoc()<CR>
+    "autocmd FileType terraform nnoremap <buffer> <Leader>o  :call terraformcomplete#OpenDoc()<CR>
     autocmd FileType terraform nnoremap <buffer> <Leader>e  :call terraformcomplete#EvalInter()<CR>
     autocmd FileType terraform nnoremap <buffer> <Leader>e  :call terraformcomplete#EvalInter()<CR>
 
@@ -704,7 +706,8 @@ let g:neomake_warning_sign = {
       \ }
 let g:neomake_tempfile_dir = '/tmp/neomake%:p:h'
 let g:neomake_terraform_tffilter_plan = 0
-"let g:neomake_terraform_enabled_makers = ['terraform_validate', 'tflint']
+let g:terraform_completion_keys = 1
+let g:neomake_terraform_enabled_makers = ['terraform_validate', 'tflint']
 " }}}
 
 " Firefox refresh
@@ -770,26 +773,40 @@ let g:javascript_plugin_jsdoc = 1
 " Vimwiki
 " Turn off URL shortening
 let g:vimwiki_url_maxsave=0
-" Wiki export config
+let g:vimwiki_folding='expr' "this allows the folding to work for markdown
+let g:vimwiki_global_ext = 0
+let g:vimwiki_hl_headers = 1
 let g:vimwiki_list = [{
-      \ 'path': '$HOME/sync/vimwiki/',
-      \ 'path_html': '$HOME/wiki/',
-      \ 'diary_index': 'index',
-      \ 'diary_rel_path': 'diary/',
-      \ 'template_path': '$HOME/wiki/vimwiki-assets/',
-      \ 'template_default': 'default',
-      \ 'template_ext': '.tmpl',
-      \ 'auto_export': 0,
-      \ 'automatic_nested_syntaxes': 0,
-      \ 'nested_syntaxes': {
-      \ 'js':'javascript',
-      \ 'json':'javascript',
-      \ 'java':'java',
-      \ 'yaml':'yaml',
-      \ 'bash':'bash',
-      \ 'sh':'shell',
-      \ 'python':'python'
-      \ }}]
+  \ 'auto_export': 1,
+  \ 'auto_header' : 1,
+  \ 'automatic_nested_syntaxes': 1,
+  \ 'autotags': 1,
+  \ 'custom_wiki2html': '~/vimwiki/scripts/convert.py',
+  \ 'ext': '.md',
+  \ 'links_space_char' : '_',
+  \ 'list_margin': 0,
+  \ 'path': '~/vimwiki',
+  \ 'path_html': '/tmp/html',
+  \ 'syntax': 'markdown',
+  \ 'template_default': 'GitHub',
+  \ 'template_ext': 'html5',
+  \ 'template_path': '~/vimwiki/templates/',
+  \ 'nested_syntaxes': {
+    \ 'bash': 'sh',
+    \ 'elixir': 'elixir',
+    \ 'java': 'java',
+    \ 'javascript': 'javascript',
+    \ 'js': 'javascript',
+    \ 'json': 'javascript',
+    \ 'python': 'python',
+    \ 'ruby': 'ruby',
+    \ 'yaml': 'yaml'
+  \ },
+\ }]
+
+"  \ 'path_html': '~/vimwiki/html/',
+
+autocmd FileType vimwiki set spell spelllang=en_us
 
 let g:autopep8_max_line_length=120
 

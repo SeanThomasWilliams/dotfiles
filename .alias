@@ -210,6 +210,7 @@ load_extra_source_files(){
     "$HOME/.fzf.bash"
     "$HOME/.local/share/bash-completion/*.bash"
     "$HOME/anaconda3/etc/profile.d/*.sh"
+    "$HOME/.iterm2_shell_integration.bash"
     "$HOME/software/taoup/taoup-fortune"
     "/usr/local/etc/profile.d/autojump.sh"
     "/usr/share/autojump/*.bash"

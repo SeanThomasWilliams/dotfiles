@@ -3,6 +3,8 @@
 .jpg
 .netrwhist
 .png
+.stignore
+.stversions/
 .vim-go/*
 Anaconda*.sh
 init.vim
