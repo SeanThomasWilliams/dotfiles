@@ -45,7 +45,7 @@ ssh_to_instance(){
       export SSH_USER
     fi
     echo >&2 "Connecting to ${ec2_instance_id}: ${SSH_USER}@${instance_ip}..."
-    sshj "$instance_ip" -t "$(generate_ssh_script)"
+    sshj "$instance_ip" -t "$(generate_ssh_script)" || true
   done
 }
 

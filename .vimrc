@@ -14,6 +14,7 @@ call plug#begin('~/.vim/plugged')
 Plug 'Ivo-Donchev/vim-react-goto-definition'
 Plug 'RRethy/vim-illuminate'
 Plug 'SeanThomasWilliams/dwm.vim'
+Plug 'SeanThomasWilliams/vim-snippets'
 Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
 Plug 'Shougo/neosnippet'
 Plug 'Shougo/neosnippet-snippets'
@@ -29,14 +30,15 @@ Plug 'ervandew/supertab'
 Plug 'fatih/vim-go', { 'tag': '*' }
 Plug 'gagoar/StripWhiteSpaces'
 Plug 'hashivim/vim-terraform'
-Plug 'SeanThomasWilliams/vim-snippets'
 Plug 'jacoborus/tender.vim'
 Plug 'juliosueiras/vim-terraform-completion'
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 Plug 'junegunn/fzf.vim'
 Plug 'leafgarland/typescript-vim'
 Plug 'lilydjwg/colorizer'
+Plug 'ludovicchabant/vim-gutentags'
 Plug 'luochen1990/rainbow'
+Plug 'majutsushi/tagbar'
 Plug 'marijnh/tern_for_vim'
 Plug 'mileszs/ack.vim'
 Plug 'mustache/vim-mustache-handlebars'
@@ -159,7 +161,7 @@ set directory=~/.vim/tmp/swap//   " swap files
 set fileformats=unix,dos,mac      " Prefer Unix over Windows over OS 9 formats
 set history=10000                 " Command history
 set noswapfile                    " it's 2013, Vim.
-set tags=~/.tags,./tags " Look for tags in this file
+set tags=~/.tags,./tags           " Look for tags in this file
 " }}}
 
 " {{{ colorscheme/style options
@@ -209,7 +211,7 @@ set shortmess=atI " Deactivate the PRESS ENTER OR TYPE COMMAND TO CONTINUE messa
 set clipboard=unnamed " Allows copy-pasting from other apps
 set scrolloff=3 " keep moreiabbrev lmis ಠ‿ಠearch matches in the middle of the window.
 set sidescrolloff=1 " Add some space around the cursor when moving it near the borders of the screen
-set lazyredraw " Redraw the screen a bit less (helps when editing ruby files)
+set lazyredraw " Don't update screen during macro and script execution
 set winminheight=0
 set winwidth=79
 set textwidth=120
@@ -254,6 +256,7 @@ set softtabstop=2                   " Number of spaces for a tab
 set shiftwidth=2                    " an autoindent (with <<) is two spaces
 set autoindent                      " Copy indent from the current line to a new line
 set smartindent                     " Be smart when indenting
+set smarttab                        " Insert "tabstop" spaces when tab is pressed
 set expandtab                       " use spaces, not tabs
 set backspace=indent,eol,start      " backspace through everything in insert mode
 set list                            " Show invisible characters using listchars
@@ -358,7 +361,8 @@ if has('autocmd')
     autocmd BufNewFile,Bufread *.spect setlocal ft=spec
     autocmd BufNewFile,Bufread *.wsgi setlocal ft=python
     autocmd BufNewFile,BufRead *.go setlocal noet ts=4 sw=4 sts=4
-    autocmd BufNewFile,BufRead Makefile setlocal noet ts=4 sw=4 sts=4
+    autocmd FileType make setlocal noet ts=4 sw=4 sts=4 foldmethod=marker foldlevel=1
+    autocmd FileType make nnoremap <silent> <leader>d :sp<CR> <c-]>
     autocmd FileType markdown setlocal wrap spell spelllang=en_us
   augroup end
 
@@ -414,8 +418,7 @@ if has('autocmd')
     autocmd FileType terraform nnoremap <buffer> <Leader>sd :sp<CR> :call terraformcomplete#JumpRef()<CR>
     autocmd FileType terraform nnoremap <buffer> <Leader>gd :call terraformcomplete#GetDoc()<CR>
     autocmd FileType terraform nnoremap <buffer> <Leader>la :call terraformcomplete#LookupAttr()<CR>
-    "autocmd FileType terraform nnoremap <buffer> <Leader>o  :call terraformcomplete#OpenDoc()<CR>
-    autocmd FileType terraform nnoremap <buffer> <Leader>e  :call terraformcomplete#EvalInter()<CR>
+    autocmd FileType terraform nnoremap <buffer> <Leader>o  :call terraformcomplete#OpenDoc()<CR>
     autocmd FileType terraform nnoremap <buffer> <Leader>e  :call terraformcomplete#EvalInter()<CR>
 
     if has('nvim')
@@ -597,6 +600,12 @@ nnoremap U :syntax sync fromstart<CR>:redraw!<CR>
 " Plugin Settings
 " ----------------------------------------- "
 
+" tagbar
+nnoremap <silent> <leader>b :TagbarToggle<CR>
+
+" gutentags
+set statusline+=%{gutentags#statusline()}
+
 " ansible-vim
 let g:ansible_unindent_after_newline = 1
 let g:ansible_extra_keywords_highlight = 1
@@ -705,9 +714,6 @@ let g:neomake_warning_sign = {
       \ 'texthl': 'NeomakeSign',
       \ }
 let g:neomake_tempfile_dir = '/tmp/neomake%:p:h'
-let g:neomake_terraform_tffilter_plan = 0
-let g:terraform_completion_keys = 1
-let g:neomake_terraform_enabled_makers = ['terraform_validate', 'tflint']
 " }}}
 
 " Firefox refresh
