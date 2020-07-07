@@ -1,4 +1,4 @@
-#!/bin/bash -eu
+#!/bin/bash -eux
 
 DIR="$(cd "$(dirname "$0")" && pwd)"
 cd "$DIR"
@@ -49,7 +49,6 @@ ln -sfn "$DIR"/vim "$HOME"/.vim
 # Neovim pip
 pip install --upgrade neovim pynvim msgpack
 sudo gem install neovim && gem environment
-yarn global add neovim
 
 # Vim plugins
 nvim +PlugInstall! +qall

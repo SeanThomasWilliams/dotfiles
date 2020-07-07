@@ -4,7 +4,7 @@
 
 [core]
   editor = nvim
-  excludesfile = /Users/williamss/.gitignore
+  excludesfile = ~/.gitignore
 
 [color]
   ui = auto

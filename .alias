@@ -174,7 +174,7 @@ load_alias_settings(){
   alias dstat-all='dstat -larm --top-io --top-latency'
 
   if command -v ag > /dev/null; then
-    AG_CMD='ag --ignore export --ignore .git --ignore logs --skip-vcs-ignores --hidden'
+    AG_CMD='ag --ignore export --ignore .git --ignore logs --ignore scratch --hidden'
     export FZF_DEFAULT_COMMAND="$AG_CMD -g \"\""
     alias fgrep="$AG_CMD"
   else

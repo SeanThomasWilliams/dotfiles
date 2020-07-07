@@ -32,7 +32,7 @@ Plug 'gagoar/StripWhiteSpaces'
 Plug 'hashivim/vim-terraform'
 Plug 'jacoborus/tender.vim'
 Plug 'juliosueiras/vim-terraform-completion'
-Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
+Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'junegunn/fzf.vim'
 Plug 'leafgarland/typescript-vim'
 Plug 'lilydjwg/colorizer'
@@ -501,8 +501,6 @@ nnoremap <silent> <leader>n :e ~/notes.txt<CR>G:InsertTime<CR>o
 nnoremap <silent> <F2> :set nonumber!<CR>:set relativenumber!<CR>:set foldcolumn=0<CR>
 nnoremap <F5> <ESC>:w<CR>:call CallInterpreter()<CR>
 
-map <F11> :!ctags -R -f ./tags . &<CR>
-
 "omnicomplete
 inoremap <C-Space> <C-X><C-I>
 inoremap <C-Space> <C-X><C-I>
@@ -605,6 +603,7 @@ nnoremap <silent> <leader>b :TagbarToggle<CR>
 
 " gutentags
 set statusline+=%{gutentags#statusline()}
+let g:gutentags_file_list_command = 'git ls-files'
 
 " ansible-vim
 let g:ansible_unindent_after_newline = 1
