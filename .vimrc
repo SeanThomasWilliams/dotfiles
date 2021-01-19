@@ -31,8 +31,7 @@ Plug 'fatih/vim-go', { 'tag': '*' }
 Plug 'gagoar/StripWhiteSpaces'
 Plug 'hashivim/vim-terraform'
 Plug 'jacoborus/tender.vim'
-Plug 'juliosueiras/vim-terraform-completion'
-Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
+Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 Plug 'junegunn/fzf.vim'
 Plug 'leafgarland/typescript-vim'
 Plug 'lilydjwg/colorizer'
@@ -40,7 +39,6 @@ Plug 'ludovicchabant/vim-gutentags'
 Plug 'luochen1990/rainbow'
 Plug 'majutsushi/tagbar'
 Plug 'marijnh/tern_for_vim'
-Plug 'mileszs/ack.vim'
 Plug 'mustache/vim-mustache-handlebars'
 Plug 'numirias/semshi', {'do': ':UpdateRemotePlugins'}
 Plug 'pangloss/vim-javascript'
@@ -202,7 +200,8 @@ set switchbuf=useopen
 set synmaxcol=500 " Don't try to highlight lines longer than X characters.
 set cmdheight=1
 set laststatus=2 " Always have a status line regardless
-set modelines=0
+set modeline
+set modelines=5
 set numberwidth=5
 set mouse=a " Enable mouse in console mode
 set noshelltemp " Be a bit faster when executing command-line shell stuff
@@ -235,6 +234,7 @@ let javascript_fold=1
 set omnifunc=syntaxcomplete#Complete
 set complete=.,w,b,u,t " Better Completion
 set completeopt=menuone,preview " Better Completion Options
+set iskeyword+=- " Allow autocomplete to treat thes as part of a completion
 " }}}
 
 " {{{ Search settings
@@ -290,6 +290,7 @@ set wildignore+=.hg,.git,.svn                    " Version control
 " {{{ Matching closing character settings
 set showmatch     " Display matching parent
 set matchtime=4   " Time to display matching parent, in tens of second
+set mmp=5000      " Set pattern max memory
 " }}}
 
 syntax case match
@@ -304,6 +305,9 @@ if has('autocmd')
     autocmd!
     " Make shell scripts executable
     au BufWritePost * call MakeScriptExecuteable()
+
+    " Make default filetype sh
+    autocmd BufEnter * if &filetype == "" | setlocal ft=sh | endif
 
     " Fold shell scripts
     autocmd FileType sh let g:sh_fold_enabled=3
@@ -412,22 +416,6 @@ if has('autocmd')
 
     autocmd FileType json nnoremap <leader>f :Prettier<CR>
     autocmd FileType yaml nnoremap <leader>f :Neoformat<CR>
-
-    " Terraform
-    autocmd FileType terraform nnoremap <buffer> <Leader>d  :call terraformcomplete#JumpRef()<CR>
-    autocmd FileType terraform nnoremap <buffer> <Leader>sd :sp<CR> :call terraformcomplete#JumpRef()<CR>
-    autocmd FileType terraform nnoremap <buffer> <Leader>gd :call terraformcomplete#GetDoc()<CR>
-    autocmd FileType terraform nnoremap <buffer> <Leader>la :call terraformcomplete#LookupAttr()<CR>
-    autocmd FileType terraform nnoremap <buffer> <Leader>o  :call terraformcomplete#OpenDoc()<CR>
-    autocmd FileType terraform nnoremap <buffer> <Leader>e  :call terraformcomplete#EvalInter()<CR>
-
-    if has('nvim')
-      autocmd FileType terraform silent! map <unique> <buffer> <Leader>rr :call terraformcomplete#NeovimRun()<CR>
-    elseif v:version >= 800
-      autocmd FileType terraform silent! map <unique> <buffer> <Leader>rr :call terraformcomplete#AsyncRun()<CR>
-    else
-      autocmd FileType terraform silent! map <unique> <buffer> <Leader>rr :call terraformcomplete#Run()<CR>
-    end
   augroup end
 
   augroup Completion
@@ -494,15 +482,19 @@ set statusline=%<%f\ (%{&ft})\ %-4(%m%)%=%-19(%3l,%02c%03V%)
 " MISC FUNCTIONS
 
 " Insert the current time
-command! InsertTime :normal o<CR><c-r>=strftime('%c')<CR>
-nnoremap <silent> <leader>n :e ~/notes.txt<CR>G:InsertTime<CR>o
+nnoremap <silent> <leader>wl :e ~/vimwiki/WorkLog.md<CR>G:norm 2o### <CR>"=strftime("%c")<CR>p:norm 2o<CR>i
 
 " MISC KEY MAPS
 nnoremap <silent> <F2> :set nonumber!<CR>:set relativenumber!<CR>:set foldcolumn=0<CR>
 nnoremap <F5> <ESC>:w<CR>:call CallInterpreter()<CR>
 
+" Indent by spaces TODO: <silent>
+noremap <silent> {{ :s/^  //e<CR>:nohlsearch<CR>
+noremap <silent> }} :s/^/  /e<CR>:nohlsearch<CR>
+
+"noremap <silent> <leader>cc :<C-B>silent <C-E>s/^/<C-R>=escape(b:comment_leader,'\/')<CR>/<CR>:nohlsearch<CR>
+"noremap <silent> <leader>cu :<C-B>silent <C-E>s/^\V<C-R>=escape(b:comment_leader,'\/')<CR>//e<CR>:nohlsearch<CR>
 "omnicomplete
-inoremap <C-Space> <C-X><C-I>
 inoremap <C-Space> <C-X><C-I>
 
 " Resize splits
@@ -583,9 +575,9 @@ nnoremap <C-t> :FZF<CR>
 nnoremap <C-p> :Files $SITE_PACKAGES<CR>
 nnoremap <C-\> :split<CR> :FZF<CR>
 
-" Ag configuration
-nnoremap <leader>a :execute 'Ag '.input('Ag: ')<CR>
-nnoremap <leader>A :Ag <C-r><C-w><CR>
+" Rg configuration
+nnoremap <leader>a :execute 'Rg '.input('Rg: ')<CR>
+nnoremap <leader>A :Rg <C-r><C-w><CR>
 nnoremap <leader>l :execute 'Locate "'.input('Locate: ').'"'<CR>
 
 " Change to directory of current file
@@ -603,7 +595,72 @@ nnoremap <silent> <leader>b :TagbarToggle<CR>
 
 " gutentags
 set statusline+=%{gutentags#statusline()}
-let g:gutentags_file_list_command = 'git ls-files'
+let g:gutentags_file_list_command = {
+\  'markers': {
+\    '.pythontags': $HOME . '/bin/python-file-lister'
+\  }
+\}
+let g:gutentags_add_default_project_roots = 0
+let g:gutentags_project_root = ['.git', '.pythontags']
+let g:gutentags_generate_on_new = 1
+let g:gutentags_generate_on_missing = 1
+let g:gutentags_generate_on_write = 1
+let g:gutentags_generate_on_empty_buffer = 0
+let g:gutentags_ctags_extra_args = [
+      \ '--tag-relative=yes',
+      \ '--fields=+ailmnS',
+      \ ]
+let g:gutentags_ctags_exclude = [
+      \ '*.git', '*.svg', '*.hg',
+      \ '*-lock.json',
+      \ '*.Master',
+      \ '*.bak',
+      \ '*.cache',
+      \ '*.class',
+      \ '*.csproj',
+      \ '*.csproj.user',
+      \ '*.css',
+      \ '*.json',
+      \ '*.less',
+      \ '*.lock',
+      \ '*.map',
+      \ '*.md',
+      \ '*.min.*',
+      \ '*.pdb',
+      \ '*.pyc',
+      \ '*.scss',
+      \ '*.sln',
+      \ '*.tmp',
+      \ '*.zip',
+      \ '*/tests/*',
+      \ '*build*.js',
+      \ '*bundle*.js',
+      \ '*sites/*/files/*',
+      \ '.*rc*',
+      \ 'bin',
+      \ 'bower_components',
+      \ 'build',
+      \ 'bundle',
+      \ 'cache',
+      \ 'compiled',
+      \ 'cscope.*',
+      \ 'dist',
+      \ 'docs',
+      \ 'example',
+      \ 'iso',
+      \ 'mnt',
+      \ 'node_modules',
+      \ 'scratch',
+      \ 'static',
+      \ 'tags*',
+      \ 'vendor',
+      \ '*.exe', '*.dll',
+      \ '*.mp3', '*.ogg', '*.flac',
+      \ '*.swp', '*.swo',
+      \ '*.bmp', '*.gif', '*.ico', '*.jpg', '*.png',
+      \ '*.rar', '*.zip', '*.tar', '*.tar.gz', '*.tar.xz', '*.tar.bz2',
+      \ '*.pdf', '*.doc', '*.docx', '*.ppt', '*.pptx',
+      \ ]
 
 " ansible-vim
 let g:ansible_unindent_after_newline = 1
@@ -733,8 +790,8 @@ let g:autopep8_disable_show_diff=1
 let g:autopep8_on_save = 1
 
 " vim-dirdiff
-let g:DirDiffExcludes = ".git,certs,images,plm*,prps*,one*,ammo*,pmrt*,ccar*,cie*,*test*.yml,*lab*.yml,*prod*.yml,README.md,*.war,*.rpm"
-let g:DirDiffIgnore = "Id:"
+let g:DirDiffExcludes = ".git,certs,images,README.md,*.war,*.rpm"
+let g:DirDiffIgnore = ""
 " ignore white space in diff
 let g:DirDiffAddArgs = "-w"
 let g:DirDiffEnableMappings = 1
@@ -744,7 +801,7 @@ let g:SuperTabDefaultCompletionType = "<c-n>"
 
 " snippets / neosnippet
 let g:neosnippet#enable_snipmate_compatibility = 1
-let g:neosnippet#snippets_directory='~/.vim/bundle/vim-snippets/snippets'
+"let g:neosnippet#snippets_directory='~/.vim/plugged/vim-snippets/snippets'
 
 " terraform
 let g:terraform_align = 1
@@ -791,7 +848,7 @@ let g:vimwiki_list = [{
   \ 'links_space_char' : '_',
   \ 'list_margin': 0,
   \ 'path': '~/vimwiki',
-  \ 'path_html': '/tmp/html',
+  \ 'path_html': '~/vimwiki/html',
   \ 'syntax': 'markdown',
   \ 'template_default': 'GitHub',
   \ 'template_ext': 'html5',
@@ -834,3 +891,21 @@ endfunction
 
 vmap <Leader>vs "vy :call VimuxShebangSlime()<CR>gv
 nmap <Leader>vo :call VimuxOpenRunner()<CR>
+
+nmap <leader>g :call Google()<CR>
+fun! Google()
+    let keyword = expand("<cword>")
+    let url = "http://www.google.com/search?q=" . keyword
+    let path = "C:/Program Files/Mozilla Firefox/"
+    exec 'silent !"' . path . 'firefox.exe" ' . url
+endfun
+
+function! GoogleSearch()
+  let searchterm = expand('<cword>')
+  if &filetype != ""
+    let searchterm .= "+" . &filetype
+  endif
+  silent! exec "silent! !open \"http://google.com/search?q=" . searchterm . "\""
+endfunction
+
+noremap gs :call GoogleSearch()<CR>

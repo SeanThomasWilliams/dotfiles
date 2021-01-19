@@ -24,7 +24,23 @@ default.priority=M
 due=1
 monthsperline=3
 calendar.holidays=full
+defaultwidth=0
 
+# Worklog report
+report.worklog.sort=end
+report.worklog.columns=uuid.short,end,description
+report.worklog.description=Completed tasks
+report.worklog.filter=(status:completed and end.after:'-30 days')
+report.worklog.labels=UUID,Completed,Description
+
+# Completed report
+report.completed.sort=end
+report.completed.columns=uuid.short,entry,end,entry.age,tags,description
+report.completed.description=Completed tasks
+report.completed.filter=(status:completed and end.after:'-30 days')
+report.completed.labels=UUID,Created,Completed,Age,Tags,Description
+
+# Default list report
 report.list.description=Lists all tasks matching the specified criteria
 report.list.columns=id,project,priority,due.relative,due,depends,recur,urgency,tags,description
 report.list.labels=ID,Project,Pri,Rel,Due,Depends,Recur,Score,Tags,Description & Annotation
@@ -34,7 +50,7 @@ report.list.filter=status:pending
 report.list.dateformat= a M-D
 alias.ls=list
 
-default.command=(due.before:7d or due: ) and status:pending list
+default.command=(due.before:5d or due: ) and status:pending list
 
 urgency.next.coefficient=25.0                   # +next tag
 urgency.due.coefficient=5.0                    # overdue or near due date

@@ -1,18 +1,21 @@
 #!/bin/bash -eu
+
 set -o pipefail
 
 if ! command -v task &> /dev/null; then
-  sudo apt-get install taskwarrior
+  echo >&2 "Install taskwarrior!"
+  exit 1
 fi
 
-TAGS=""
 
-if git remote get-url origin &> /dev/null; then
-  remote_url=$(git remote get-url origin | awk -F':' '{print tolower($NF)}' | sed 's/.git//g')
-  ORG=$(echo "$remote_url" | awk -F'/' '{print $(NF-1)}')
-  REPO=$(echo "$remote_url" | awk -F'/' '{print $NF}' | tr -d '-' | tr -d '[0-9]')
-  #TAGS="+${ORG} +${REPO}"
-  TAGS="+${REPO}"
+if [[ -z ${TASK_TAGS-} ]]; then
+  if git remote get-url origin &> /dev/null; then
+    remote_url=$(git remote get-url origin | awk -F':' '{print tolower($NF)}' | sed 's/.git//g')
+    #ORG=$(echo "$remote_url" | awk -F'/' '{print $(NF-1)}' | tr -d '[0-9]')
+    REPO=$(echo "$remote_url" | awk -F'/' '{print $NF}' | tr -d '-' | tr -d '0-9')
+    #TASK_TAGS="+${ORG} +${REPO}"
+    TASK_TAGS="+${REPO}"
+  fi
 fi
 
-task $TAGS $@
+task ${TASK_TAGS-} "$@"

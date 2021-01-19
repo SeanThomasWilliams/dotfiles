@@ -16,5 +16,11 @@ vim/init.vim
 vim/plugged/
 vim/tmp/
 tags
-tags.*
+tags.files
+tags.lock
+tags.temp
+*-tmp
+*-temp
 .Makefile.*
+.pythontags
+temp/*

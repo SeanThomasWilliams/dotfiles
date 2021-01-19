@@ -128,6 +128,18 @@ load_lang_settings(){
   export LC_TIME="en_US.UTF-8"
 }
 
+fix_path_ordering(){
+  local sorted_path
+  sorted_path=$(echo "${PATH}" |\
+                  tr ':' '\n' |\
+                  awk '{ print length, $0 }' |\
+                  sort -rn |\
+                  cut -d' ' -f2 |\
+                  paste -s -d: -)
+  PATH="${sorted_path}"; export PATH
+}
+export -f fix_path_ordering
+
 add_to_path_if_exists(){
   local path_dir
   path_dir="$1"
@@ -152,6 +164,7 @@ load_path_settings(){
   # PATH Options. Reverse order of importance since they are prepended.
   PATH_PARTS=(
     /usr/local/bin
+    /usr/local/opt/libpq/bin
     "$HOME/bin/Sencha/Cmd"
     "$HOME/.local/bin"
     "$HOME/.npm-packages/bin"
@@ -173,10 +186,9 @@ load_alias_settings(){
   alias c="column -t -n -s ',' | less -S -R"
   alias dstat-all='dstat -larm --top-io --top-latency'
 
-  if command -v ag > /dev/null; then
-    AG_CMD='ag --ignore export --ignore .git --ignore logs --ignore scratch --hidden'
-    export FZF_DEFAULT_COMMAND="$AG_CMD -g \"\""
-    alias fgrep="$AG_CMD"
+  if command -v rg > /dev/null; then
+    export FZF_DEFAULT_COMMAND="rg --files"
+    alias fgrep="rg --no-ignore -S"
   else
     alias fgrep="find . -type f | awk '!/CVS|\.class|\.jar|\.war|\.git|\.svn|_Stub|\.#/  {print \$0;}' | sed 's/\ /\\\ /g' | xargs grep --color=always -n "
   fi
@@ -201,6 +213,39 @@ load_alias_settings(){
 
   # Autoenable direnv
   command -v direnv &> /dev/null && eval "$(direnv hook bash)"
+
+  unalias remake gmake remake &> /dev/null
+  for make_prg in remake gmake make; do
+    if command -v "$make_prg" &> /dev/null; then
+      MAKE_PRG=$(command -v "$make_prg")
+      break
+    fi
+  done
+
+  # Recursive Makefile
+  recursive_make(){
+    if [[ -f Makefile ]]; then
+      "$MAKE_PRG" "$@"
+    else
+      base_dir=$(git rev-parse --show-toplevel)
+      cur_dir=$(pwd)
+      until test -f "$cur_dir/Makefile"; do
+        # Hit the base directory
+        if [[ $cur_dir == $base_dir ]]; then
+          break
+        fi
+        cur_dir=$(dirname "$cur_dir")
+      done
+
+      # Run Make
+      "$MAKE_PRG" -C "$cur_dir" "$@"
+    fi
+  }
+  export -f recursive_make
+
+  alias make='recursive_make'
+  alias gmake='recursive_make'
+  alias remake='recursive_make'
 }
 
 load_extra_source_files(){
@@ -211,7 +256,6 @@ load_extra_source_files(){
     "$HOME/.local/share/bash-completion/*.bash"
     "$HOME/anaconda3/etc/profile.d/*.sh"
     "$HOME/.iterm2_shell_integration.bash"
-    "$HOME/software/taoup/taoup-fortune"
     "/usr/local/etc/profile.d/autojump.sh"
     "/usr/share/autojump/*.bash"
   )
@@ -255,3 +299,4 @@ load_lang_settings
 load_alias_settings
 load_extra_source_files
 load_ps1_settings
+fix_path_ordering

@@ -1,14 +1,7 @@
-#!/usr/bin/env bash
-#shellcheck disable=SC2207
+# bash completion for GNU make                             -*- shell-script -*-
 
-# Makefile target completion with caching based on md5
-
-_make_completions(){
-  if [ "${#COMP_WORDS[@]}" != "2" ]; then
-    return
-  fi
-
-  local use_cache suggestions
+_make_cache_makefile_output(){
+  local use_cache
   use_cache=0
 
   MAKEFILE="$PWD/Makefile"
@@ -19,6 +12,14 @@ _make_completions(){
     return
   fi
 
+  MAKEFILES=("$MAKEFILE")
+  if compgen -G "$PWD"/*.mk &> /dev/null; then
+    MAKEFILES+=("$PWD"/*.mk)
+  fi
+
+  # Delete cache older than the bash-completion script
+  find "$PWD" -type f -name ".Makefile.cache" -maxdepth 1 -not -newer "${BASH_SOURCE[0]}" -delete
+
   # Check if we should use the cache
   if [[ -f "$MAKEFILE_MD5" && -f "$MAKEFILE_CACHE" ]]; then
     if md5sum -c "$MAKEFILE_MD5" &> /dev/null; then
@@ -28,30 +29,182 @@ _make_completions(){
 
   # Populate the cache
   if [[ $use_cache -eq 0 ]]; then
-    #echo >&2 -e "\nRepopulating cache..."
-
-    make -qp |\
-      grep -oE '^[a-zA-Z0-9_.-]+:([^=]|$)' |\
-      sed 's/[^a-zA-Z0-9_-]*$//;/^\./d;/Makefile/d;/FORCE/d' |\
-      sort -u > "$MAKEFILE_CACHE"
-
+    echo >&2 -e "\nRepopulating cache..."
+    # Cache output
+    $1 -npq __BASH_MAKE_COMPLETION__=1 "${makef[@]}" "${makef_dir[@]}" .DEFAULT 2> /dev/null |\
+      grep -v "FORCE" > "$MAKEFILE_CACHE"
+    #echo >&2 -e "\nMade cache..."
     # Make new md5
-    md5sum "$MAKEFILE" > "$MAKEFILE_MD5"
+    md5sum "${MAKEFILES[@]}" > "$MAKEFILE_MD5"
   fi
 
-  # keep the suggestions in a local variable
-  suggestions=($(compgen -W "$(cat "$MAKEFILE_CACHE")" -- "${COMP_WORDS[1]}"))
-
-  if [ "${#suggestions[@]}" == "1" ]; then
-    # if there's only one match, we remove the command literal
-    # to proceed with the automatic completion of the number
-    COMPREPLY=("${suggestions[0]}")
-  else
-    # more than one suggestions resolved,
-    # respond with the suggestions intact
-    COMPREPLY=("${suggestions[@]}")
-  fi
+  cat "$MAKEFILE_CACHE"
 }
 
-complete -F _make_completions make
-complete -F _make_completions remake
+_make_target_extract_script()
+{
+    local mode="$1"
+    shift
+
+    local prefix="$1"
+    local prefix_pat=$( command sed 's/[][\,.*^$(){}?+|/]/\\&/g' <<<"$prefix" )
+    local basename=${prefix##*/}
+    local dirname_len=$(( ${#prefix} - ${#basename} ))
+
+    if [[ $mode == -d ]]; then
+        # display mode, only output current path component to the next slash
+        local output="\2"
+    else
+        # completion mode, output full path to the next slash
+        local output="\1\2"
+    fi
+
+    cat <<EOF
+    1,/^# * Make data base/           d;        # skip any makefile output
+    /^# * Finished Make data base/,/^# * Make data base/{
+                                      d;        # skip any makefile output
+    }
+    /^# * Variables/,/^# * Files/     d;        # skip until files section
+    /^# * Not a target/,/^$/          d;        # skip not target blocks
+    /^${prefix_pat}/,/^$/!            d;        # skip anything user dont want
+
+    # The stuff above here describes lines that are not
+    #  explicit targets or not targets other than special ones
+    # The stuff below here decides whether an explicit target
+    #  should be output.
+
+    /^# * File is an intermediate prerequisite/ {
+      s/^.*$//;x;                               # unhold target
+      d;                                        # delete line
+    }
+
+    /^$/ {                                      # end of target block
+      x;                                        # unhold target
+      /^$/d;                                    # dont print blanks
+      s|^\(.\{${dirname_len}\}\)\(.\{${#basename}\}[^:/]*/\{0,1\}\)[^:]*:.*$|${output}|p;
+      d;                                        # hide any bugs
+    }
+
+    # This pattern includes a literal tab character as \t is not a portable
+    # representation and fails with BSD sed
+    /^[^#	:%]\{1,\}:/ {         # found target block
+      /^\.PHONY:/                 d;            # special target
+      /^\.SUFFIXES:/              d;            # special target
+      /^\.DEFAULT:/               d;            # special target
+      /^\.PRECIOUS:/              d;            # special target
+      /^\.INTERMEDIATE:/          d;            # special target
+      /^\.SECONDARY:/             d;            # special target
+      /^\.SECONDEXPANSION:/       d;            # special target
+      /^\.DELETE_ON_ERROR:/       d;            # special target
+      /^\.IGNORE:/                d;            # special target
+      /^\.LOW_RESOLUTION_TIME:/   d;            # special target
+      /^\.SILENT:/                d;            # special target
+      /^\.EXPORT_ALL_VARIABLES:/  d;            # special target
+      /^\.NOTPARALLEL:/           d;            # special target
+      /^\.ONESHELL:/              d;            # special target
+      /^\.POSIX:/                 d;            # special target
+      /^\.NOEXPORT:/              d;            # special target
+      /^\.MAKE:/                  d;            # special target
+EOF
+
+    # don't complete with hidden targets unless we are doing a partial completion
+    if [[ -z "${prefix_pat}" || "${prefix_pat}" = */ ]]; then
+      cat <<EOF
+      /^${prefix_pat}[^a-zA-Z0-9]/d;            # convention for hidden tgt
+EOF
+    fi
+
+    cat <<EOF
+      h;                                        # hold target
+      d;                                        # delete line
+    }
+
+EOF
+}
+
+_make()
+{
+    local cur prev words cword split
+    _init_completion -s || return
+
+    local file makef makef_dir=( "-C" "." ) makef_inc i
+
+    case $prev in
+        -f|--file|--makefile|-o|--old-file|--assume-old|-W|--what-if|\
+        --new-file|--assume-new)
+            _filedir
+            return
+            ;;
+        -I|--include-dir|-C|--directory|-m)
+            _filedir -d
+            return
+            ;;
+        -E)
+            COMPREPLY=( $( compgen -v -- "$cur" ) )
+            return
+            ;;
+        --eval|-D|-V|-x)
+            return
+            ;;
+        --jobs|-j)
+            COMPREPLY=( $( compgen -W "{1..$(( $(_ncpus)*2 ))}" -- "$cur" ) )
+            return
+            ;;
+    esac
+
+    $split && return
+
+    if [[ "$cur" == -* ]]; then
+        local opts="$( _parse_help "$1" )"
+        [[ $opts ]] || opts="$( _parse_usage "$1" )"
+        COMPREPLY=( $( compgen -W "$opts" -- "$cur" ) )
+        [[ $COMPREPLY == *= ]] && compopt -o nospace
+    elif [[ $cur == *=* ]]; then
+        prev=${cur%%=*}
+        cur=${cur#*=}
+        local diropt
+        [[ ${prev,,} == *dir?(ectory) ]] && diropt=-d
+        _filedir $diropt
+    else
+        # before we check for makefiles, see if a path was specified
+        # with -C/--directory
+        for (( i=0; i < ${#words[@]}; i++ )); do
+            if [[ ${words[i]} == -@(C|-directory) ]]; then
+                # eval for tilde expansion
+                eval makef_dir=( -C "${words[i+1]}" )
+                break
+            fi
+        done
+
+        # before we scan for targets, see if a Makefile name was
+        # specified with -f/--file/--makefile
+        for (( i=0; i < ${#words[@]}; i++ )); do
+            if [[ ${words[i]} == -@(f|-?(make)file) ]]; then
+                # eval for tilde expansion
+                eval makef=( -f "${words[i+1]}" )
+                break
+            fi
+        done
+
+        # recognise that possible completions are only going to be displayed
+        # so only the base name is shown
+        local mode=--
+        if (( COMP_TYPE != 9 )); then
+            mode=-d # display-only mode
+        fi
+
+        local IFS=$' \t\n' script=$( _make_target_extract_script $mode "$cur" )
+        COMPREPLY=( $( LC_ALL=C _make_cache_makefile_output "$@" |\
+            command sed -ne "$script" ) )
+
+        if [[ $mode != -d ]]; then
+            # Completion will occur if there is only one suggestion
+            # so set options for completion based on the first one
+            [[ $COMPREPLY == */ ]] && compopt -o nospace
+        fi
+
+    fi
+} &&
+complete -F _make make remake gmake gnumake pmake colormake
+
+# ex: filetype=sh

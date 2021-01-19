@@ -1,5 +1,15 @@
 {
-    "rules": {
-        "comma-dangle": [1, "never"]
-    }
+  "parserOptions": {
+    "ecmaFeatures": {
+      "jsx": true
+    },
+    "ecmaVersion": 6,
+    "sourceType": "module"
+  },
+  "rules": {
+    "comma-dangle": [
+      1,
+      "never"
+    ]
+  }
 }

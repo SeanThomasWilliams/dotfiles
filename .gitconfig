@@ -1,6 +1,7 @@
 [user]
   name = Sean Williams
   email = sean@xeed.io
+	signingkey = D911E4AB259CE385
 
 [core]
   editor = nvim
@@ -23,7 +24,7 @@
   dc = diff --cached
   dh1 = diff HEAD~1
   di = diff
-  ds = diff --stat=160,120
+  ds = diff --staged
   remove-tags = "!f() { git tag -l ${1} | xargs -I % echo \"git tag -d % && git push --delete origin %\" | sh; }; f"
   add-tag = !sh -c \"git tag "$1" && git push origin --tags\"
   fa = fetch --all
@@ -38,6 +39,7 @@
   ls = log --author='Sean Williams' --no-merges --stat --pretty=medium
   lsp = !git ls -p
   new = !sh -c 'git log $1@{1}..$1@{0} "$@"'
+  mt = mergetool
   noff = merge --no-ff
   pom = push origin master
   pp = !sh -c \"git fetch -p && git pull --rebase && git pushall\"
@@ -46,8 +48,9 @@
   pushall = !git remote | xargs -n 1 git push
   r = !git l -30
   ra = !git r --all
+  rc = rebase --continue
   slg = stash list --pretty=reflg
-  st = status -s
+  st = status
   show-ignored-files = ls-files . --ignored --exclude-standard --others
   show-untracked-files = ls-files . --exclude-standard --others
   undo = reset --hard
@@ -76,9 +79,10 @@
   keepBackup = false
 
 [pretty]
-  lg = %C(red)%h%C(reset) %C(green)%ci%C(reset) %s %C(bold blue)-- %an%C(reset)%C(yellow)%d%C(reset)
-  reflg = %C(red)%h%C(reset) %C(green)%ci%C(reset) %s %C(bold blue)-- %an%C(reset) %C(yellow)(%gd)%C(reset)
+  lg = %C(red)%h%C(reset) - %C(green)%ci%C(reset) %s %C(bold blue)-- %an%C(reset)%C(yellow)%d%C(reset)
   glg = %C(bold blue)%h%C(reset) - %C(bold green)(%ar)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an <%ae>%C(reset)%C(bold yellow)%d%C(reset)
+  worklog = [%as](%h): %s
+  reflg = %C(red)%h%C(reset) %C(green)%ci%C(reset) %s %C(bold blue)-- %an%C(reset) %C(yellow)(%gd)%C(reset)
 
 [push]
   default = current
@@ -94,3 +98,9 @@
 
 [http]
   sslVerify = false
+[credential]
+	helper = store
+[pull]
+	rebase = true
+[submodule]
+	recurse = true

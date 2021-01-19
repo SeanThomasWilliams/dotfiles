@@ -19,14 +19,6 @@ if exists('g:loaded_neomake')
                 \ 'errorformat': 'Error\ loading\ files\ Error\ parsing %f:\ At\ %l:%c:\ %m'
                 \ }
 
-    let g:neomake_terraform_tffilter_maker = {
-                \ 'exe': 'tffilter',
-                \ 'append_file': 0,
-                \ 'cwd': '%:p:h',
-                \ 'args': args,
-                \ 'errorformat': '%f:%l:%m'
-                \ }
-
     let g:neomake_terraform_tflint_maker = {
                 \ 'exe' : 'tflint',
                 \ 'append_file': 0,
@@ -35,5 +27,5 @@ if exists('g:loaded_neomake')
                 \ 'errorformat': '%+P%f,%p%t%*[^:]:%l %m,%-Q'
                 \ }
 
-    let g:neomake_terraform_enabled_makers = ['terraform_validate', 'tflint', 'tffilter']
+    let g:neomake_terraform_enabled_makers = ['terraform_validate', 'tflint']
 endif

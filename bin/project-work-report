@@ -1,0 +1,256 @@
+#!/usr/bin/env bash
+
+set -eu
+
+# Default timespan
+DAYS=6
+# Taskwarrior filtering
+TASK_TAGS="${TASK_TAGS:-+${PROJECT}}"
+
+if [[ -n ${DEBUG-} ]]; then
+  set -x
+fi
+
+usage(){
+  cat >&2 <<EOF
+Generate a work log for the last ${DAYS} days.
+
+Usage: $0 [-d]
+
+Arguments:
+  -d
+    Number of days (default: ${DAYS})
+  -s
+    Start Date (2020-01-01)
+  -e
+    End Date (2020-02-01)
+  -h
+    Show usage and exit
+
+ENVIRONMENT:
+  PROJECT
+      Name of the project to summarize
+  GIT_REPO_URL_<NAME>
+      For each git repo, specify an environment variable with this prefix
+  TASK_TAGS
+      Filter for taskwarrior tasks. Default: (+${PROJECT:-PROJECT})
+EOF
+}
+
+while getopts ':d:e:s:h' opt; do
+  case "${opt}" in
+    s)
+      START_DATE="${OPTARG}"
+      ;;
+    e)
+      END_DATE="${OPTARG}"
+      ;;
+    d)
+      DAYS="${OPTARG}"
+      ;;
+    h)
+      usage
+      exit 0
+      ;;
+    *)
+      usage
+      exit 1
+      ;;
+  esac
+done
+
+shift $((OPTIND-1))
+
+: "${PROJECT}"
+
+# Set start/end times. Push end date to tomrrow, so we don't cut off what happens today
+if [[ -z ${START_DATE-} ]]; then
+  START_DATE=$(gdate -d "-${DAYS} day" "+%Y-%m-%d")
+fi
+if [[ -z ${END_DATE-} ]]; then
+  END_DATE=$(gdate "+%Y-%m-%d")
+fi
+
+# Start query after midnight (Leaving off 'Z' for UTC/Zulu time)
+# 2020-12-30T00:00:00
+QUERY_START_DATE="${START_DATE}T00:00:00"
+# End query before midnight
+# 2020-12-30T23:59:59
+QUERY_END_DATE="${END_DATE}T23:59:59"
+
+# Setup Output Path
+BASE_DIR="$HOME/anr/${PROJECT}/.worklog"
+mkdir -p "$BASE_DIR"
+WORK_SUMMARY_FILE="$BASE_DIR/project-status.md"
+rm -f "$WORK_SUMMARY_FILE"
+
+read -r -d '' taskawkscript <<'EOF' || true
+BEGIN {
+  WIDTH=100
+}
+function wrap(text, padding_size){
+  padding=sprintf("%*s%s", padding_size, "", "");
+  while (length(text)>WIDTH) {
+      print substr(text,1,WIDTH) "-";
+      text=padding substr(text,WIDTH+1);
+  }
+  print text;
+}
+$1 ~ /^[0-9a-f]{8}$/ {
+  comp=$1;
+  uuid=$2;
+  $1="";
+  $2="";
+  sub("^ *", "");
+  wrap(sprintf("[%s](%s): %s", uuid, comp, $0), 24);
+  next;
+}
+$1 ~ /[0-9]{4}-[0-9]{1,2}/ {
+  comp=$1;
+  $1="";
+  sub("^ *", "");
+  wrap(sprintf("%25s %s", "-", $0), 26);
+  next;
+}
+EOF
+
+read -r -d '' gitawkscript <<'EOF' || true
+BEGIN {
+  WIDTH=100
+}
+function wrap(text, padding_size){
+  padding=sprintf("%*s%s", padding_size, "", "");
+  while (length(text)>WIDTH) {
+      print substr(text,1,WIDTH) "-";
+      text=padding substr(text,WIDTH+1);
+  }
+  print text;
+}
+{ wrap($0, 23); }
+EOF
+
+
+get_task_complete_report_from_export(){
+  echo "### Completed tasks "
+  echo '```'
+  task "${TASK_TAGS}" "(end.after=${START_DATE} and end.before=${QUERY_END_DATE} and status:completed)" export 2> /dev/null |\
+    jq -r '.[] | [(.end | "[", .[0:4], "-", .[4:6], "-", .[6:8], "] - "), .uuid[:8], " - ", .description, " ", ((.annotations // [{"description": ""}]) | .[].description)] | join("")' |\
+    grep -v "Submit project work report" |\
+    sort -r
+  echo '```'
+  echo
+}
+
+get_task_complete_report(){
+  echo "### Completed tasks "
+  echo '```'
+
+  task "${TASK_TAGS}" "(end.after=${QUERY_START_DATE} and end.before=${QUERY_END_DATE} and status:completed)" worklog 2> /dev/null |\
+    tail -n +4 |\
+    ghead -n -2 |\
+    grep -v "Submit project work report" |\
+    gawk "$taskawkscript"
+
+  echo '```'
+  echo
+}
+
+ensure_git_repo(){
+  local repo_dir repo_url
+  repo_dir="$1"
+  repo_url="$2"
+
+  if [[ ! -d "$repo_dir" ]]; then
+    git clone "$repo_url" "$repo_dir"
+  fi
+
+  cd "$repo_dir"
+  git pull >&2
+}
+
+git_repo_log(){
+  local repo_dir repo_url repo_name
+  repo_dir="$1"
+  repo_url="$2"
+  repo_name="$3"
+
+  cd "$repo_dir"
+  GIT_AUTHOR="$(git config user.name)"
+  export GIT_PAGER=cat
+
+  echo >&2 "Checking git repo $repo_name"
+
+  GIT_CHANGES=$(git log \
+    --author="$GIT_AUTHOR" \
+    --pretty=worklog \
+    --after="${START_DATE}" \
+    --before="${QUERY_END_DATE}" |\
+    grep -v -i bump |\
+    grep -v Autocommit || true)
+
+  if [[ -n ${GIT_CHANGES-} ]]; then
+    echo "### Changes to ${repo_name} repo"
+    echo
+    echo '```'
+    echo "$GIT_CHANGES" |\
+      gawk "$gitawkscript"
+    echo '```'
+    echo
+  fi
+}
+
+clean_git_repo_env(){
+  local repo_env
+  repo_env="$1"
+
+  short_repo_name="${repo_env/WORKLOG_GIT_REPO_/}"
+  lower_repo_name="${short_repo_name,,}"
+  echo "${lower_repo_name//_/-}"
+}
+
+git_log_for_env(){
+  repo_name=$(clean_git_repo_env "$repo_env")
+  repo_url="${!repo_env}"
+  repo_dir="$BASE_DIR/$repo_name"
+
+  ensure_git_repo "$repo_dir" "$repo_url"
+  git_repo_log "$repo_dir" "$repo_url" "$repo_name"
+}
+
+get_all_git_logs(){
+  for repo_env in "${!WORKLOG_GIT_REPO_@}"; do
+    git_log_for_env "$repo_env"
+  done
+}
+
+generate_report(){
+  echo "## ${PROJECT^^} Work Summary for ${START_DATE} through ${END_DATE}"
+  echo
+
+  echo "### Overall Summary"
+  echo
+  echo "Summary body"
+  echo
+
+  get_task_complete_report
+
+  get_all_git_logs
+}
+
+render_report(){
+  generate_report | tee "$WORK_SUMMARY_FILE"
+
+  pandoc \
+    --section-divs \
+    --template="$HOME/vimwiki/templates/GitHub.html5" \
+    -s \
+    --highlight-style=pygments \
+    --metadata pagetitle="Project-Status" \
+    -f markdown \
+    -t html \
+    -o "${WORK_SUMMARY_FILE%.*}.html" "$WORK_SUMMARY_FILE"
+
+  open "${WORK_SUMMARY_FILE%.*}.html"
+}
+
+render_report

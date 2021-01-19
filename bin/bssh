@@ -1,15 +1,22 @@
 #!/bin/bash -eu
-# shellcheck disable=SC2016
+# shellcheck disable=SC2016,SC1090
 
 if [[ $# -lt 1 ]]; then
     echo >&2 "SSH to the EC2 Resources for the given AWS CloudFormation Stack or AWS Elastic Beanstalk Environment"
-    echo >&2 "Usage: $0 RESOURCE_NAME"
-    echo >&2 "RESOURCE_NAME: AWS CloudFormation Stack or AWS Elastic Beanstalk Environment Name"
+    echo >&2 "Usage: $0 RESOURCE_NAMES"
+    echo >&2 "RESOURCE_NAMES: AWS CloudFormation Stack or AWS Elastic Beanstalk Environment Name"
     exit 1
 fi
 
 AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-us-gov-west-1}
-RESOURCE_NAME=$1
+RESOURCE_NAMES=("$@")
+
+if [[ ${STAGE} == "lab" && -z "${WORKSPACE-}" ]]; then
+  source_script=source_aws_api_keys.sh
+  if ! aws --region "$AWS_DEFAULT_REGION" sts get-caller-identity &> /dev/null; then
+    source "$(command -v "$source_script")" || (echo >&2 "Cannot source ${source_script}!"; exit 1)
+  fi
+fi
 
 generate_ssh_script(){
   cat <<EOF
@@ -20,7 +27,7 @@ generate_ssh_script(){
     /var/log/eb-activity.log
     /var/log/eb-docker/containers/eb-current-app/*.*
     /var/log/tomcat8/catalina/*.*
-    /one/PLT/plt_latest/tomcat/logs/*.*
+    /var/log/rke/rancher/logs/*.log
   "
   for lf in \$LOG_FILES; do
     export lf
@@ -105,13 +112,22 @@ get_cf_stack_instance_ids(){
     jq -r '.[]'
 }
 
-get_ec2_instance_ids(){
+get_ec2_instance_ids_by_name() {
   local ec2_name
-  ec2_name=$1
+  ec2_name="$1"
+
   aws ec2 describe-instances \
     --filters "Name=tag:Name,Values=${ec2_name}" \
     --query 'Reservations[*].Instances[?State.Name == `running`].InstanceId[]' 2> /dev/null |\
-  jq -r '.[]'
+    jq -r '.[]' |\
+    sort -u
+}
+
+get_all_ec2_instance_ids_by_name(){
+  for ec2_name_tag in "$@"; do
+    get_ec2_instance_ids_by_name "$ec2_name_tag" &
+  done
+  wait
 }
 
 get_stack_instance_ids(){
@@ -125,7 +141,7 @@ get_stack_instance_ids(){
 
 # Whether a beanstalk or CF stack exists
 stack_exists=0
-for instance_id in $(get_stack_instance_ids "$RESOURCE_NAME" | sort); do
+for instance_id in $(get_stack_instance_ids "${RESOURCE_NAMES[@]}" | sort); do
   ssh_to_instance "$instance_id"
   stack_exists=1
 done
@@ -137,6 +153,6 @@ else
   echo >&2 "No CF or EB stack exists... trying matching instances"
 fi
 
-for instance_id in $(get_ec2_instance_ids "$RESOURCE_NAME" | sort); do
+for instance_id in $(get_all_ec2_instance_ids_by_name "${RESOURCE_NAMES[@]}"); do
   ssh_to_instance "$instance_id"
 done

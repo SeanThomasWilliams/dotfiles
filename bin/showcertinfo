@@ -4,7 +4,7 @@ sslinfo(){
   local cert
   cert=${1}
   suffix=${cert##*.}
-  echo >&2 "Information for $cert:"
+  echo "Information for $cert:"
   case "$suffix" in
     p7b)
       openssl pkcs7 -print_certs -in "$cert"
@@ -14,9 +14,13 @@ sslinfo(){
       ;;
     pem|crt)
       openssl x509 -text -noout -in "$cert"
+      echo >&2 "MD5:"
+      openssl x509 -noout -modulus -in "$cert" | openssl md5
       ;;
     key)
       openssl rsa -check -in "$cert"
+      echo >&2 "MD5:"
+      openssl rsa -noout -modulus -in "$cert" | openssl md5
       ;;
     csr)
       openssl req -text -noout -verify -in "$cert"

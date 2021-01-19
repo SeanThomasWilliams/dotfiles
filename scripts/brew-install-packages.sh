@@ -1,32 +1,25 @@
 #!/bin/bash -eu
 
 install_brew(){
+  echo >&2 "Installing brew"
   /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 }
 
-command -v brew || install_brew
+if ! command -v brew &> /dev/null; then
+  install_brew
+fi
 
-cat <<EOF | xargs brew install
-ag
-autojump
-bash-completion@2
-coreutils
-cowsay
-direnv
-fortune
-gcc
-htop
-jq
-kubectl
-npm
-open-completion
-pip-completion
-prettier
-task
-terraform
-tflint
-tmux
-watch
-wget
-yarn
-EOF
+BREW_INSTALLED_PACKAGES="$(brew list)"
+
+brew_install(){
+  local package="$1"
+  if ! echo "$BREW_INSTALLED_PACKAGES" | grep -q "$package"; then
+    brew install "$package"
+  else
+    echo >&2 "Package $package is already installed"
+  fi
+}
+
+while read -r pkg; do
+  brew_install "$pkg"
+done < brew.txt

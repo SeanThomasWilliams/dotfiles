@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# .bashrc -> .bash_profile -> .alias
+# .bashrc -> .bash_profile -> .alias -> .local.alias
 
 # Exit if non-interactive
 [[ -z "$PS1" ]] && return
