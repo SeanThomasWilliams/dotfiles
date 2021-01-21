@@ -351,6 +351,7 @@ if has('autocmd')
     autocmd!
 
     " Filetypes
+    autocmd BufNewFile,BufRead .alias* setlocal ft=sh
     autocmd BufNewFile,BufRead *.config setlocal ft=yaml et ts=2 sw=2 sts=2
     autocmd BufNewFile,BufRead *.j2 setlocal ft=yaml et ts=2 sw=2 sts=2
     autocmd BufNewFile,BufRead *.js setlocal et ts=2 sw=2 sts=2

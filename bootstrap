@@ -1,7 +1,10 @@
-#!/bin/bash -eux
+#!/bin/bash
 
 DIR="$(cd "$(dirname "$0")" && pwd)"
 cd "$DIR"
+
+set -eu
+set -o pipefail
 
 # Darwin/Linux
 UNAME_S=$(uname -s)

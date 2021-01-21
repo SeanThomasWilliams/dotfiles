@@ -79,6 +79,17 @@ load_ansible_settings(){
   fi
 }
 
+load_node_settings(){
+  if ! command -v node &> /dev/null; then
+    return
+  fi
+
+  node_bin=$(dirname "$(readlink -f "$(command -v node)")")
+
+  add_to_path_if_exists "$node_bin"
+  add_to_path_if_exists "$HOME/.npm-packages/bin"
+}
+
 load_golang_settings(){
   # Go Settings
   GOROOT="$HOME/software/go"; export GOROOT
@@ -100,47 +111,36 @@ load_golang_settings(){
   fi
 }
 
-load_history_settings(){
-  ### history
-  shopt -s histappend              # append new history items to .bash_history
-  export HISTCONTROL=ignorespace   # leading space hides commands from history
-  export HISTFILESIZE=10000        # increase history file size (default is 500)
-  export HISTSIZE=${HISTFILESIZE}  # increase history size (default is 500)
-  export PROMPT_COMMAND="history -a; history -n; ${PROMPT_COMMAND}"
+load_java_settings(){
+  local java_cmd java_bin java_path java_home
 
-  # HSTR configuration
-  if command -V hstr &> /dev/null; then
-    alias hh=hstr                    # hh to be alias for hstr
-    export HSTR_CONFIG=hicolor       # get more colors
-
-    # if this is interactive shell, then bind hstr to Ctrl-r (for Vi mode check doc)
-    if [[ $- =~ .*i.* ]]; then
-      bind '"\C-r": "\C-a hstr -- \C-j"'
+  for java_cmd in javac java; do
+    # If there is no java program, try the next one
+    if ! command -v "$java_cmd" &> /dev/null; then
+      continue
     fi
-    # if this is interactive shell, then bind 'kill last command' to Ctrl-x k
-    if [[ $- =~ .*i.* ]]; then
-      bind '"\C-xk": "\C-a hstr -k \C-j"'
-    fi
-  fi
-}
 
-load_lang_settings(){
-  # LANG
-  export LANG=en_us.UTF-8
-  export LC_ALL=en_US.UTF-8
-  export LC_COLLATE="en_US.UTF-8"
-  export LC_CTYPE="en_US.UTF-8"
-  export LC_MESSAGES="en_US.UTF-8"
-  export LC_MONETARY="en_US.UTF-8"
-  export LC_NUMERIC="en_US.UTF-8"
-  export LC_TIME="en_US.UTF-8"
+    java_path=$(readlink -f "$(command -v "$java_cmd")")
+    if [[ -f "${java_path-}" ]]; then
+      # Transform /usr/local/jdk/bin/javac -> /usr/local/jdk/bin
+      java_bin=$(dirname "$java_path")
+      # Transform /usr/local/jdk/bin -> /usr/local/jdk
+      java_home=$(dirname "$java_bin")
+
+      if [[ -d "${java_bin-}" && -d "${java_home-}" ]]; then
+        add_to_path_if_exists "$java_bin"
+        JAVA_HOME="$java_home"; export JAVA_HOME
+        return # Stop after the first success
+      fi
+    fi
+  done
 }
 
 fix_path_ordering(){
   local sorted_path
+
   sorted_path=$(echo "${PATH}" |\
-                  tr ':' '\n' |\
-                  awk '{ print length, $0 }' |\
+                  awk 'BEGIN { RS=":" } length > 1 { print length, $0 }' |\
                   sort -rn |\
                   cut -d' ' -f2 |\
                   paste -s -d: -)
@@ -151,31 +151,21 @@ export -f fix_path_ordering
 add_to_path_if_exists(){
   local path_dir
   path_dir="$1"
+
   if [[ -d "$path_dir" ]]; then
-    if ! echo "${PATH}" | grep -q "${path_dir}:"; then
+    if ! echo "${PATH}" | grep -wq "${path_dir}"; then
       PATH="${path_dir}:${PATH}"; export PATH
     fi
   fi
 }
 
 load_path_settings(){
-  local java_home_options
-  java_home_options="/etc/alternatives/java_sdk /usr/local/opt/openjdk"
-
-  for jh in $java_home_options; do
-    if [[ -d "$jh" ]]; then
-      JAVA_HOME="$jh"; export JAVA_HOME
-      add_to_path_if_exists "$JAVA_HOME/bin"
-    fi
-  done
-
   # PATH Options. Reverse order of importance since they are prepended.
   PATH_PARTS=(
     /usr/local/bin
     /usr/local/opt/libpq/bin
     "$HOME/bin/Sencha/Cmd"
     "$HOME/.local/bin"
-    "$HOME/.npm-packages/bin"
     "$HOME/anaconda3/bin"
     "$HOME/bin"
   )
@@ -186,6 +176,12 @@ load_path_settings(){
 
   # Shorten prompt
   export PROMPT_DIRTRIM=3
+
+  # Load language settings
+  load_python_settings
+  load_golang_settings
+  load_node_settings
+  load_java_settings
 }
 
 load_alias_settings(){
@@ -256,6 +252,43 @@ load_alias_settings(){
   alias remake='recursive_make'
 }
 
+load_history_settings(){
+  ### history
+  shopt -s histappend              # append new history items to .bash_history
+  export HISTCONTROL=ignorespace   # leading space hides commands from history
+  export HISTFILESIZE=10000        # increase history file size (default is 500)
+  export HISTSIZE=${HISTFILESIZE}  # increase history size (default is 500)
+  export PROMPT_COMMAND="history -a; history -n; ${PROMPT_COMMAND}"
+
+  # HSTR configuration
+  if command -V hstr &> /dev/null; then
+    alias hh=hstr                    # hh to be alias for hstr
+    export HSTR_CONFIG=hicolor       # get more colors
+
+    # if this is interactive shell, then bind hstr to Ctrl-r (for Vi mode check doc)
+    if [[ $- =~ .*i.* ]]; then
+      bind '"\C-r": "\C-a hstr -- \C-j"'
+    fi
+    # if this is interactive shell, then bind 'kill last command' to Ctrl-x k
+    if [[ $- =~ .*i.* ]]; then
+      bind '"\C-xk": "\C-a hstr -k \C-j"'
+    fi
+  fi
+}
+
+load_lang_settings(){
+  # LANG
+  export LANG=en_us.UTF-8
+  export LC_ALL=en_US.UTF-8
+  export LC_COLLATE="en_US.UTF-8"
+  export LC_CTYPE="en_US.UTF-8"
+  export LC_MESSAGES="en_US.UTF-8"
+  export LC_MONETARY="en_US.UTF-8"
+  export LC_NUMERIC="en_US.UTF-8"
+  export LC_TIME="en_US.UTF-8"
+}
+
+
 load_extra_source_files(){
   ### source workstation-specific
   SOURCEFILES=(
@@ -294,13 +327,13 @@ load_ps1_settings(){
 
 load_shell_settings(){
   unset MAILCHECK # Don't check mail when opening terminal.
+  # Get OS Arch ('linux' or 'darwin')
+  UNAME_S=$(uname -s | tr '[:upper:]' '[:lower:]')
 }
 
 load_shell_settings
 load_path_settings
 load_session_manager_settings
-load_python_settings
-load_golang_settings
 load_editor_settings
 load_history_settings
 load_lang_settings
