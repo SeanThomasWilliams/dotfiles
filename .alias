@@ -9,10 +9,18 @@ __vte_prompt_command() { true; }
 load_session_manager_settings(){
   ### session managers
   screenreattach(){
-    if [[ $1 == "ls" ]]; then
-      tmux list-sessions
+    if [[ $# -lt 1 ]]; then
+      session_name=$(tmux list-sessions -F '#{session_name}' | head -n 1)
     else
-      tmux -u -2 new -A -s "${1:-tmux}"
+      session_name="$1"
+    fi
+
+    if [[ $session_name == ls ]]; then
+      tmux list-sessions
+    elif [[ -f $HOME/.tmuxp/$session_name.yaml ]]; then
+      tmuxp load -y -2 "$session_name"
+    else
+      tmux -u -2 new -A -s "${session_name}"
     fi
   }
   export -f screenreattach
