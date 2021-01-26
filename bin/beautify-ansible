@@ -1,0 +1,39 @@
+#!/usr/bin/env python
+
+import sys
+from ruamel.yaml import YAML
+
+comments = True
+parser_type = 'rt'
+
+yaml = YAML(typ=parser_type, pure=True)
+yaml.default_flow_style = False
+yaml.explicit_start = True
+yaml.indent(mapping=2, sequence=4, offset=2)
+yaml.width = 1000
+
+
+def recursive_sort_mappings(s):
+    if isinstance(s, list):
+        for elem in s:
+            recursive_sort_mappings(elem)
+        return
+    if not isinstance(s, dict):
+        return
+    for key in sorted(s, reverse=True):
+        value = s.pop(key)
+        recursive_sort_mappings(value)
+        s.insert(0, key, value)
+
+
+def main():
+    """Prettify the YAML"""
+    for filename in sys.argv[1:]:
+        data = None
+        with open(filename, 'r') as fil:
+            data = yaml.load(fil)
+        with open(filename, 'w') as fil:
+            yaml.dump(data, fil)
+
+
+main()

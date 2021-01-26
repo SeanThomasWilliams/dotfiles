@@ -1,0 +1,103 @@
+#!/usr/bin/env bash
+
+if [[ -n ${DEBUG-} ]]; then
+  set -x
+fi
+set -eu -o pipefail
+
+DIR="$(cd "$(dirname "$0")" && pwd)"
+PATH="$DIR:$PATH"
+export PATH
+COMMAND=(/bin/bash)
+
+usage(){
+  cat >&2 <<EOF
+Usage: $0 [options] COMMAND (default: ${COMMAND[@]}})
+
+OPTIONS
+  -a
+      Pod app name
+  -n
+      Pod Namespace
+  -h
+      Display this usage message and exit
+
+ENVIRONMENT VARIABLES
+  KUBECONFIG
+      Path to Kubernetes cluster config file
+
+EOF
+}
+
+# Parse arguments
+while getopts ":a:n:h" opt; do
+  case "${opt}" in
+    a)
+      APP="${OPTARG}"
+      ;;
+    n)
+      NAMESPACE="${OPTARG}"
+      ;;
+    h)
+      usage
+      exit
+      ;;
+    \?)
+      usage
+      exit 1
+      ;;
+  esac
+done
+
+if [[ ${OPTIND} -eq 1 ]]; then
+  usage
+  exit 1
+fi
+
+shift $((OPTIND -1))
+
+if [[ ${#@} -gt 0 ]]; then
+  COMMAND=("$@")
+fi
+
+: "${APP}"
+: "${KUBECONFIG}"
+
+if [[ -z ${NAMESPACE-} ]]; then
+  NAMESPACE=${APP/-*/}
+fi
+
+: "${NAMESPACE}"
+
+list_app_names(){
+  echo >&2 "Valid app selectors in namespace $NAMESPACE: "
+  kubectl get -n "$NAMESPACE" pods -o json |\
+    jq -r '.items[].metadata.labels | (.app // ."app.kubernetes.io/name")' |\
+    sort -u >&2
+}
+
+get_pod_names(){
+  local pod_names
+  pod_names=$(kubectl get -n "$NAMESPACE" pods -l app="${APP}" -o name)
+  if [[ -z ${pod_names-} ]]; then
+    pod_names=$(kubectl get -n "$NAMESPACE" pods -l app.kubernetes.io/name="${APP}" -o name)
+  fi
+  echo "$pod_names"
+}
+
+if [[ -z ${APP-} ]]; then
+  list_app_names
+  exit 0
+fi
+
+pod_names=$(get_pod_names)
+
+if [[ -z ${pod_names-} ]]; then
+  echo >&2 "No matching pod found!"
+  list_app_names
+  exit 1
+fi
+
+for pod_name in $pod_names; do
+  kubectl exec -n "$NAMESPACE" -it "$pod_name" -- "${COMMAND[@]}"
+done

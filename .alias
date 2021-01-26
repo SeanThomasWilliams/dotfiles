@@ -329,6 +329,13 @@ load_shell_settings(){
   unset MAILCHECK # Don't check mail when opening terminal.
   # Get OS Arch ('linux' or 'darwin')
   UNAME_S=$(uname -s | tr '[:upper:]' '[:lower:]')
+
+  if [[ "$UNAME_S" == darwin ]]; then
+    readlink(){
+      greadlink "$@"
+    }
+    export -f readlink
+  fi
 }
 
 load_shell_settings

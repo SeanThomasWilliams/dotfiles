@@ -1,0 +1,17 @@
+#!/usr/bin/env python
+
+import json
+import sys
+
+def main():
+    """Prettify the JSON"""
+    for filename in sys.argv[1:]:
+        data = None
+        with open(filename, 'r') as fil:
+            data = json.load(fil)
+        with open(filename, 'w') as fil:
+            json.dump(data, fil, indent=2, sort_keys=True)
+            fil.write("\n")  # Add newline, since JSON formatter doesn't
+
+
+main()

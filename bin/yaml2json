@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# Convert JSON file to YAML file.
+
+infile="${1:-/dev/stdin}"
+outfile="${2:-/dev/stdout}"
+
+python3 -c 'import sys, yaml, json; json.dump(yaml.safe_load(sys.stdin), sys.stdout, indent=2)' \
+    < "$infile" \
+    > "$outfile"

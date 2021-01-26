@@ -1,0 +1,177 @@
+#!/usr/bin/env bash
+
+if [[ -n ${DEBUG-} ]]; then
+  set -x
+fi
+set -eu -o pipefail
+
+DIR="$(cd "$(dirname "$0")" && pwd)"
+PATH="$DIR:$PATH"
+export PATH
+EXTRA_ARGS=()
+SINCE="1m"
+esc=$(printf '\033')
+
+usage(){
+  cat >&2 <<EOF
+Usage: $0 [options] COMMAND (default: ${COMMAND[@]}})
+
+OPTIONS
+  -a
+      Pod app name
+  -c
+      Pod container name
+  -p
+      Pod name
+  -n
+      Pod Namespace
+  -f
+      Follow logs
+  -s
+      Since duration (60s, 5m, 1h, etc)
+  -h
+      Display this usage message and exit
+
+ENVIRONMENT VARIABLES
+  KUBECONFIG
+      Path to Kubernetes cluster config file
+
+EOF
+}
+
+# Parse arguments
+while getopts ":a:c:fn:p:s:h" opt; do
+  case "${opt}" in
+    a)
+      APP="${OPTARG}"
+      ;;
+    c)
+      CONTAINER="${OPTARG}"
+      ;;
+    n)
+      NAMESPACE="${OPTARG}"
+      ;;
+    p)
+      POD_NAME="${OPTARG}"
+      ;;
+    s)
+      SINCE="${OPTARG}"
+      ;;
+    f)
+      EXTRA_ARGS+=(-f)
+      ;;
+    h)
+      usage
+      exit
+      ;;
+    \?)
+      usage
+      exit 1
+      ;;
+  esac
+done
+
+if [[ ${OPTIND} -eq 1 ]]; then
+  usage
+  exit 1
+fi
+
+shift $((OPTIND -1))
+
+if [[ ${#@} -gt 0 ]]; then
+  COMMAND=("$@")
+fi
+
+: "${KUBECONFIG}"
+
+if [[ -z ${NAMESPACE-} ]]; then
+  if [[ -z ${APP} ]]; then
+    NAMESPACE=${APP/-*/}
+  fi
+fi
+
+list_app_names(){
+  echo >&2 "Valid app selectors in namespace $NAMESPACE: "
+  kubectl get -n "$NAMESPACE" pods -o json |\
+    jq -r '.items[].metadata.labels | (.app // ."app.kubernetes.io/name")' |\
+    grep -v 'null' |\
+    sort -u >&2
+}
+
+list_pod_names(){
+  echo >&2 "Valid pod names in namespace $NAMESPACE: "
+  kubectl get -n "$NAMESPACE" pods -o name | sed 's#pod/##g'
+}
+
+list_selectors(){
+  list_app_names
+  echo >&2
+  list_pod_names
+}
+
+get_pod_names_by_app(){
+  local pod_names
+  pod_names=$(kubectl get -n "$NAMESPACE" pods -l app="${APP}" -o name)
+  if [[ -z ${pod_names-} ]]; then
+    pod_names=$(kubectl get -n "$NAMESPACE" pods -l app.kubernetes.io/name="${APP}" -o name)
+  fi
+  echo "$pod_names" | sed 's#pod/##g'
+}
+
+if [[ -z ${APP-} && -z ${POD_NAME-} ]]; then
+  list_selectors
+  exit 0
+fi
+
+get_pod_container_logs(){
+  local pod_name container_name
+  pod_name="$1"
+  container_name="$2"
+
+  (kubectl logs -n "$NAMESPACE" "$pod_name" -c "$container_name" --since="$SINCE" "${EXTRA_ARGS[@]}" |\
+    sed -e "s#^#${esc}[1m${container_name}${esc}[0m: #") &
+}
+
+get_pod_logs(){
+  local pod_name
+  pod_name="$1"
+
+  kubectl get -n "$NAMESPACE" pod "$pod_name" 1> /dev/null || (list_pod_names && exit 1)
+
+  pod_ip=$(kubectl get -n "$NAMESPACE" pod "$pod_name" -o jsonpath='{.status.podIP}')
+  echo >&2 "Fetching logs for pod: $pod_name with ip: ${pod_ip-}"
+  if [[ -z ${CONTAINER-} ]]; then
+    container_list=$(kubectl get -n "$NAMESPACE" pod "$pod_name" -o go-template=$'{{range .spec.containers}}{{.name}}\n{{end}}')
+    if [[ -z ${container_list-} ]]; then
+      echo >&2 "No container name specified or discovered for $pod_name"
+      exit 1
+    fi
+    echo >&2 -e "Pod $pod_name has containers: ${container_list//$'\n'/ }"
+    for container_name in $container_list; do
+      get_pod_container_logs "$pod_name" "$container_name"
+    done
+  else
+    get_pod_container_logs "$pod_name" "$CONTAINER"
+  fi
+  wait
+}
+
+get_logs_by_app(){
+  pod_names=$(get_pod_names_by_app)
+
+  if [[ -z ${pod_names-} ]]; then
+    echo >&2 "No matching pod found!"
+    list_app_names
+    exit 1
+  fi
+
+  for pod_name in $pod_names; do
+    get_pod_logs "$pod_name"
+  done
+}
+
+if [[ -n ${POD_NAME-} ]]; then
+  get_pod_logs "$POD_NAME"
+else
+  get_logs_by_app
+fi

@@ -1,0 +1,81 @@
+#!/bin/bash -eu
+# shellcheck disable=SC2068
+
+usage(){
+  cat >&2 <<EOF
+Run a temporary docker container and clean-up
+
+Usage: $0 [-s <SHELL>] [-m <MOUNT_PATH>] [-i] [-h] <CONTAINER> <ARGS>
+
+Arguments:
+  -i
+    Interactive session
+  -p PORT
+    Port to expose
+  -s SHELL
+    Docker shell for interactive terminal
+  -m MOUNT_PATH
+    Local path to mount
+  -u
+    Run as local user
+  -h
+    Show usage and exit
+EOF
+}
+
+declare -a DOCKER_OPTS
+DOCKER_SHELL="/bin/bash"
+DOCKER_OPTS+=("--init" "--rm" "-i" "-t")
+INTERACTIVE=0
+USER_ID=$(id -u)
+GROUP_ID=$(id -g)
+
+while getopts ':ip:s:uv:h' opt; do
+  case "${opt}" in
+    i)
+      INTERACTIVE=1
+      ;;
+    p)
+      DOCKER_OPTS+=("-p" "${OPTARG}:${OPTARG}")
+      ;;
+    v)
+      MOUNT_PATH="${OPTARG}"
+      ;;
+    s)
+      DOCKER_SHELL="${OPTARG}"
+      ;;
+    u)
+      DOCKER_OPTS+=("-u" "$USER_ID:$GROUP_ID")
+      ;;
+    h)
+      usage
+      exit 0
+      ;;
+    *)
+      usage
+      exit 1
+      ;;
+  esac
+done
+
+shift $((OPTIND-1))
+
+if [[ $INTERACTIVE == 1 ]]; then
+  DOCKER_OPTS+=("--entrypoint" "$DOCKER_SHELL")
+fi
+
+if [[ -n ${MOUNT_PATH-} ]]; then
+  if [[ ${MOUNT_PATH} =~ : ]]; then
+    DOCKER_OPTS+=("-v" "$MOUNT_PATH")
+  else
+    DOCKER_OPTS+=("-v" "$PWD:$MOUNT_PATH")
+  fi
+fi
+
+if [[ $# -lt 1 ]]; then
+  usage
+  exit 1
+fi
+
+echo >&2 docker run ${DOCKER_OPTS[@]} $@
+docker run ${DOCKER_OPTS[@]} $@
