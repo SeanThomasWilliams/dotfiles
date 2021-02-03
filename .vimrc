@@ -369,6 +369,7 @@ if has('autocmd')
     autocmd FileType make setlocal noet ts=4 sw=4 sts=4 foldmethod=marker foldlevel=1
     autocmd FileType make nnoremap <silent> <leader>d :sp<CR> <c-]>
     autocmd FileType markdown setlocal wrap spell spelllang=en_us
+"    autocmd Filetype yaml setlocal makeprg=kube-linter\ lint\ %
   augroup end
 
   augroup Python
@@ -759,6 +760,8 @@ let g:neoformat_only_msg_on_error = 1
 
 " {{{ Neomake options
 :highlight NeomakeSign guifg=Yellow guibg=#dc322f gui=bold
+let g:neomake_makeprg_buffer_output = 0
+"let g:neomake_open_list = 1
 let g:neomake_python_enabled_makers = ['pycodestyle', 'flake8', 'python']
 let g:neomake_javascript_enabled_makers = ['eslint', 'jshint']
 let g:neomake_dockerfile_enabled_makers = []

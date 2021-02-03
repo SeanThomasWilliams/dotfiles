@@ -1,30 +1,13 @@
 #!/usr/bin/env bash
 # shellcheck disable=SC1090,SC2086,SC2139,SC2142
 
-# .bashrc -> .bash_profile -> .alias
+# .bash_profile -> .alias
 
 # Workaround
 __vte_prompt_command() { true; }
 
 load_session_manager_settings(){
   ### session managers
-  screenreattach(){
-    if [[ $# -lt 1 ]]; then
-      session_name=$(tmux list-sessions -F '#{session_name}' | head -n 1)
-    else
-      session_name="$1"
-    fi
-
-    if [[ $session_name == ls ]]; then
-      tmux list-sessions
-    elif [[ -f $HOME/.tmuxp/$session_name.yaml ]]; then
-      tmuxp load -y -2 "$session_name"
-    else
-      tmux -u -2 new -A -s "${session_name}"
-    fi
-  }
-  export -f screenreattach
-  alias sr="screenreattach"
 
   # custom session manager settings
   alias htop="TERM=screen htop"
@@ -51,11 +34,6 @@ load_editor_settings(){
 
   export PAGER="less"
   export LESS="-FRSX"
-
-  vimdirdiff(){
-    $EDITOR -c "DirDiff $1 $2"
-  }
-  export -f vimdirdiff
 }
 
 load_python_settings(){
@@ -92,9 +70,9 @@ load_node_settings(){
 
 load_golang_settings(){
   # Go Settings
-  GOROOT="$HOME/software/go"; export GOROOT
-  GOPATH="$HOME/gocode"; export GOPATH
-  GOBIN="$GOPATH/bin"; export GOBIN
+  GOROOT="$HOME/software/go"
+  GOPATH="$HOME/gocode"
+  GOBIN="$GOPATH/bin"
 
   # PATH Options. Reverse order of importance since they are prepended.
   PATH_PARTS=(
@@ -107,6 +85,9 @@ load_golang_settings(){
   done
 
   if command -v go &> /dev/null; then
+    export GOROOT
+    export GOPATH
+    export GOBIN
     export GO111MODULE=on
   fi
 }
@@ -146,7 +127,6 @@ fix_path_ordering(){
                   paste -s -d: -)
   PATH="${sorted_path}"; export PATH
 }
-export -f fix_path_ordering
 
 add_to_path_if_exists(){
   local path_dir
@@ -154,9 +134,12 @@ add_to_path_if_exists(){
 
   if [[ -d "$path_dir" ]]; then
     if ! echo "${PATH}" | grep -wq "${path_dir}"; then
-      PATH="${path_dir}:${PATH}"; export PATH
+      PATH="${path_dir}:${PATH}";
+      export PATH
     fi
   fi
+
+  fix_path_ordering
 }
 
 load_path_settings(){
@@ -219,37 +202,18 @@ load_alias_settings(){
   command -v direnv &> /dev/null && eval "$(direnv hook bash)"
 
   unalias remake gmake remake &> /dev/null
+
   for make_prg in remake gmake make; do
     if command -v "$make_prg" &> /dev/null; then
       MAKE_PRG=$(command -v "$make_prg")
+      export MAKE_PRG
       break
     fi
   done
 
-  # Recursive Makefile
-  recursive_make(){
-    if [[ -f Makefile ]]; then
-      "$MAKE_PRG" "$@"
-    else
-      base_dir=$(git rev-parse --show-toplevel)
-      cur_dir=$(pwd)
-      until test -f "$cur_dir/Makefile"; do
-        # Hit the base directory
-        if [[ $cur_dir == $base_dir ]]; then
-          break
-        fi
-        cur_dir=$(dirname "$cur_dir")
-      done
-
-      # Run Make
-      "$MAKE_PRG" -C "$cur_dir" "$@"
-    fi
-  }
-  export -f recursive_make
-
-  alias make='recursive_make'
-  alias gmake='recursive_make'
-  alias remake='recursive_make'
+  alias make='make'
+  alias gmake='make'
+  alias remake='make'
 }
 
 load_history_settings(){
@@ -314,7 +278,8 @@ load_extra_source_files(){
 }
 
 load_ps1_settings(){
-  if [[ -z "${PS1-}" ]]; then
+  # Check if PS1 is set (interactive shell)
+  if [[ -z ${PS1-} ]]; then
     return
   fi
 
@@ -328,13 +293,9 @@ load_ps1_settings(){
 load_shell_settings(){
   unset MAILCHECK # Don't check mail when opening terminal.
   # Get OS Arch ('linux' or 'darwin')
-  UNAME_S=$(uname -s | tr '[:upper:]' '[:lower:]')
-
-  if [[ "$UNAME_S" == darwin ]]; then
-    readlink(){
-      greadlink "$@"
-    }
-    export -f readlink
+  if [[ -z ${UNAME_S-} ]]; then
+    UNAME_S=$(uname -s | tr '[:upper:]' '[:lower:]')
+    export UNAME_S
   fi
 }
 

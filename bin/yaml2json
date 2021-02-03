@@ -1,10 +1,19 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
+IFS=$'\n\t'
 
 # Convert JSON file to YAML file.
 
-infile="${1:-/dev/stdin}"
-outfile="${2:-/dev/stdout}"
+infile=${1:-/dev/stdin}
+outfile=${2:-/dev/stdout}
 
-python3 -c 'import sys, yaml, json; json.dump(yaml.safe_load(sys.stdin), sys.stdout, indent=2)' \
-    < "$infile" \
-    > "$outfile"
+make_python_command(){
+cat <<EOF
+import sys, yaml, json
+dictionaries = yaml.load_all(sys.stdin, Loader=yaml.FullLoader)
+for item in dictionaries:
+  json.dump(item, sys.stdout, indent=2)
+EOF
+}
+
+python3 -c "$(make_python_command)" < "$infile" > "$outfile"

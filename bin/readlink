@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+# Remove script directory from PATH
+PATH=$(echo "$PATH" | sed "s#^${SCRIPT_DIR}:##;s#:${SCRIPT_DIR}:#:#;s#:${SCRIPT_DIR}\$##")
+
+if [[ -z ${UNAME_S-} ]]; then
+  UNAME_S=$(uname -s | tr '[:upper:]' '[:lower:]')
+fi
+
+if [[ $UNAME_S == darwin ]]; then
+  greadlink "$@"
+else
+  readlink "$@"
+fi

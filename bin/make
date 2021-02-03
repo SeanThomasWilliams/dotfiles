@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+# Remove script directory from PATH
+PATH=$(echo "$PATH" | sed "s#^${SCRIPT_DIR}:##;s#:${SCRIPT_DIR}:#:#;s#:${SCRIPT_DIR}\$##")
+
+if [[ -z ${MAKE_PRG-} ]]; then
+  unalias remake gmake remake &> /dev/null
+  for make_prg in remake gmake make; do
+    if command -v "$make_prg" &> /dev/null; then
+      MAKE_PRG=$(command -v "$make_prg")
+      export MAKE_PRG
+      break
+    fi
+  done
+fi
+
+if [ -f Makefile ]; then
+  "$MAKE_PRG" "$@"
+else
+  cur_dir=$(pwd)
+  base_dir=$(git rev-parse --show-toplevel)
+
+  if [[ -d ${base_dir-} ]]; then
+    until test -f "$cur_dir/Makefile"; do
+      # Hit the base directory
+      if [ "$cur_dir" == "$base_dir" ]; then
+        break
+      fi
+      cur_dir=$(dirname "$cur_dir")
+    done
+  fi
+
+  # Run Make
+  "$MAKE_PRG" -C "$cur_dir" "$@"
+fi

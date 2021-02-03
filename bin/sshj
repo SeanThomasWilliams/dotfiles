@@ -1,0 +1,50 @@
+#!/bin/bash -eu
+
+usage(){
+  echo >&2 "Usage: SSH_PROXY_HOST=host SSH_USER=ec2-user $0 <TARGET_HOST> [<host args...>]"
+  echo >&2
+  echo >&2 "Environment Variables:"
+  echo >&2 "SSH_PROXY_HOST: SSH host configured in $HOME/.ssh/config, used as a jump box"
+  echo >&2 "SSH_KEY: Name of the SSH key file located in $HOME/.ssh/. Default: $HOME/.ssh/\${SSH_PROXY_HOST}app.pem"
+  echo >&2 "SSH_USER: SSH user account for the TARGET_HOST"
+  echo >&2
+  echo >&2 "Args:"
+  echo >&2 "TARGET_HOST: Private IP of the target host. Usage: $0 host or $0 user@host"
+  echo >&2 "Host Args (List, Optional): Optional list of arguments to pass to the SSH command."
+}
+
+populate_args(){
+  TARGET_HOST=${1-}
+
+  # Check TARGET_HOST for user@host form
+  IFS=" " read -r -a target_host_split <<< "${TARGET_HOST//@/ }"
+
+  if [[ "${#target_host_split[@]}" -eq 2 ]]; then
+    SSH_USER="${target_host_split[0]}"
+    TARGET_HOST="${target_host_split[1]}"
+  fi
+
+  if [[ -z ${SSH_PROXY_HOST-} || -z ${TARGET_HOST-} ]]; then
+    usage
+    exit 1
+  fi
+
+  SSH_KEY=${SSH_KEY:-${SSH_PROXY_HOST}app.pem}
+  SSH_KEY_FILE="${SSH_KEY_FILE:-$HOME/.ssh/${SSH_KEY}}"
+  if [[ ! -f ${SSH_KEY_FILE} ]]; then
+    echo >&2 "Unable to read SSH key file: ${SSH_KEY_FILE}"
+    usage
+    exit 1
+  fi
+
+  SSH_USER=${SSH_USER:-ec2-user}
+}
+
+populate_args "$@"
+
+echo >&2 "Connecting to ${SSH_USER}@${TARGET_HOST} using jumpbox ${SSH_PROXY_HOST} and key ${SSH_KEY_FILE}..."
+
+ssh \
+    -o "ProxyCommand ssh -W %h:%p ${SSH_PROXY_HOST}" \
+    -i "${SSH_KEY_FILE}" \
+    "${SSH_USER}@${TARGET_HOST}" "${@:2}"

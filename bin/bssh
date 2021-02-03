@@ -9,7 +9,20 @@ if [[ $# -lt 1 ]]; then
 fi
 
 AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-us-gov-west-1}
-RESOURCE_NAMES=("$@")
+RESOURCE_NAMES=()
+
+while [[ -n ${1-} ]]; do
+  if [[ $1 == '--' ]]; then
+    shift
+    break
+  fi
+  RESOURCE_NAMES+=("$1")
+  shift
+done
+
+if [[ $# -gt 0 ]]; then
+  REMOTE_COMMAND=(sudo -E "$@")
+fi
 
 if [[ ${STAGE} == "lab" && -z "${WORKSPACE-}" ]]; then
   source_script=source_aws_api_keys.sh
@@ -19,6 +32,11 @@ if [[ ${STAGE} == "lab" && -z "${WORKSPACE-}" ]]; then
 fi
 
 generate_ssh_script(){
+  if [[ -n ${REMOTE_COMMAND-} ]]; then
+    echo "${REMOTE_COMMAND[@]}"
+    return
+  fi
+
   cat <<EOF
   LOG_FILES="
     /var/log/cloud-init-output.log

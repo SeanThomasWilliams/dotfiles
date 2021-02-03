@@ -1,7 +1,7 @@
 [user]
   name = Sean Williams
   email = sean@xeed.io
-	signingkey = D911E4AB259CE385
+  signingkey = D911E4AB259CE385
 
 [core]
   editor = nvim
@@ -99,8 +99,8 @@
 [http]
   sslVerify = false
 [credential]
-	helper = store
+  helper = store
 [pull]
-	rebase = true
+  rebase = true
 [submodule]
-	recurse = true
+  recurse = true
