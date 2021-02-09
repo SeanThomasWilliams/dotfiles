@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-
-set -eu
+set -euo pipefail
+IFS=$'\n\t'
 
 # Default timespan
 DAYS=6
@@ -129,18 +129,6 @@ function wrap(text, padding_size){
 { wrap($0, 23); }
 EOF
 
-
-get_task_complete_report_from_export(){
-  echo "### Completed tasks "
-  echo '```'
-  task "${TASK_TAGS}" "(end.after=${START_DATE} and end.before=${QUERY_END_DATE} and status:completed)" export 2> /dev/null |\
-    jq -r '.[] | [(.end | "[", .[0:4], "-", .[4:6], "-", .[6:8], "] - "), .uuid[:8], " - ", .description, " ", ((.annotations // [{"description": ""}]) | .[].description)] | join("")' |\
-    grep -v "Submit project work report" |\
-    sort -r
-  echo '```'
-  echo
-}
-
 get_task_complete_report(){
   echo "### Completed tasks "
   echo '```'
@@ -185,8 +173,7 @@ git_repo_log(){
     --pretty=worklog \
     --after="${START_DATE}" \
     --before="${QUERY_END_DATE}" |\
-    grep -v -i bump |\
-    grep -v Autocommit || true)
+    grep -v -i -E "bump|autocommit" || true)
 
   if [[ -n ${GIT_CHANGES-} ]]; then
     echo "### Changes to ${repo_name} repo"
