@@ -18,7 +18,7 @@ _make_cache_makefile_output(){
   fi
 
   # Delete cache older than the bash-completion script
-  find "$PWD" -type f -name ".Makefile.cache" -maxdepth 1 -not -newer "${BASH_SOURCE[0]}" -delete
+  find "$PWD" -maxdepth 1 -type f -name ".Makefile.cache" -not -newer "${BASH_SOURCE[0]}" -delete
 
   # Check if we should use the cache
   if [[ -f "$MAKEFILE_MD5" && -f "$MAKEFILE_CACHE" ]]; then
