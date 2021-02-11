@@ -29,7 +29,7 @@ _make_cache_makefile_output(){
 
   # Populate the cache
   if [[ $use_cache -eq 0 ]]; then
-    echo >&2 -e "\nRepopulating cache..."
+    # echo >&2 -e "\nRepopulating cache..."
     # Cache output
     $1 -npq __BASH_MAKE_COMPLETION__=1 "${makef[@]}" "${makef_dir[@]}" .DEFAULT 2> /dev/null |\
       grep -v "FORCE" > "$MAKEFILE_CACHE"
