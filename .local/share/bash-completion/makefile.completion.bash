@@ -1,44 +1,64 @@
 # bash completion for GNU make                             -*- shell-script -*-
 
-_make_cache_makefile_output(){
-  local use_cache
-  use_cache=0
+update_cache(){
+  local makefile makefile_md5 makefile_cache makefile_dir makefile_list
 
-  MAKEFILE="$PWD/Makefile"
-  MAKEFILE_MD5="$PWD/.Makefile.md5sum"
-  MAKEFILE_CACHE="$PWD/.Makefile.cache"
+  makefile_dir="${1:-.}"
 
-  if [[ ! -f "$MAKEFILE" ]]; then
+  if [[ -d "${makefile_dir}" ]]; then
+    cd "${makefile_dir}"
+  fi
+
+  makefile="$PWD/Makefile" # Makefile path
+  makefile_md5="$PWD/.Makefile.md5sum" # Makefile(s) md5sum
+  makefile_cache="$PWD/.Makefile.cache" # Autocompletion cache
+
+  if [[ ! -f "$makefile" ]]; then
+    echo >&2 "Can't find ${makefile}..."
     return
   fi
 
-  MAKEFILES=("$MAKEFILE")
+  # Cache output
+  make -npq __BASH_MAKE_COMPLETION__=1 .DEFAULT 2> /dev/null |\
+    grep -v "FORCE" > "${makefile_cache}.tmp" && mv "${makefile_cache}.tmp" "${makefile_cache}"
+
+  makefile_list=("$makefile")
   if compgen -G "$PWD"/*.mk &> /dev/null; then
-    MAKEFILES+=("$PWD"/*.mk)
+    makefile_list+=("$PWD"/*.mk)
   fi
 
-  # Delete cache older than the bash-completion script
-  find "$PWD" -maxdepth 1 -type f -name ".Makefile.cache" -not -newer "${BASH_SOURCE[0]}" -delete
+  # Make new md5
+  md5sum "${makefile_list[@]}" > "$makefile_md5"
+}
 
-  # Check if we should use the cache
-  if [[ -f "$MAKEFILE_MD5" && -f "$MAKEFILE_CACHE" ]]; then
-    if md5sum -c "$MAKEFILE_MD5" &> /dev/null; then
-      use_cache=1
+_make_cache_makefile_output(){
+  local makefile makefile_md5 makefile_cache makefile_dir
+
+  makefile_dir="${makef_dir[1]}"
+  if [[ -d "${makefile_dir}" ]]; then
+    cd "${makefile_dir}"
+  fi
+
+  makefile="$PWD/Makefile" # Makefile path
+  makefile_md5="$PWD/.Makefile.md5sum" # Makefile(s) md5sum
+  makefile_cache="$PWD/.Makefile.cache" # Autocompletion cache
+
+  if [[ ! -f "$makefile" ]]; then
+    echo >&2 "Can't find ${makefile}..."
+    return
+  fi
+
+  # Check if we have a valid cache
+  if [[ -f "$makefile_md5" && -f "$makefile_cache" ]]; then
+    if ! md5sum -c "$makefile_md5" &> /dev/null; then
+      # Cache exists but is invalid. Use the current cache and fire off an update for next time
+      nohup bash -c "${BASH_SOURCE[0]} ${makefile_dir}" < /dev/null > /dev/null 2>&1 & # completely detached from terminal
     fi
+  else
+    update_cache "${makefile_dir}"
   fi
 
-  # Populate the cache
-  if [[ $use_cache -eq 0 ]]; then
-    # echo >&2 -e "\nRepopulating cache..."
-    # Cache output
-    $1 -npq __BASH_MAKE_COMPLETION__=1 "${makef[@]}" "${makef_dir[@]}" .DEFAULT 2> /dev/null |\
-      grep -v "FORCE" > "$MAKEFILE_CACHE"
-    #echo >&2 -e "\nMade cache..."
-    # Make new md5
-    md5sum "${MAKEFILES[@]}" > "$MAKEFILE_MD5"
-  fi
-
-  cat "$MAKEFILE_CACHE"
+  cat "$makefile_cache"
 }
 
 _make_target_extract_script()
@@ -129,82 +149,86 @@ _make()
 
     local file makef makef_dir=( "-C" "." ) makef_inc i
 
-    case $prev in
-        -f|--file|--makefile|-o|--old-file|--assume-old|-W|--what-if|\
-        --new-file|--assume-new)
-            _filedir
-            return
-            ;;
-        -I|--include-dir|-C|--directory|-m)
-            _filedir -d
-            return
-            ;;
-        -E)
-            COMPREPLY=( $( compgen -v -- "$cur" ) )
-            return
-            ;;
-        --eval|-D|-V|-x)
-            return
-            ;;
-        --jobs|-j)
-            COMPREPLY=( $( compgen -W "{1..$(( $(_ncpus)*2 ))}" -- "$cur" ) )
-            return
-            ;;
+    case "$prev" in
+      -f|--file|--makefile|-o|--old-file|--assume-old|-W|--what-if|\
+      --new-file|--assume-new)
+        _filedir
+        return
+        ;;
+      -I|--include-dir|-C|--directory|-m)
+        _filedir -d
+        return
+        ;;
+      -E)
+        COMPREPLY=( $( compgen -v -- "$cur" ) )
+        return
+        ;;
+      --eval|-D|-V)
+        return
+        ;;
+      --jobs|-j)
+        COMPREPLY=( $( compgen -W "{1..$(( $(_ncpus)*2 ))}" -- "$cur" ) )
+        return
+        ;;
     esac
 
     $split && return
 
     if [[ "$cur" == -* ]]; then
-        local opts="$( _parse_help "$1" )"
-        [[ $opts ]] || opts="$( _parse_usage "$1" )"
-        COMPREPLY=( $( compgen -W "$opts" -- "$cur" ) )
-        [[ $COMPREPLY == *= ]] && compopt -o nospace
+      local opts="$( _parse_help "$1" )"
+      [[ $opts ]] || opts="$( _parse_usage "$1" )"
+      COMPREPLY=( $( compgen -W "$opts" -- "$cur" ) )
+      [[ $COMPREPLY == *= ]] && compopt -o nospace
     elif [[ $cur == *=* ]]; then
-        prev=${cur%%=*}
-        cur=${cur#*=}
-        local diropt
-        [[ ${prev,,} == *dir?(ectory) ]] && diropt=-d
-        _filedir $diropt
+      prev=${cur%%=*}
+      cur=${cur#*=}
+      local diropt
+      [[ ${prev,,} == *dir?(ectory) ]] && diropt=-d
+      _filedir $diropt
     else
-        # before we check for makefiles, see if a path was specified
-        # with -C/--directory
-        for (( i=0; i < ${#words[@]}; i++ )); do
-            if [[ ${words[i]} == -@(C|-directory) ]]; then
-                # eval for tilde expansion
-                eval makef_dir=( -C "${words[i+1]}" )
-                break
-            fi
-        done
-
-        # before we scan for targets, see if a Makefile name was
-        # specified with -f/--file/--makefile
-        for (( i=0; i < ${#words[@]}; i++ )); do
-            if [[ ${words[i]} == -@(f|-?(make)file) ]]; then
-                # eval for tilde expansion
-                eval makef=( -f "${words[i+1]}" )
-                break
-            fi
-        done
-
-        # recognise that possible completions are only going to be displayed
-        # so only the base name is shown
-        local mode=--
-        if (( COMP_TYPE != 9 )); then
-            mode=-d # display-only mode
+      # before we check for makefiles, see if a path was specified
+      # with -C/--directory
+      for (( i=0; i < ${#words[@]}; i++ )); do
+        if [[ ${words[i]} == -@(C|-directory) ]]; then
+          # eval for tilde expansion
+          eval makef_dir=( -C "${words[i+1]}" )
+          break
         fi
+      done
 
-        local IFS=$' \t\n' script=$( _make_target_extract_script $mode "$cur" )
-        COMPREPLY=( $( LC_ALL=C _make_cache_makefile_output "$@" |\
-            command sed -ne "$script" ) )
-
-        if [[ $mode != -d ]]; then
-            # Completion will occur if there is only one suggestion
-            # so set options for completion based on the first one
-            [[ $COMPREPLY == */ ]] && compopt -o nospace
+      # before we scan for targets, see if a Makefile name was
+      # specified with -f/--file/--makefile
+      for (( i=0; i < ${#words[@]}; i++ )); do
+        if [[ ${words[i]} == -@(f|-?(make)file) ]]; then
+          # eval for tilde expansion
+          eval makef=( -f "${words[i+1]}" )
+          break
         fi
+      done
 
+      # recognise that possible completions are only going to be displayed
+      # so only the base name is shown
+      local mode=--
+      if (( COMP_TYPE != 9 )); then
+        mode=-d # display-only mode
+      fi
+
+      local IFS=$' \t\n' script=$( _make_target_extract_script $mode "$cur" )
+      COMPREPLY=( $( LC_ALL=C _make_cache_makefile_output "$@" |\
+          command sed -ne "$script" ) )
+
+      if [[ $mode != -d ]]; then
+        # Completion will occur if there is only one suggestion
+        # so set options for completion based on the first one
+        [[ $COMPREPLY == */ ]] && compopt -o nospace
+      fi
     fi
 } &&
 complete -F _make make remake gmake gnumake pmake colormake
+
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+  # ${BASH_SOURCE[0]} is being called directly. Invoke the cache update job.
+  update_cache "$@"
+fi
 
 # ex: filetype=sh

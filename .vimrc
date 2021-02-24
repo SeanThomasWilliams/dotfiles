@@ -301,6 +301,26 @@ syntax on " Enable highlighting for syntax
 if has('autocmd')
   filetype plugin indent on           " allow for individual indentations per file type
 
+  augroup LargeFile
+    let g:large_file = 1048576 " 1MB
+
+    " Set options:
+    "   eventignore+=FileType (no syntax highlighting etc assumes FileType always on)
+    "   noswapfile (save copy of file)
+    "   bufhidden=unload (save memory when other file is viewed)
+    "   buftype=nowritefile (is read-only)
+    "   undolevels=-1 (no undo possible)
+    "   \ set eventignore+=FileType |
+    au BufReadPre *
+      \ let f=expand("<afile>") |
+      \ if getfsize(f) > g:large_file |
+        \ set eventignore=all |
+        \ setlocal nowrap noswapfile bufhidden=unload buftype=nowrite undolevels=-1 nohidden syntax=off ft= |
+      \ else |
+        \ set eventignore-=FileType |
+      \ endif
+  augroup END
+
   augroup Shell
     autocmd!
     " Make shell scripts executable
@@ -363,6 +383,7 @@ if has('autocmd')
     autocmd BufNewFile,BufRead */playbooks/vars/*.yml setlocal filetype=yaml.ansible et ts=2 sw=2 sts=2
     autocmd BufNewFile,BufRead */tasks/*.yml setlocal filetype=yaml.ansible et ts=2 sw=2 sts=2
     autocmd BufNewFile,BufRead Jenkinsfile* setlocal ft=groovy
+    autocmd BufNewFile,BufRead *.jenkinsfile setlocal ft=groovy
     autocmd BufNewFile,Bufread *.spect setlocal ft=spec
     autocmd BufNewFile,Bufread *.wsgi setlocal ft=python
     autocmd BufNewFile,BufRead *.go setlocal noet ts=4 sw=4 sts=4
@@ -483,8 +504,8 @@ set statusline=%<%f\ (%{&ft})\ %-4(%m%)%=%-19(%3l,%02c%03V%)
 
 " MISC FUNCTIONS
 
-" Insert the current time
-nnoremap <silent> <leader>wl :e ~/vimwiki/WorkLog.md<CR>G:norm 2o### <CR>"=strftime("%c")<CR>p:norm 2o<CR>i
+" Edit WorkLog Journal
+nnoremap <silent> <leader>wl :e ~/vimwiki/WorkLog.md<CR>
 
 " MISC KEY MAPS
 nnoremap <silent> <F2> :set nonumber!<CR>:set relativenumber!<CR>:set foldcolumn=0<CR>

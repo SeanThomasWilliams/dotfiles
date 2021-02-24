@@ -13,7 +13,7 @@
 [alias]
   aa = add --all
   add-branch = "!f() { BRANCH=$1; if [[ -z ${BRANCH} ]]; then echo >&2 "Specify branch name!"; exit 1; fi; git checkout -b ${BRANCH}; git push -u; }; f "
-  amend = commit --amend
+  amp = !sh -c \"git add . && git commit --amend --no-edit && git push -f\"
   b = branch
   blg = branch --format '%(color:red)%(objectname:short)%(color:reset) %(color:green)%(committerdate:iso)%(color:reset) %(subject) %(color:bold blue)-- %(authorname)%(color:reset) %(color:yellow)(%(refname:short))%(color:reset)'
   branch-status = !git-branch-status
@@ -26,6 +26,7 @@
   di = diff
   ds = diff --staged
   remove-tags = "!f() { git tag -l ${1} | xargs -I % echo \"git tag -d % && git push --delete origin %\" | sh; }; f"
+  delete-branch = !sh -c \"git branch -D "$1" && git push -d origin "$1"\"
   add-tag = !sh -c \"git tag "$1" && git push origin --tags\"
   fa = fetch --all
   ff = merge --ff-only

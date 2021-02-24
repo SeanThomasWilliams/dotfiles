@@ -5,7 +5,7 @@ usage(){
   cat >&2 <<EOF
 Run a temporary docker container and clean-up
 
-Usage: $0 [-s <SHELL>] [-m <MOUNT_PATH>] [-i] [-h] <CONTAINER> <ARGS>
+Usage: $0 [-s <SHELL>] [-v <MOUNT_PATH>[:<CONTAINER_PATH>]] [-i] [-h] <CONTAINER> <ARGS>
 
 Arguments:
   -i
@@ -14,8 +14,8 @@ Arguments:
     Port to expose
   -s SHELL
     Docker shell for interactive terminal
-  -m MOUNT_PATH
-    Local path to mount
+  -v MOUNT_PATH[:CONTAINER_PATH]
+    Local path to mount (optional remote container mount path)
   -u
     Run as local user
   -h
@@ -65,11 +65,21 @@ if [[ $INTERACTIVE == 1 ]]; then
 fi
 
 if [[ -n ${MOUNT_PATH-} ]]; then
-  if [[ ${MOUNT_PATH} =~ : ]]; then
-    DOCKER_OPTS+=("-v" "$MOUNT_PATH")
-  else
-    DOCKER_OPTS+=("-v" "$PWD:$MOUNT_PATH")
+  # Validate MOUNT_PATH LHS
+  lhs_mount=$(echo "${MOUNT_PATH}" | cut -d':' -f1)
+  rhs_mount=$(echo "${MOUNT_PATH}" | cut -d':' -f2)
+  if [[ -z ${rhs_mount-} ]]; then
+    rhs_mount="/mnt"
   fi
+
+  if [[ ! -d ${lhs_mount} ]]; then
+    echo >&2 "Invalid usage: '-v ${MOUNT_PATH}'. '$lhs_mount' is not a directory!"
+    echo >&2
+    usage
+    exit 1
+  fi
+
+  DOCKER_OPTS+=("-v" "$(realpath "$lhs_mount"):${rhs_mount}")
 fi
 
 if [[ $# -lt 1 ]]; then
@@ -78,4 +88,4 @@ if [[ $# -lt 1 ]]; then
 fi
 
 echo >&2 docker run ${DOCKER_OPTS[@]} $@
-docker run ${DOCKER_OPTS[@]} $@
+docker run "${DOCKER_OPTS[@]}" "$@"
