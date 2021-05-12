@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+#shellcheck disable=SC2207
+
+PYTHON_PATHS=($(python -c 'import sys; print(":".join([p for p in sys.path if p]))' | tr ':' '\n'))
+
+for d in "${PYTHON_PATHS[@]}"; do
+  [[ ! -d "$d" ]] && continue
+  rp=$(realpath "$d")
+  find "$rp" -type f -name '*.py' |\
+  grep -Ev 'migrations|test|modules|encodings|lexer|vendor|corpus|_internal|providers|plugins|ansible|locale'
+done
+
+project_dir=$(git rev-parse --show-toplevel 2> /dev/null)
+if [[ -n ${project_dir-} && -d ${project_dir} ]]; then
+  find "$(realpath "$project_dir")" -type f -name '*.py'
+fi

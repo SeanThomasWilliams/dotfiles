@@ -43,6 +43,7 @@ Plug 'mustache/vim-mustache-handlebars'
 Plug 'numirias/semshi', {'do': ':UpdateRemotePlugins'}
 Plug 'pangloss/vim-javascript'
 Plug 'pearofducks/ansible-vim'
+Plug 'pedrohdz/vim-yaml-folds'
 Plug 'peitalin/vim-jsx-typescript'
 Plug 'powerman/vim-plugin-AnsiEsc'
 Plug 'prettier/vim-prettier', { 'do': 'yarn install' }
@@ -618,13 +619,14 @@ nnoremap <silent> <leader>b :TagbarToggle<CR>
 
 " gutentags
 set statusline+=%{gutentags#statusline()}
+" let g:gutentags_define_advanced_commands = 1 " Extra Debugging
 let g:gutentags_file_list_command = {
 \  'markers': {
 \    '.pythontags': $HOME . '/bin/python-file-lister'
 \  }
 \}
 let g:gutentags_add_default_project_roots = 0
-let g:gutentags_project_root = ['.git', '.pythontags']
+let g:gutentags_project_root = ['.git', '.pythontags', '.forcetags']
 let g:gutentags_generate_on_new = 1
 let g:gutentags_generate_on_missing = 1
 let g:gutentags_generate_on_write = 1
@@ -769,7 +771,14 @@ let g:rainbow_active = 1
 " Python formatters
 let g:neoformat_enabled_python = ['yapf', 'isort', 'docformatter']
 " YAML formatters
-let g:neoformat_enabled_yaml = ['pyyaml', 'prettier']
+let g:neoformat_enabled_yaml = ['beautifyk8s']
+let g:neoformat_yaml_beautifyk8s = {
+            \ 'exe': 'beautify-k8s',
+            \ 'args': ['-i'],
+            \ 'stdin': 0,
+            \ 'replace': 0,
+            \ 'valid_exit_codes': [0],
+            \ }
 " Enable tab to spaces conversion
 let g:neoformat_basic_format_retab = 1
 " Enable trimmming of trailing whitespace
@@ -893,7 +902,7 @@ let g:vimwiki_list = [{
 
 "  \ 'path_html': '~/vimwiki/html/',
 
-autocmd FileType vimwiki set spell spelllang=en_us
+autocmd FileType vimwiki set spell spelllang=en_us complete+=kspell
 
 let g:autopep8_max_line_length=120
 

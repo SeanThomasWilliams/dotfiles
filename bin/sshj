@@ -42,7 +42,7 @@ populate_args(){
 
 populate_args "$@"
 
-echo >&2 "Connecting to ${SSH_USER}@${TARGET_HOST} using jumpbox ${SSH_PROXY_HOST} and key ${SSH_KEY_FILE}..."
+#echo >&2 "Connecting to ${SSH_USER}@${TARGET_HOST} using jumpbox ${SSH_PROXY_HOST} and key ${SSH_KEY_FILE}"
 
 ssh \
     -o "ProxyCommand ssh -W %h:%p ${SSH_PROXY_HOST}" \

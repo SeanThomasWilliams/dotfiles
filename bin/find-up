@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+set -euo pipefail
+IFS=$'\n\t'
+
+if [[ $# -ne 1 ]]; then
+  echo >&2 "Usage: $0 <file name>"
+  exit 1
+fi
+
+FNAME="$(basename "$1")"
+cur_dir="$PWD"
+
+while [[ $cur_dir != / ]]; do
+  if [[ -f "$cur_dir/$FNAME" ]]; then
+    echo "$cur_dir/$FNAME"
+    break
+  fi
+
+  cur_dir=$(dirname "$cur_dir")
+done

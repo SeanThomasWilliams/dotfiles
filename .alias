@@ -222,7 +222,10 @@ load_history_settings(){
   export HISTCONTROL=ignorespace   # leading space hides commands from history
   export HISTFILESIZE=10000        # increase history file size (default is 500)
   export HISTSIZE=${HISTFILESIZE}  # increase history size (default is 500)
-  export PROMPT_COMMAND="history -a; history -n; ${PROMPT_COMMAND}"
+  if ! [[ "${PROMPT_COMMAND:-}" =~ history ]]; then
+    PROMPT_COMMAND="history -a;history -n${PROMPT_COMMAND:+;$PROMPT_COMMAND}"
+    export PROMPT_COMMAND
+  fi
 
   # HSTR configuration
   if command -V hstr &> /dev/null; then
@@ -260,9 +263,9 @@ load_extra_source_files(){
     "$HOME/.fzf.bash"
     "$HOME/.local/share/bash-completion/*.bash"
     "$HOME/anaconda3/etc/profile.d/*.sh"
-    "$HOME/.iterm2_shell_integration.bash"
     "/usr/local/etc/profile.d/autojump.sh"
     "/usr/share/autojump/*.bash"
+    "/Applications/iTerm.app/Contents/Resources/iterm2_shell_integration.bash"
   )
 
   local sf glob_sf

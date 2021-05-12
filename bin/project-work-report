@@ -137,7 +137,7 @@ get_task_complete_report(){
     tail -n +4 |\
     ghead -n -2 |\
     grep -v "Submit project work report" |\
-    gawk "$taskawkscript"
+    gawk "$taskawkscript" || true
 
   echo '```'
   echo
