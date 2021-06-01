@@ -1,17 +1,16 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
+IFS=$'\n\t'
 
-DIR="$(cd "$(dirname "$0")" && pwd)"
-cd "$DIR"
-
-set -eu
-set -o pipefail
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+cd "$SCRIPT_DIR"
 
 # Darwin/Linux
 UNAME_S=$(uname -s)
 
 git submodule update --init --recursive
 
-for fname in "$DIR"/.*; do
+for fname in "$SCRIPT_DIR"/.*; do
   [[ ! -f $fname ]] && continue # Skip missing files
 
   fname_base=$(basename "$fname")
@@ -29,36 +28,31 @@ done
 # Bash-completion
 mkdir -p "$HOME/.local/share/"
 rm -f "$HOME/.local/share/bash-completion"
-ln -sfn "$DIR/.local/share/bash-completion" "$HOME/.local/share/"
+ln -sfn "$SCRIPT_DIR/.local/share/bash-completion" "$HOME/.local/share/"
 
 # For neovim
 mkdir -p "$HOME"/.config
-ln -sfn "$DIR"/vim "$HOME"/.config/nvim
-ln -sfn "$DIR"/.vimrc "$HOME"/.config/nvim/init.vim
+ln -sfn "$SCRIPT_DIR"/vim "$HOME"/.config/nvim
+ln -sfn "$SCRIPT_DIR"/.vimrc "$HOME"/.config/nvim/init.vim
 
 # Config dir
-for d in "$DIR"/config/*; do
+for d in "$SCRIPT_DIR"/config/*; do
   ln -sfn "$d" "$HOME"/.config/"$(basename "$d")"
 done
 
+# ctags.d
+ln -sfn "$SCRIPT_DIR"/.ctags.d "$HOME"/.ctags.d
+
 # Binaries
 mkdir -p "$HOME"/bin
-ln -sfn "$DIR"/bin/* "$HOME"/bin/
+ln -sfn "$SCRIPT_DIR"/bin/* "$HOME"/bin/
 
 # Vim dir
 rm -f "$HOME"/.vim
-ln -sfn "$DIR"/vim "$HOME"/.vim
-
-# Neovim pip
-pip install --upgrade neovim pynvim msgpack
-sudo gem install neovim && gem environment
+ln -sfn "$SCRIPT_DIR"/vim "$HOME"/.vim
 
 # Vim plugins
 nvim +PlugInstall! +qall
-
-# Go binaries
-mkdir -p ~/gocode/src/github.com/
-nvim +GoInstallBinaries +qall
 
 # Vim Remote plugins
 nvim +UpdateRemotePlugins +qall

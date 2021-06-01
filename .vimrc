@@ -595,7 +595,7 @@ endif
 
 " FZF configuration
 let $SITE_PACKAGES=expand("$CONDA_PREFIX") . '/lib/python3.7/site-packages'
-nnoremap <C-t> :FZF<CR>
+nnoremap <C-t> :Tags<CR>
 nnoremap <C-p> :Files $SITE_PACKAGES<CR>
 nnoremap <C-\> :split<CR> :FZF<CR>
 
@@ -616,10 +616,34 @@ nnoremap U :syntax sync fromstart<CR>:redraw!<CR>
 
 " tagbar
 nnoremap <silent> <leader>b :TagbarToggle<CR>
+" autocmd FileType * nested :call tagbar#autoopen(0)
+let g:tagbar_compact = 1
+let g:tagbar_type_ansible = {
+    \ 'ctagstype' : 'ansible',
+    \ 'kinds' : [
+      \ 't:Tasks',
+      \ 'h:Hosts'
+    \ ],
+    \ 'sort' : 0
+    \ }
+
+let g:tagbar_type_terraform = {
+    \ 'ctagstype' : 'terraform',
+    \ 'kinds' : [
+      \ 'd:Data',
+      \ 'r:Resources',
+      \ 'm:Modules',
+      \ 'o:Outputs',
+      \ 'P:Providers',
+      \ 'v:Variables',
+      \ 'f:TFVars'
+    \ ],
+    \ 'sort': 0
+    \ }
 
 " gutentags
 set statusline+=%{gutentags#statusline()}
-" let g:gutentags_define_advanced_commands = 1 " Extra Debugging
+let g:gutentags_define_advanced_commands = 1 " Extra Debugging
 let g:gutentags_file_list_command = {
 \  'markers': {
 \    '.pythontags': $HOME . '/bin/python-file-lister'
@@ -649,7 +673,6 @@ let g:gutentags_ctags_exclude = [
       \ '*.less',
       \ '*.lock',
       \ '*.map',
-      \ '*.md',
       \ '*.min.*',
       \ '*.pdb',
       \ '*.pyc',
@@ -826,8 +849,7 @@ let g:autopep8_on_save = 1
 " vim-dirdiff
 let g:DirDiffExcludes = ".git,certs,images,README.md,*.war,*.rpm"
 let g:DirDiffIgnore = ""
-" ignore white space in diff
-let g:DirDiffAddArgs = "-w"
+let g:DirDiffAddArgs = "-w" " ignore white space in diff
 let g:DirDiffEnableMappings = 1
 
 " supertab

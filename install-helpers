@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# Neovim pip
+pip install --upgrade neovim pynvim msgpack
+sudo gem install neovim && gem environment
+
+# Go binaries
+mkdir -p ~/gocode/src/github.com/
+nvim +GoInstallBinaries +qall
