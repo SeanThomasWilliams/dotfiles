@@ -1,6 +1,5 @@
 [pycodestyle]
 count = False
-ignore = E226,E302,E41
-max-line-length = 160
-statistics = True
-exclude = .tox,.git,*/migrations/*,*/static/CACHE/*,docs,node_modules
+select = B,C,E,F,W,T4,B9
+ignore = E203, E266, E501, W503
+max-line-length = 128

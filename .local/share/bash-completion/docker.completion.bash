@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# shellcheck disable=SC2016,SC2119,SC2155,SC2206,SC2207
+# shellcheck disable=SC2016,SC2119,SC2155,SC2206,SC2207,SC2254
 #
 # Shellcheck ignore list:
 #  - SC2016: Expressions don't expand in single quotes, use double quotes for that.
@@ -7,6 +7,7 @@
 #  - SC2155: Declare and assign separately to avoid masking return values.
 #  - SC2206: Quote to prevent word splitting, or split robustly with mapfile or read -a.
 #  - SC2207: Prefer mapfile or read -a to split command output (or quote to avoid splitting).
+#  - SC2254: Quote expansions in case patterns to match literally rather than as a glob.
 #
 # You can find more details for each warning at the following page:
 #    https://github.com/koalaman/shellcheck/wiki/<SCXXXX>
@@ -550,17 +551,18 @@ __docker_complete_nodes() {
 # output to the IDs or names of matching items. This setting takes
 # precedence over the environment setting.
 __docker_services() {
-	local fields='$2'  # default: service name only
-	[ "${DOCKER_COMPLETION_SHOW_SERVICE_IDS}" = yes ] && fields='$1,$2' # ID & name
+	local format='{{.Name}}'  # default: service name only
+	[ "${DOCKER_COMPLETION_SHOW_SERVICE_IDS}" = yes ] && format='{{.ID}} {{.Name}}' # ID & name
 
 	if [ "$1" = "--id" ] ; then
-		fields='$1' # IDs only
+		format='{{.ID}}' # IDs only
 		shift
 	elif [ "$1" = "--name" ] ; then
-		fields='$2' # names only
+		format='{{.Name}}' # names only
 		shift
 	fi
-        __docker_q service ls "$@" | awk "NR>1 {print $fields}"
+
+	__docker_q service ls --quiet --format "$format" "$@"
 }
 
 # __docker_complete_services applies completion of services based on the current
@@ -572,7 +574,7 @@ __docker_complete_services() {
 		current="$2"
 		shift 2
 	fi
-	COMPREPLY=( $(compgen -W "$(__docker_services "$@")" -- "$current") )
+	COMPREPLY=( $(__docker_services "$@" --filter "name=$current") )
 }
 
 # __docker_tasks returns a list of all task IDs.
@@ -600,17 +602,9 @@ __docker_append_to_completions() {
 # The result is cached for the duration of one invocation of bash completion.
 __docker_fetch_info() {
 	if [ -z "$info_fetched" ] ; then
-		read -r client_experimental server_experimental server_os <<< "$(__docker_q version -f '{{.Client.Experimental}} {{.Server.Experimental}} {{.Server.Os}}')"
+		read -r server_experimental server_os <<< "$(__docker_q version -f '{{.Server.Experimental}} {{.Server.Os}}')"
 		info_fetched=true
 	fi
-}
-
-# __docker_client_is_experimental tests whether the Docker cli is configured to support
-# experimental features. If so, the function exits with 0 (true).
-# Otherwise, or if the result cannot be determined, the exit value is 1 (false).
-__docker_client_is_experimental() {
-	__docker_fetch_info
-	[ "$client_experimental" = "true" ]
 }
 
 # __docker_server_is_experimental tests whether the currently configured Docker
@@ -687,7 +681,7 @@ __docker_pos_first_nonflag() {
 		(( counter++ ))
 	done
 
-	echo $counter
+	echo "$counter"
 }
 
 # __docker_map_key_of_current_option returns `key` if we are currently completing the
@@ -830,55 +824,63 @@ __docker_complete_local_ips() {
 # not granted by default and may be added.
 # see https://docs.docker.com/engine/reference/run/#/runtime-privilege-and-linux-capabilities
 __docker_complete_capabilities_addable() {
-	COMPREPLY=( $( compgen -W "
+  local capabilities=(
 		ALL
-		AUDIT_CONTROL
-		BLOCK_SUSPEND
-		DAC_READ_SEARCH
-		IPC_LOCK
-		IPC_OWNER
-		LEASE
-		LINUX_IMMUTABLE
-		MAC_ADMIN
-		MAC_OVERRIDE
-		NET_ADMIN
-		NET_BROADCAST
-		SYS_ADMIN
-		SYS_BOOT
-		SYSLOG
-		SYS_MODULE
-		SYS_NICE
-		SYS_PACCT
-		SYS_PTRACE
-		SYS_RAWIO
-		SYS_RESOURCE
-		SYS_TIME
-		SYS_TTY_CONFIG
-		WAKE_ALARM
-	" -- "$cur" ) )
+		CAP_AUDIT_CONTROL
+		CAP_AUDIT_READ
+		CAP_BLOCK_SUSPEND
+		CAP_BPF
+		CAP_CHECKPOINT_RESTORE
+		CAP_DAC_READ_SEARCH
+		CAP_IPC_LOCK
+		CAP_IPC_OWNER
+		CAP_LEASE
+		CAP_LINUX_IMMUTABLE
+		CAP_MAC_ADMIN
+		CAP_MAC_OVERRIDE
+		CAP_NET_ADMIN
+		CAP_NET_BROADCAST
+		CAP_PERFMON
+		CAP_SYS_ADMIN
+		CAP_SYS_BOOT
+		CAP_SYSLOG
+		CAP_SYS_MODULE
+		CAP_SYS_NICE
+		CAP_SYS_PACCT
+		CAP_SYS_PTRACE
+		CAP_SYS_RAWIO
+		CAP_SYS_RESOURCE
+		CAP_SYS_TIME
+		CAP_SYS_TTY_CONFIG
+		CAP_WAKE_ALARM
+		RESET
+  )
+	COMPREPLY=( $( compgen -W "${capabilities[*]} ${capabilities[*]#CAP_}" -- "$cur" ) )
 }
 
 # __docker_complete_capabilities_droppable completes Linux capability options which are
 # allowed by default and can be dropped.
 # see https://docs.docker.com/engine/reference/run/#/runtime-privilege-and-linux-capabilities
 __docker_complete_capabilities_droppable() {
-	COMPREPLY=( $( compgen -W "
+	local capabilities=(
 		ALL
-		AUDIT_WRITE
-		CHOWN
-		DAC_OVERRIDE
-		FOWNER
-		FSETID
-		KILL
-		MKNOD
-		NET_BIND_SERVICE
-		NET_RAW
-		SETFCAP
-		SETGID
-		SETPCAP
-		SETUID
-		SYS_CHROOT
-	" -- "$cur" ) )
+		CAP_AUDIT_WRITE
+		CAP_CHOWN
+		CAP_DAC_OVERRIDE
+		CAP_FOWNER
+		CAP_FSETID
+		CAP_KILL
+		CAP_MKNOD
+		CAP_NET_BIND_SERVICE
+		CAP_NET_RAW
+		CAP_SETFCAP
+		CAP_SETGID
+		CAP_SETPCAP
+		CAP_SETUID
+		CAP_SYS_CHROOT
+		RESET
+	)
+	COMPREPLY=( $( compgen -W "${capabilities[*]} ${capabilities[*]#CAP_}" -- "$cur" ) )
 }
 
 __docker_complete_detach_keys() {
@@ -933,7 +935,7 @@ __docker_complete_log_options() {
 	# awslogs does not implement the $common_options2.
 	local awslogs_options="$common_options1 awslogs-create-group awslogs-credentials-endpoint awslogs-datetime-format awslogs-group awslogs-multiline-pattern awslogs-region awslogs-stream tag"
 
-	local fluentd_options="$common_options1 $common_options2 fluentd-address fluentd-async-connect fluentd-buffer-limit fluentd-retry-wait fluentd-max-retries fluentd-sub-second-precision tag"
+	local fluentd_options="$common_options1 $common_options2 fluentd-address fluentd-async fluentd-buffer-limit fluentd-request-ack fluentd-retry-wait fluentd-max-retries fluentd-sub-second-precision tag"
 	local gcplogs_options="$common_options1 $common_options2 gcp-log-cmd gcp-meta-id gcp-meta-name gcp-meta-zone gcp-project"
 	local gelf_options="$common_options1 $common_options2 gelf-address gelf-compression-level gelf-compression-type gelf-tcp-max-reconnect gelf-tcp-reconnect-delay tag"
 	local journald_options="$common_options1 $common_options2 tag"
@@ -1143,6 +1145,36 @@ __docker_complete_stack_orchestrator_options() {
 	return 1
 }
 
+__docker_complete_ulimits() {
+	local limits="
+		as
+		chroot
+		core
+		cpu
+		data
+		fsize
+		locks
+		maxlogins
+		maxsyslogins
+		memlock
+		msgqueue
+		nice
+		nofile
+		nproc
+		priority
+		rss
+		rtprio
+		sigpending
+		stack
+	"
+	if [ "$1" = "--rm" ] ; then
+		COMPREPLY=( $( compgen -W "$limits" -- "$cur" ) )
+	else
+		COMPREPLY=( $( compgen -W "$limits" -S = -- "$cur" ) )
+		__docker_nospace
+	fi
+}
+
 __docker_complete_user_group() {
 	if [[ $cur == *:* ]] ; then
 		COMPREPLY=( $(compgen -g -- "${cur#*:}") )
@@ -1185,7 +1217,6 @@ _docker_docker() {
 		*)
 			local counter=$( __docker_pos_first_nonflag "$(__docker_to_extglob "$global_options_with_args")" )
 			if [ "$cword" -eq "$counter" ]; then
-				__docker_client_is_experimental && commands+=(${experimental_client_commands[*]})
 				__docker_server_is_experimental && commands+=(${experimental_server_commands[*]})
 				COMPREPLY=( $( compgen -W "${commands[*]} help" -- "$cur" ) )
 			fi
@@ -1204,6 +1235,7 @@ _docker_build() {
 
 _docker_builder() {
 	local subcommands="
+		build
 		prune
 	"
 	__docker_subcommands "$subcommands" && return
@@ -1216,6 +1248,10 @@ _docker_builder() {
 			COMPREPLY=( $( compgen -W "$subcommands" -- "$cur" ) )
 			;;
 	esac
+}
+
+_docker_builder_build() {
+	_docker_image_build
 }
 
 _docker_builder_prune() {
@@ -1598,6 +1634,10 @@ _docker_container_exec() {
 			__docker_nospace
 			return
 			;;
+		--env-file)
+			_filedir
+			return
+			;;
 		--user|-u)
 			__docker_complete_user_group
 			return
@@ -1609,7 +1649,7 @@ _docker_container_exec() {
 
 	case "$cur" in
 		-*)
-			COMPREPLY=( $( compgen -W "--detach -d --detach-keys --env -e --help --interactive -i --privileged -t --tty -u --user --workdir -w" -- "$cur" ) )
+			COMPREPLY=( $( compgen -W "--detach -d --detach-keys --env -e --env-file --help --interactive -i --privileged -t --tty -u --user --workdir -w" -- "$cur" ) )
 			;;
 		*)
 			__docker_complete_containers_running
@@ -1662,17 +1702,17 @@ _docker_container_kill() {
 
 _docker_container_logs() {
 	case "$prev" in
-		--since|--tail|--until)
+		--since|--tail|-n|--until)
 			return
 			;;
 	esac
 
 	case "$cur" in
 		-*)
-			COMPREPLY=( $( compgen -W "--details --follow -f --help --since --tail --timestamps -t --until" -- "$cur" ) )
+			COMPREPLY=( $( compgen -W "--details --follow -f --help --since --tail -n --timestamps -t --until" -- "$cur" ) )
 			;;
 		*)
-			local counter=$(__docker_pos_first_nonflag '--since|--tail|--until')
+			local counter=$(__docker_pos_first_nonflag '--since|--tail|-n|--until')
 			if [ "$cword" -eq "$counter" ]; then
 				__docker_complete_containers_all
 			fi
@@ -1859,6 +1899,7 @@ _docker_container_run_and_create() {
 		--blkio-weight-device
 		--cap-add
 		--cap-drop
+		--cgroupns
 		--cgroup-parent
 		--cidfile
 		--cpu-period
@@ -1883,6 +1924,7 @@ _docker_container_run_and_create() {
 		--env -e
 		--env-file
 		--expose
+		--gpus
 		--group-add
 		--health-cmd
 		--health-interval
@@ -1913,6 +1955,7 @@ _docker_container_run_and_create() {
 		--pid
 		--pids-limit
 		--publish -p
+		--pull
 		--restart
 		--runtime
 		--security-opt
@@ -2016,6 +2059,10 @@ _docker_container_run_and_create() {
 			_filedir
 			return
 			;;
+		--cgroupns)
+			COMPREPLY=( $( compgen -W "host private" -- "$cur" ) )
+			return
+			;;
 		--device|--tmpfs|--volume|-v)
 			case "$cur" in
 				*:*)
@@ -2107,13 +2154,17 @@ _docker_container_run_and_create() {
 			esac
 			return
 			;;
+		--pull)
+		  COMPREPLY=( $( compgen -W 'always missing never' -- "$cur" ) )
+		  return
+		  ;;
 		--runtime)
 			__docker_complete_runtimes
 			return
 			;;
 		--security-opt)
-			COMPREPLY=( $( compgen -W "apparmor= label= no-new-privileges seccomp=" -- "$cur") )
-			if [ "${COMPREPLY[*]}" != "no-new-privileges" ] ; then
+			COMPREPLY=( $( compgen -W "apparmor= label= no-new-privileges seccomp= systempaths=unconfined" -- "$cur") )
+			if [[ ${COMPREPLY[*]} = *= ]] ; then
 				__docker_nospace
 			fi
 			return
@@ -2125,6 +2176,10 @@ _docker_container_run_and_create() {
 		--storage-opt)
 			COMPREPLY=( $( compgen -W "size" -S = -- "$cur") )
 			__docker_nospace
+			return
+			;;
+		--ulimit)
+			__docker_complete_ulimits
 			return
 			;;
 		--user|-u)
@@ -2342,11 +2397,15 @@ _docker_context_create() {
 		--description|--docker|--kubernetes)
 			return
 			;;
+		--from)
+			__docker_complete_contexts
+			return
+			;;
 	esac
 
 	case "$cur" in
 		-*)
-			COMPREPLY=( $( compgen -W "--default-stack-orchestrator --description --docker --help --kubernetes" -- "$cur" ) )
+			COMPREPLY=( $( compgen -W "--default-stack-orchestrator --description --docker --from --help --kubernetes" -- "$cur" ) )
 			;;
 	esac
 }
@@ -2494,6 +2553,7 @@ _docker_daemon() {
 		--ip-forward=false
 		--ip-masq=false
 		--iptables=false
+		--ip6tables
 		--ipv6
 		--live-restore
 		--no-new-privileges
@@ -2516,6 +2576,8 @@ _docker_daemon() {
 		--cluster-store-opt
 		--config-file
 		--containerd
+		--containerd-namespace
+		--containerd-plugins-namespace
 		--cpu-rt-period
 		--cpu-rt-runtime
 		--data-root
@@ -2541,6 +2603,7 @@ _docker_daemon() {
 		--log-opt
 		--max-concurrent-downloads
 		--max-concurrent-uploads
+		--max-download-attempts
 		--metrics-addr
 		--mtu
 		--network-control-plane-mtu
@@ -2608,6 +2671,10 @@ _docker_daemon() {
 			_filedir
 			return
 			;;
+		--default-ulimit)
+			__docker_complete_ulimits
+			return
+			;;
 		--exec-root|--data-root)
 			_filedir -d
 			return
@@ -2617,36 +2684,15 @@ _docker_daemon() {
 			return
 			;;
 		--storage-driver|-s)
-			COMPREPLY=( $( compgen -W "aufs btrfs devicemapper overlay overlay2 vfs zfs" -- "$(echo "$cur" | tr '[:upper:]' '[:lower:]')" ) )
+			COMPREPLY=( $( compgen -W "aufs btrfs overlay2 vfs zfs" -- "$(echo "$cur" | tr '[:upper:]' '[:lower:]')" ) )
 			return
 			;;
 		--storage-opt)
 			local btrfs_options="btrfs.min_space"
-			local devicemapper_options="
-				dm.basesize
-				dm.blkdiscard
-				dm.blocksize
-				dm.directlvm_device
-				dm.fs
-				dm.libdm_log_level
-				dm.loopdatasize
-				dm.loopmetadatasize
-				dm.min_free_space
-				dm.mkfsarg
-				dm.mountopt
-				dm.override_udev_sync_check
-				dm.thinpooldev
-				dm.thinp_autoextend_percent
-				dm.thinp_autoextend_threshold
-				dm.thinp_metapercent
-				dm.thinp_percent
-				dm.use_deferred_deletion
-				dm.use_deferred_removal
-			"
 			local overlay2_options="overlay2.size"
 			local zfs_options="zfs.fsname"
 
-			local all_options="$btrfs_options $devicemapper_options $overlay2_options $zfs_options"
+			local all_options="$btrfs_options $overlay2_options $zfs_options"
 
 			case $(__docker_value_of_option '--storage-driver|-s') in
 				'')
@@ -2654,9 +2700,6 @@ _docker_daemon() {
 					;;
 				btrfs)
 					COMPREPLY=( $( compgen -W "$btrfs_options" -S = -- "$cur" ) )
-					;;
-				devicemapper)
-					COMPREPLY=( $( compgen -W "$devicemapper_options" -S = -- "$cur" ) )
 					;;
 				overlay2)
 					COMPREPLY=( $( compgen -W "$overlay2_options" -S = -- "$cur" ) )
@@ -2709,73 +2752,8 @@ _docker_daemon() {
 	esac
 }
 
-_docker_deploy() {
-	__docker_server_is_experimental && _docker_stack_deploy
-}
-
 _docker_diff() {
 	_docker_container_diff
-}
-
-
-_docker_engine() {
-	local subcommands="
-		activate
-		check
-		update
-	"
-	__docker_subcommands "$subcommands" && return
-
-	case "$cur" in
-		-*)
-			COMPREPLY=( $( compgen -W "--help" -- "$cur" ) )
-			;;
-		*)
-			COMPREPLY=( $( compgen -W "$subcommands" -- "$cur" ) )
-			;;
-	esac
-}
-
-_docker_engine_activate() {
-	case "$prev" in
-		--containerd|--engine-image|--format|--license|--registry-prefix|--version)
-			return
-			;;
-	esac
-
-	case "$cur" in
-		-*)
-			COMPREPLY=( $( compgen -W "--containerd --display-only --engine-image --format --help --license --quiet --registry-prefix --version" -- "$cur" ) )
-			;;
-	esac
-}
-
-_docker_engine_check() {
-	case "$prev" in
-		--containerd|--engine-image|--format|--registry-prefix)
-			return
-			;;
-	esac
-
-	case "$cur" in
-		-*)
-			COMPREPLY=( $( compgen -W "--containerd --downgrades --engine-image --format --help --pre-releases --quiet -q --registry-prefix --upgrades" -- "$cur" ) )
-			;;
-	esac
-}
-
-_docker_engine_update() {
-	case "$prev" in
-		--containerd|--engine-image|--registry-prefix|--version)
-			return
-			;;
-	esac
-
-	case "$cur" in
-		-*)
-			COMPREPLY=( $( compgen -W "--containerd --engine-image --help --registry-prefix --version" -- "$cur" ) )
-			;;
-	esac
 }
 
 
@@ -2863,7 +2841,6 @@ _docker_image_build() {
 	"
 
 	local boolean_options="
-		--compress
 		--disable-content-trust=false
 		--force-rm
 		--help
@@ -2872,13 +2849,27 @@ _docker_image_build() {
 		--quiet -q
 		--rm
 	"
+
 	if __docker_server_is_experimental ; then
 		options_with_args+="
 			--platform
 		"
 		boolean_options+="
 			--squash
-			--stream
+		"
+	fi
+
+	if [ "$DOCKER_BUILDKIT" = "1" ] ; then
+		options_with_args+="
+			--output -o
+			--platform
+			--progress
+			--secret
+			--ssh
+		"
+	else
+		boolean_options+="
+			--compress
 		"
 	fi
 
@@ -2926,6 +2917,10 @@ _docker_image_build() {
 			esac
 			return
 			;;
+		--progress)
+			COMPREPLY=( $( compgen -W "auto plain tty" -- "$cur" ) )
+			return
+			;;
 		--tag|-t)
 			__docker_complete_images --repo --tag
 			return
@@ -2941,6 +2936,10 @@ _docker_image_build() {
 
 			local targets="$( sed -n 's/^FROM .\+ AS \(.\+\)/\1/p' "$dockerfile" 2>/dev/null )"
 			COMPREPLY=( $( compgen -W "$targets" -- "$cur" ) )
+			return
+			;;
+		--ulimit)
+			__docker_complete_ulimits
 			return
 			;;
 		$(__docker_to_extglob "$options_with_args") )
@@ -3128,7 +3127,7 @@ _docker_image_pull() {
 _docker_image_push() {
 	case "$cur" in
 		-*)
-			COMPREPLY=( $( compgen -W "--disable-content-trust=false --help" -- "$cur" ) )
+			COMPREPLY=( $( compgen -W "--all-tags -a --disable-content-trust=false --help --quiet -q" -- "$cur" ) )
 			;;
 		*)
 			local counter=$(__docker_pos_first_nonflag)
@@ -3578,17 +3577,17 @@ _docker_service_inspect() {
 
 _docker_service_logs() {
 	case "$prev" in
-		--since|--tail)
+		--since|--tail|-n)
 			return
 			;;
 	esac
 
 	case "$cur" in
 		-*)
-			COMPREPLY=( $( compgen -W "--details --follow -f --help --no-resolve --no-task-ids --no-trunc --raw --since --tail --timestamps -t" -- "$cur" ) )
+			COMPREPLY=( $( compgen -W "--details --follow -f --help --no-resolve --no-task-ids --no-trunc --raw --since --tail -n --timestamps -t" -- "$cur" ) )
 			;;
 		*)
-			local counter=$(__docker_pos_first_nonflag '--since|--tail')
+			local counter=$(__docker_pos_first_nonflag '--since|--tail|-n')
 			if [ "$cword" -eq "$counter" ]; then
 				__docker_complete_services_and_tasks
 			fi
@@ -3608,7 +3607,7 @@ _docker_service_ls() {
 			return
 			;;
 		mode)
-			COMPREPLY=( $( compgen -W "global replicated" -- "${cur##*=}" ) )
+			COMPREPLY=( $( compgen -W "global global-job replicated replicated-job" -- "${cur##*=}" ) )
 			return
 			;;
 		name)
@@ -3722,6 +3721,8 @@ _docker_service_update() {
 # and `docker service update`
 _docker_service_update_and_create() {
 	local options_with_args="
+		--cap-add
+		--cap-drop
 		--endpoint-mode
 		--entrypoint
 		--health-cmd
@@ -3733,8 +3734,10 @@ _docker_service_update_and_create() {
 		--isolation
 		--limit-cpu
 		--limit-memory
+		--limit-pids
 		--log-driver
 		--log-opt
+		--max-replicas
 		--replicas
 		--replicas-max-per-node
 		--reserve-cpu
@@ -3799,6 +3802,7 @@ _docker_service_update_and_create() {
 			--publish -p
 			--secret
 			--sysctl
+			--ulimit
 		"
 
 		case "$prev" in
@@ -3807,7 +3811,7 @@ _docker_service_update_and_create() {
 				return
 				;;
 			--mode)
-				COMPREPLY=( $( compgen -W "global replicated" -- "$cur" ) )
+				COMPREPLY=( $( compgen -W "global global-job replicated replicated-job" -- "$cur" ) )
 				return
 				;;
 		esac
@@ -3851,6 +3855,8 @@ _docker_service_update_and_create() {
 			--secret-rm
 			--sysctl-add
 			--sysctl-rm
+			--ulimit-add
+			--ulimit-rm
 		"
 
 		boolean_options="$boolean_options
@@ -3879,6 +3885,14 @@ _docker_service_update_and_create() {
 	esac
 
 	case "$prev" in
+		--cap-add)
+			__docker_complete_capabilities_addable
+			return
+			;;
+		--cap-drop)
+			__docker_complete_capabilities_droppable
+			return
+			;;
 		--config|--config-add|--config-rm)
 			__docker_complete_configs
 			return
@@ -3944,6 +3958,14 @@ _docker_service_update_and_create() {
 			;;
 		--update-failure-action)
 			COMPREPLY=( $( compgen -W "continue pause rollback" -- "$cur" ) )
+			return
+			;;
+		--ulimit|--ulimit-add)
+			__docker_complete_ulimits
+			return
+			;;
+		--ulimit-rm)
+			__docker_complete_ulimits --rm
 			return
 			;;
 		--update-order|--rollback-order)
@@ -4160,6 +4182,7 @@ _docker_manifest() {
 		create
 		inspect
 		push
+		rm
 	"
 	__docker_subcommands "$subcommands" && return
 
@@ -4184,6 +4207,7 @@ _docker_manifest_annotate() {
 				mips64
 				mips64le
 				ppc64le
+				riscv64
 				s390x" -- "$cur" ) )
 			return
 			;;
@@ -4257,6 +4281,17 @@ _docker_manifest_push() {
 	esac
 }
 
+_docker_manifest_rm() {
+	case "$cur" in
+		-*)
+			COMPREPLY=( $( compgen -W "--help" -- "$cur" ) )
+			;;
+		*)
+			__docker_complete_images --force-tag --id
+			;;
+	esac
+}
+
 _docker_node() {
 	local subcommands="
 		demote
@@ -4320,6 +4355,9 @@ _docker_node_ls() {
 			__docker_complete_nodes --cur "${cur##*=}" --id
 			return
 			;;
+		label|node.label)
+			return
+			;;
 		membership)
 			COMPREPLY=( $( compgen -W "accepted pending" -- "${cur##*=}" ) )
 			return
@@ -4336,7 +4374,7 @@ _docker_node_ls() {
 
 	case "$prev" in
 		--filter|-f)
-			COMPREPLY=( $( compgen -W "id label membership name role" -S = -- "$cur" ) )
+			COMPREPLY=( $( compgen -W "id label membership name node.label role" -S = -- "$cur" ) )
 			__docker_nospace
 			return
 			;;
@@ -4874,10 +4912,6 @@ _docker_stack_deploy() {
 	__docker_complete_stack_orchestrator_options && return
 
 	case "$prev" in
-		--bundle-file)
-			_filedir dab
-			return
-			;;
 		--compose-file|-c)
 			_filedir yml
 			return
@@ -4891,13 +4925,12 @@ _docker_stack_deploy() {
 	case "$cur" in
 		-*)
 			local options="--compose-file -c --help --orchestrator"
-			__docker_server_is_experimental && __docker_stack_orchestrator_is swarm && options+=" --bundle-file"
 			__docker_stack_orchestrator_is kubernetes && options+=" --kubeconfig --namespace"
 			__docker_stack_orchestrator_is swarm && options+=" --prune --resolve-image --with-registry-auth"
 			COMPREPLY=( $( compgen -W "$options" -- "$cur" ) )
 			;;
 		*)
-			local counter=$(__docker_pos_first_nonflag '--bundle-file|--compose-file|-c|--kubeconfig|--namespace|--orchestrator|--resolve-image')
+			local counter=$(__docker_pos_first_nonflag '--compose-file|-c|--kubeconfig|--namespace|--orchestrator|--resolve-image')
 			if [ "$cword" -eq "$counter" ]; then
 				__docker_complete_stacks
 			fi
@@ -5156,12 +5189,16 @@ _docker_system_events() {
 			__docker_complete_networks --cur "${cur##*=}"
 			return
 			;;
+		node)
+			__docker_complete_nodes --cur "${cur##*=}"
+			return
+			;;
 		scope)
 			COMPREPLY=( $( compgen -W "local swarm" -- "${cur##*=}" ) )
 			return
 			;;
 		type)
-			COMPREPLY=( $( compgen -W "config container daemon image network plugin secret service volume" -- "${cur##*=}" ) )
+			COMPREPLY=( $( compgen -W "config container daemon image network node plugin secret service volume" -- "${cur##*=}" ) )
 			return
 			;;
 		volume)
@@ -5172,7 +5209,7 @@ _docker_system_events() {
 
 	case "$prev" in
 		--filter|-f)
-			COMPREPLY=( $( compgen -S = -W "container daemon event image label network scope type volume" -- "$cur" ) )
+			COMPREPLY=( $( compgen -S = -W "container daemon event image label network node scope type volume" -- "$cur" ) )
 			__docker_nospace
 			return
 			;;
@@ -5457,8 +5494,8 @@ _docker() {
 		config
 		container
 		context
-		engine
 		image
+		manifest
 		network
 		node
 		plugin
@@ -5517,13 +5554,8 @@ _docker() {
 		wait
 	)
 
-	local experimental_client_commands=(
-		manifest
-	)
-
 	local experimental_server_commands=(
 		checkpoint
-		deploy
 	)
 
 	local commands=(${management_commands[*]} ${top_level_commands[*]})
@@ -5549,7 +5581,7 @@ _docker() {
 	# variables to cache server info, populated on demand for performance reasons
 	local info_fetched server_experimental server_os
 	# variables to cache client info, populated on demand for performance reasons
-	local client_experimental stack_orchestrator_is_kubernetes stack_orchestrator_is_swarm
+	local stack_orchestrator_is_kubernetes stack_orchestrator_is_swarm
 
 	local host config context
 

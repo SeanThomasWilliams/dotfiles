@@ -3,7 +3,7 @@ set -euo pipefail
 IFS=$'\n\t'
 
 # Default timespan
-DAYS=6
+DAYS=30
 # Taskwarrior filtering
 TASK_TAGS="${TASK_TAGS:-+${PROJECT}}"
 
@@ -21,9 +21,9 @@ Arguments:
   -d
     Number of days (default: ${DAYS})
   -s
-    Start Date (2020-01-01)
+    Start Date (2021-01-01)
   -e
-    End Date (2020-02-01)
+    End Date (2021-02-01)
   -h
     Show usage and exit
 
@@ -33,7 +33,7 @@ ENVIRONMENT:
   GIT_REPO_URL_<NAME>
       For each git repo, specify an environment variable with this prefix
   TASK_TAGS
-      Filter for taskwarrior tasks. Default: (+${PROJECT:-PROJECT})
+      Filter for taskwarrior tasks. Default: (${TASK_TAGS})
 EOF
 }
 
@@ -133,7 +133,10 @@ get_task_complete_report(){
   echo "### Completed tasks "
   echo '```'
 
-  task "${TASK_TAGS}" "(end.after=${QUERY_START_DATE} and end.before=${QUERY_END_DATE} and status:completed)" worklog 2> /dev/null |\
+
+  task "${TASK_TAGS}" \
+    "(end.after='${QUERY_START_DATE}' and end.before='${QUERY_END_DATE}' and status:completed)" \
+    worklog 2> /dev/null |\
     tail -n +4 |\
     ghead -n -2 |\
     grep -v "Submit project work report" |\

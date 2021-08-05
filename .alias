@@ -175,7 +175,7 @@ load_alias_settings(){
 
   if command -v rg > /dev/null; then
     export FZF_DEFAULT_COMMAND="rg --files"
-    alias fgrep="rg --no-ignore -S"
+    alias fgrep="rg -S"
   else
     alias fgrep="find . -type f | awk '!/CVS|\.class|\.jar|\.war|\.git|\.svn|_Stub|\.#/  {print \$0;}' | sed 's/\ /\\\ /g' | xargs grep --color=always -n "
   fi

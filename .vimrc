@@ -11,28 +11,33 @@ set nocompatible " Required
 
 call plug#begin('~/.vim/plugged')
 " Other plugins
+" Plug 'davidhalter/jedi-vim'
+" Plug 'ervandew/supertab'
+" Plug 'numirias/semshi', {'do': ':UpdateRemotePlugins'}
+" Plug 'zchee/deoplete-jedi'
+" Plug 'RRethy/vim-illuminate'
+" Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
+" Plug 'carlitux/deoplete-ternjs', { 'do': 'npm install -g tern' }
+" Plug 'hashivim/vim-terraform'
+" Plug 'zchee/deoplete-go', { 'do': 'make' }
 Plug 'Ivo-Donchev/vim-react-goto-definition'
-Plug 'RRethy/vim-illuminate'
 Plug 'SeanThomasWilliams/dwm.vim'
-Plug 'SeanThomasWilliams/vim-snippets'
-Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
-Plug 'Shougo/neosnippet'
-Plug 'Shougo/neosnippet-snippets'
+Plug 'honza/vim-snippets'
+Plug 'SirVer/ultisnips'
+Plug 'airblade/vim-gitgutter'
 Plug 'arakashic/nvim-colors-solarized'
 Plug 'benekastah/neomake'
 Plug 'benmills/vimux'
 Plug 'benmills/vimux-golang'
 Plug 'bling/vim-airline'
-Plug 'carlitux/deoplete-ternjs', { 'do': 'npm install -g tern' }
-Plug 'davidhalter/jedi-vim'
 Plug 'ekalinin/Dockerfile.vim'
-Plug 'ervandew/supertab'
 Plug 'fatih/vim-go', { 'tag': '*' }
 Plug 'gagoar/StripWhiteSpaces'
-Plug 'hashivim/vim-terraform'
+Plug 'hrsh7th/nvim-compe'
 Plug 'jacoborus/tender.vim'
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 Plug 'junegunn/fzf.vim'
+Plug 'kristijanhusak/completion-tags'
 Plug 'leafgarland/typescript-vim'
 Plug 'lilydjwg/colorizer'
 Plug 'ludovicchabant/vim-gutentags'
@@ -40,13 +45,17 @@ Plug 'luochen1990/rainbow'
 Plug 'majutsushi/tagbar'
 Plug 'marijnh/tern_for_vim'
 Plug 'mustache/vim-mustache-handlebars'
-Plug 'numirias/semshi', {'do': ':UpdateRemotePlugins'}
+Plug 'neovim/nvim-lspconfig', { 'do': 'npm i -g pyright' }
+Plug 'nvim-lua/completion-nvim'
+Plug 'nvim-lua/lsp-status.nvim'
+Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}  " We recommend updating the parsers on update
 Plug 'pangloss/vim-javascript'
 Plug 'pearofducks/ansible-vim'
 Plug 'pedrohdz/vim-yaml-folds'
 Plug 'peitalin/vim-jsx-typescript'
 Plug 'powerman/vim-plugin-AnsiEsc'
 Plug 'prettier/vim-prettier', { 'do': 'yarn install' }
+Plug 'projekt0n/github-nvim-theme'
 Plug 'sbdchd/neoformat'
 Plug 'shmup/vim-sql-syntax'
 Plug 'towolf/vim-helm'
@@ -56,11 +65,11 @@ Plug 'tpope/vim-surround'
 Plug 'vim-perl/vim-perl'
 Plug 'vimwiki/vimwiki'
 Plug 'will133/vim-dirdiff'
-Plug 'zchee/deoplete-go', { 'do': 'make' }
-Plug 'zchee/deoplete-jedi'
 
 " Required, plugins available after.
 call plug#end()
+
+lua require('init')
 
 "+----------------- Basic Configurations ------------+
 " GUI Configuration
@@ -140,6 +149,8 @@ endif
 nnoremap <Leader>ve :e $MYVIMRC<CR>
 " Reload vimrc configuration file
 nnoremap <Leader>vr :source $MYVIMRC<CR>
+" Run PlugInstall after reload
+nnoremap <Leader>pi :source $MYVIMRC<CR>:PlugInstall<CR>
 
 " Show neovim health
 nnoremap <Leader>ch :checkhealth<CR>
@@ -165,7 +176,8 @@ set tags=~/.tags,./tags           " Look for tags in this file
 
 " {{{ colorscheme/style options
 syntax enable
-colorscheme tender
+
+" colorscheme tender
 let g:airline_theme = 'tender'
 " Enable true color
 if exists('+termguicolors')
@@ -186,7 +198,7 @@ set background=dark
 set bg=dark
 " Make syntax errors in SCREAM
 " (otherwise a missing comma in JSON is bold red vs regular red - not visible)
-:highlight Error term=reverse cterm=bold ctermfg=7 ctermbg=1 guifg=White guibg=Red
+" :highlight Error term=reverse cterm=bold ctermfg=7 ctermbg=1 guifg=White guibg=Red
 " }}}
 
 " {{{ Misc UI settings
@@ -207,7 +219,7 @@ set numberwidth=5
 set mouse=a " Enable mouse in console mode
 set noshelltemp " Be a bit faster when executing command-line shell stuff
 set hidden " hide open buffers instead of closing them, when opening a new one with :e
-set shortmess=atI " Deactivate the PRESS ENTER OR TYPE COMMAND TO CONTINUE message
+set shortmess=actI " Deactivate the PRESS ENTER OR TYPE COMMAND TO CONTINUE message
 set clipboard=unnamed " Allows copy-pasting from other apps
 set scrolloff=3 " keep moreiabbrev lmis ಠ‿ಠearch matches in the middle of the window.
 set sidescrolloff=1 " Add some space around the cursor when moving it near the borders of the screen
@@ -232,10 +244,14 @@ let javascript_fold=1
 " }}}
 
 " {{{ completion options
-set omnifunc=syntaxcomplete#Complete
+" set omnifunc=syntaxcomplete#Complete
 set complete=.,w,b,u,t " Better Completion
-set completeopt=menuone,preview " Better Completion Options
+" set completeopt=menuone,noselect
+set completeopt=menuone
+set completeopt+=noinsert
+set completeopt-=preview
 set iskeyword+=- " Allow autocomplete to treat thes as part of a completion
+set updatetime=300
 " }}}
 
 " {{{ Search settings
@@ -501,7 +517,21 @@ nnoremap <c-o> <c-o>zz
 nnoremap * *``
 
 " STATUS LINE
-set statusline=%<%f\ (%{&ft})\ %-4(%m%)%=%-19(%3l,%02c%03V%)
+" set statusline=%<%f\ (%{&ft})\ %-4(%m%)%=%-19(%3l,%02c%03V%)
+"------------------------------------------------
+" Status Line START
+set statusline=%<%f\ %h%m%r
+set statusline+=%=%-10.60{LspStatus()}\ %-.(%l,%c%V%)\ %P
+
+function! LspStatus() abort
+  if luaeval('#vim.lsp.buf_get_clients() > 0')
+    return luaeval("require('lsp-status').status()")
+  endif
+
+  return ''
+endfunction
+" Status Line END
+"------------------------------------------------
 
 " MISC FUNCTIONS
 
@@ -519,7 +549,7 @@ noremap <silent> }} :s/^/  /e<CR>:nohlsearch<CR>
 "noremap <silent> <leader>cc :<C-B>silent <C-E>s/^/<C-R>=escape(b:comment_leader,'\/')<CR>/<CR>:nohlsearch<CR>
 "noremap <silent> <leader>cu :<C-B>silent <C-E>s/^\V<C-R>=escape(b:comment_leader,'\/')<CR>//e<CR>:nohlsearch<CR>
 "omnicomplete
-inoremap <C-Space> <C-X><C-I>
+" inoremap <C-Space> <C-X><C-I>
 
 " Resize splits
 nnoremap <silent> + :exe "vertical resize " . (winwidth(0) * 4/3)<CR>
@@ -594,10 +624,11 @@ else
 endif
 
 " FZF configuration
-let $SITE_PACKAGES=expand("$CONDA_PREFIX") . '/lib/python3.7/site-packages'
-nnoremap <C-t> :Tags<CR>
+let $SITE_PACKAGES=expand("$HOME") . '/anaconda3/lib/python3.7/site-packages'
+nnoremap <C-T> :Tags<CR>
 nnoremap <C-p> :Files $SITE_PACKAGES<CR>
 nnoremap <C-\> :split<CR> :FZF<CR>
+nnoremap <C-t> :FZF<CR>
 
 " Rg configuration
 nnoremap <leader>a :execute 'Rg '.input('Rg: ')<CR>
@@ -613,6 +644,15 @@ nnoremap U :syntax sync fromstart<CR>:redraw!<CR>
 " ------------------------------------------"
 " Plugin Settings
 " ----------------------------------------- "
+
+" LSP + Tag Completion
+" Or combine with lsp
+"autocmd BufEnter * lua require'completion'.on_attach()
+"
+"let g:completion_chain_complete_list = {
+"      \ 'default': [
+"      \    {'complete_items': ['lsp', 'tags']},
+"      \  ]}
 
 " tagbar
 nnoremap <silent> <leader>b :TagbarToggle<CR>
@@ -715,42 +755,38 @@ let g:ansible_unindent_after_newline = 1
 let g:ansible_extra_keywords_highlight = 1
 
 " Deoplete
-let g:deoplete#omni_patterns = {}
-"let g:deoplete#auto_complete_delay = 50
-let g:deoplete#min_pattern_length = 1
-"let g:deoplete#max_list = 100
-let g:deoplete#smart_case = 1
-let g:deoplete#enable_at_startup = 1
-"let g:deoplete#file#enable_buffer_path = 1
+" let g:deoplete#omni_patterns = {}
+" let g:deoplete#auto_complete_delay = 50
+" let g:deoplete#min_pattern_length = 1
+" let g:deoplete#max_list = 100
+" let g:deoplete#smart_case = 1
+" let g:deoplete#enable_at_startup = 1
+" let g:deoplete#file#enable_buffer_path = 1
 
 " Deoplete Jedi/Python
-let g:deoplete#sources#jedi#show_docstring = 1
-let g:jedi#completions_command = "<C-Space>"
-let g:jedi#documentation_command = "K"
-let g:jedi#goto_assignments_command = "<leader>g"
-let g:jedi#goto_command = "<leader>d"
-let g:jedi#goto_definitions_command = ""
-let g:jedi#rename_command = "<leader>r"
-let g:jedi#show_call_signatures = "1"
-let g:jedi#usages_command = "<leader>n"
+" let g:deoplete#sources#jedi#show_docstring = 1
+" let g:jedi#completions_command = "<C-Space>"
+" let g:jedi#documentation_command = "K"
+" let g:jedi#goto_assignments_command = "<leader>g"
+" let g:jedi#goto_command = "<leader>d"
+" let g:jedi#goto_definitions_command = ""
+" let g:jedi#rename_command = "<leader>r"
+" let g:jedi#show_call_signatures = 1
+" let g:jedi#smart_auto_mappings = 1
+" let g:jedi#usages_command = "<leader>n"
 
 " Deoplete Golang
-let g:deoplete#sources#go#sort_class = ['package', 'func', 'type', 'var', 'const']
-let g:deoplete#sources#go#json_directory = $HOME . '.vim/deocache'
-let g:deoplete#sources#go#use_cache = 1
+" let g:deoplete#sources#go#sort_class = ['package', 'func', 'type', 'var', 'const']
+" let g:deoplete#sources#go#json_directory = $HOME . '.vim/deocache'
+" let g:deoplete#sources#go#use_cache = 1
 
 " Deoplete javascript/ternjs
-let g:deoplete#sources#ternjs#timeout = 1
+" let g:deoplete#sources#ternjs#timeout = 1
 " Whether to include the types of the completions in the result data. Default: 0
-let g:deoplete#sources#ternjs#types = 1
-let g:deoplete#sources#ternjs#case_insensitive = 1
+" let g:deoplete#sources#ternjs#types = 1
+" let g:deoplete#sources#ternjs#case_insensitive = 1
 
-"let g:deoplete#omni_patterns.terraform = '[^ *\t"{=$]\w*'
-call deoplete#custom#option('omni_patterns', {
-\ 'complete_method': 'omnifunc',
-\ 'terraform': '[^ *\t"{=$]\w*',
-\})
-call deoplete#initialize()
+" call deoplete#initialize()
 
 " tern_for_vim.
 let g:tern#command = ["tern"]
@@ -792,7 +828,21 @@ let g:rainbow_active = 1
 
 " Neoformat
 " Python formatters
-let g:neoformat_enabled_python = ['yapf', 'isort', 'docformatter']
+let g:neoformat_python_autoflake = {
+  \ 'exe': 'autoflake',
+  \ 'stdin': 0,
+  \ 'replace': 1,
+  \ 'args': [
+    \   '--in-place',
+    \   '--remove-all-unused-imports',
+    \   '--ignore-init-module-imports',
+    \   '--expand-star-imports',
+    \   '--remove-unused-variables',
+    \   '--remove-duplicate-keys',
+  \ ],
+  \ }
+
+let g:neoformat_enabled_python = ['isort', 'autoflake', 'black']
 " YAML formatters
 let g:neoformat_enabled_yaml = ['beautifyk8s']
 let g:neoformat_yaml_beautifyk8s = {
@@ -815,8 +865,8 @@ let g:neoformat_only_msg_on_error = 1
 :highlight NeomakeSign guifg=Yellow guibg=#dc322f gui=bold
 let g:neomake_makeprg_buffer_output = 0
 "let g:neomake_open_list = 1
-let g:neomake_python_enabled_makers = ['pycodestyle', 'flake8', 'python']
-let g:neomake_javascript_enabled_makers = ['eslint', 'jshint']
+let g:neomake_python_enabled_makers = ['python', 'mypy', 'frosted', 'flake8']
+let g:neomake_javascript_enabled_makers = ['eslint']
 let g:neomake_dockerfile_enabled_makers = []
 let g:neomake_error_sign = {
       \ 'text': '•',
@@ -853,11 +903,14 @@ let g:DirDiffAddArgs = "-w" " ignore white space in diff
 let g:DirDiffEnableMappings = 1
 
 " supertab
-let g:SuperTabDefaultCompletionType = "<c-n>"
+" let g:SuperTabDefaultCompletionType = "<c-n>"
 
-" snippets / neosnippet
-let g:neosnippet#enable_snipmate_compatibility = 1
+" snippets
+" let g:neosnippet#enable_snipmate_compatibility = 1
+" let g:completion_enable_snippet = 'Neosnippet'
 "let g:neosnippet#snippets_directory='~/.vim/plugged/vim-snippets/snippets'
+"let g:UltiSnipsSnippetDirectories=[expand("$HOME/.vim/plugged/vim-snippets/snippets")]
+" let g:UltiSnipsExpandTrigger="<C-x><C-s>"
 
 " terraform
 let g:terraform_align = 1
@@ -867,15 +920,15 @@ let g:terraform_completion_keys = 0
 let g:terraform_registry_module_completion = 1
 
 " C-k to execute snippet
-imap <C-s> <Plug>(neosnippet_expand)
-imap <C-k> <Plug>(neosnippet_expand_or_jump)
-smap <C-k> <Plug>(neosnippet_expand_or_jump)
-xmap <C-k> <Plug>(neosnippet_expand_target)
+" imap <C-s> <Plug>(neosnippet_expand)
+" imap <C-k> <Plug>(neosnippet_expand_or_jump)
+" smap <C-k> <Plug>(neosnippet_expand_or_jump)
+" xmap <C-k> <Plug>(neosnippet_expand_target)
 
 "" Expand the completed snippet trigger by <CR>.
-imap <expr><CR>
-      \ (pumvisible() && neosnippet#expandable()) ?
-      \ "\<Plug>(neosnippet_expand)" : "\<CR>"
+"imap <expr><CR>
+"      \ (pumvisible() && neosnippet#expandable()) ?
+"      \ "\<Plug>(neosnippet_expand)" : "\<CR>"
 
 " For conceal markers.
 if has('conceal')

@@ -17,7 +17,7 @@ Arguments:
   -v MOUNT_PATH[:CONTAINER_PATH]
     Local path to mount (optional remote container mount path)
   -u
-    Run as local user
+    Run as given user
   -h
     Show usage and exit
 EOF
@@ -27,10 +27,8 @@ declare -a DOCKER_OPTS
 DOCKER_SHELL="/bin/bash"
 DOCKER_OPTS+=("--init" "--rm" "-i" "-t")
 INTERACTIVE=0
-USER_ID=$(id -u)
-GROUP_ID=$(id -g)
 
-while getopts ':ip:s:uv:h' opt; do
+while getopts ':ip:s:u:v:h' opt; do
   case "${opt}" in
     i)
       INTERACTIVE=1
@@ -45,7 +43,7 @@ while getopts ':ip:s:uv:h' opt; do
       DOCKER_SHELL="${OPTARG}"
       ;;
     u)
-      DOCKER_OPTS+=("-u" "$USER_ID:$GROUP_ID")
+      DOCKER_OPTS+=("-u" "${OPTARG}")
       ;;
     h)
       usage

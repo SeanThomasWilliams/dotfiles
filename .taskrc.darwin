@@ -30,7 +30,7 @@ defaultwidth=0
 report.worklog.sort=end
 report.worklog.columns=uuid.short,end,description
 report.worklog.description=Completed tasks
-report.worklog.filter=(status:completed and end.after:'-30 days')
+report.worklog.filter=(status:completed)
 report.worklog.labels=UUID,Completed,Description
 
 # Completed report

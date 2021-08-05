@@ -1,4 +1,8 @@
-#!/bin/bash -e
+#!/usr/bin/env bash
+set -euo pipefail
+IFS=$'\n\t'
+
+# Show certificate info for the given input files or domains
 
 sslinfo(){
   local cert
@@ -33,6 +37,18 @@ sslinfo(){
 }
 
 for fname in "$@"; do
+  if [[ $fname =~ https://* ]]; then
+    tmpdir=$(mktemp -d)
+
+    domain="$(echo "$fname" | cut -d'/' -f3)"
+    fname="$tmpdir/${domain}.crt"
+
+    openssl s_client -showcerts \
+      -connect "$domain:443" \
+      -servername "$domain" </dev/null 2>/dev/null |\
+      openssl x509 -outform PEM > "$fname"
+  fi
+
   sslinfo "$fname"
 done
 
