@@ -145,12 +145,13 @@ add_to_path_if_exists(){
 load_path_settings(){
   # PATH Options. Reverse order of importance since they are prepended.
   PATH_PARTS=(
-    /usr/local/bin
-    /usr/local/opt/libpq/bin
-    "$HOME/bin/Sencha/Cmd"
     "$HOME/.local/bin"
     "$HOME/anaconda3/bin"
     "$HOME/bin"
+    "$HOME/bin/Sencha/Cmd"
+    /usr/local/bin
+    /usr/local/opt/libpq/bin
+    /usr/local/opt/llvm/bin
   )
 
   for path_part in "${PATH_PARTS[@]}"; do
