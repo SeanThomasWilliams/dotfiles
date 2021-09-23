@@ -1,12 +1,27 @@
 #!/bin/bash
 
+set -eux
+set -o pipefail
+
+node_packages=(
+  eslint
+  jshint
+  tern
+  neovim
+)
+
 # Neovim pip
+pip install --upgrade pip
 pip install --upgrade neovim pynvim msgpack
 sudo gem install neovim && gem environment
 
 # Node neovim
-npm install -g neovim
-yarn global add neovim
+if ! command -v yarn 2> /dev/null; then
+  npm install -g yarn
+fi
+
+npm install -g "${node_packages[@]}"
+yarn global add "${node_packages[@]}"
 
 # Go binaries
 mkdir -p ~/gocode/src/github.com/

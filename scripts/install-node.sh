@@ -17,13 +17,3 @@ sudo tar -xJvf "node-$VERSION-$DISTRO.tar.xz" -C /usr/local/lib/nodejs
 for prg in node npm npx; do
   sudo ln -sf "/usr/local/lib/nodejs/node-$VERSION-$DISTRO/bin/$prg" "/usr/bin/$prg"
 done
-
-node_packages=(
-  eslint
-  jshint
-  tern
-  neovim
-)
-
-npm install -g yarn "${node_packages[@]}"
-yarn global add "${node_packages[@]}"
