@@ -12,6 +12,8 @@ Arguments:
     Interactive session
   -p PORT
     Port to expose
+  -e ENV
+    Environment variable from local environment to expose to the container
   -s SHELL
     Docker shell for interactive terminal
   -v MOUNT_PATH[:CONTAINER_PATH]
@@ -28,8 +30,11 @@ DOCKER_SHELL="/bin/bash"
 DOCKER_OPTS+=("--init" "--rm" "-i" "-t")
 INTERACTIVE=0
 
-while getopts ':ip:s:u:v:h' opt; do
+while getopts ':e:ip:s:u:v:h' opt; do
   case "${opt}" in
+    e)
+      DOCKER_OPTS+=("-e" "${OPTARG}")
+      ;;
     i)
       INTERACTIVE=1
       ;;

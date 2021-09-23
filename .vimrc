@@ -175,18 +175,14 @@ set tags=~/.tags,./tags           " Look for tags in this file
 " }}}
 
 " {{{ colorscheme/style options
-syntax enable
-
-" colorscheme tender
+colorscheme github_dimmed " github_dark_default github_dark
 let g:airline_theme = 'tender'
 " Enable true color
 if exists('+termguicolors')
   let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"
   let &t_8b = "\<Esc>[48;2;%lu;%lu;%lum"
-"  set termguicolors " Enables truecolor in neovim >= 0.1.5
+  set termguicolors " Enables truecolor in neovim >= 0.1.5
 endif
-let $NVIM_TUI_ENABLE_TRUE_COLOR=1 " forces true color
-let $NVIM_TUI_ENABLE_CURSOR_SHAPE=1 " Changes cursor to a line on insert mode
 
 set number        " Displays line numbers
 set colorcolumn=+1 " highlight column after 'textwidth'
@@ -312,7 +308,9 @@ set mmp=5000      " Set pattern max memory
 
 syntax case match
 syntax sync minlines=1024
-syntax on " Enable highlighting for syntax
+if !exists("g:syntax_on")
+    syntax enable
+endif
 
 " Autocommands that cant live in after/filetypes
 if has('autocmd')
@@ -1001,20 +999,12 @@ endfunction
 vmap <Leader>vs "vy :call VimuxShebangSlime()<CR>gv
 nmap <Leader>vo :call VimuxOpenRunner()<CR>
 
-nmap <leader>g :call Google()<CR>
-fun! Google()
-    let keyword = expand("<cword>")
-    let url = "http://www.google.com/search?q=" . keyword
-    let path = "C:/Program Files/Mozilla Firefox/"
-    exec 'silent !"' . path . 'firefox.exe" ' . url
-endfun
-
 function! GoogleSearch()
   let searchterm = expand('<cword>')
   if &filetype != ""
     let searchterm .= "+" . &filetype
   endif
-  silent! exec "silent! !open \"http://google.com/search?q=" . searchterm . "\""
+  silent! exec "silent! !open \"http://google.com/search?q=" . searchterm . "\" &"
 endfunction
 
-noremap gs :call GoogleSearch()<CR>
+nmap <Leader>gs :call GoogleSearch()<CR>

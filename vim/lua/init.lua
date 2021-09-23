@@ -1,15 +1,6 @@
 local nvim_lsp = require("lspconfig")
 local lsp_status = require("lsp-status")
 
--- require('config.ultisnips')
-
--- Dark theme
-require("github-theme").setup(
-    {
-        themeStyle = "dark"
-    }
-)
-
 -- Treesitter
 require "nvim-treesitter.configs".setup {
     ensure_installed = "maintained", -- one of "all", "maintained" (parsers with maintainers), or a list of languages

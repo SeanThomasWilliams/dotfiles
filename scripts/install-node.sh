@@ -1,6 +1,6 @@
 #!/bin/bash -eux
 
-VERSION=v12.18.1
+VERSION=v14.17.6
 DISTRO=linux-x64
 
 cleanup(){
@@ -18,4 +18,12 @@ for prg in node npm npx; do
   sudo ln -sf "/usr/local/lib/nodejs/node-$VERSION-$DISTRO/bin/$prg" "/usr/bin/$prg"
 done
 
-sudo npm -g install eslint jshint tern yarn neovim
+node_packages=(
+  eslint
+  jshint
+  tern
+  neovim
+)
+
+npm install -g yarn "${node_packages[@]}"
+yarn global add "${node_packages[@]}"

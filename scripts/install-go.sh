@@ -1,6 +1,6 @@
 #!/bin/bash -eux
 
-GO_VERSION="1.15.2"
+GO_VERSION="1.17"
 UNAME_S=$(uname -s | tr '[:upper:]' '[:lower:]')
 
 mkdir -p "$HOME/software"

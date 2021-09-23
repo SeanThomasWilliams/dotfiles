@@ -172,6 +172,7 @@ load_alias_settings(){
   alias ansible-lint="ansible-lint -c $HOME/.ansible-lint"
   alias c="column -t -n -s ',' | less -S -R"
   alias dstat-all='dstat -larm --top-io --top-latency'
+  alias ssh-keygen='ssh-keygen -t rsa -b 3072'
 
   if command -v rg > /dev/null; then
     export FZF_DEFAULT_COMMAND="rg --files"
