@@ -54,7 +54,7 @@ Plug 'pearofducks/ansible-vim'
 Plug 'pedrohdz/vim-yaml-folds'
 Plug 'peitalin/vim-jsx-typescript'
 Plug 'powerman/vim-plugin-AnsiEsc'
-Plug 'prettier/vim-prettier', { 'do': 'yarn install' }
+Plug 'prettier/vim-prettier', { 'do': 'yarn install --no-lockfile' }
 Plug 'projekt0n/github-nvim-theme'
 Plug 'sbdchd/neoformat'
 Plug 'shmup/vim-sql-syntax'

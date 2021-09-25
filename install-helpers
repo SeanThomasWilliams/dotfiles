@@ -20,7 +20,7 @@ if ! command -v yarn 2> /dev/null; then
   npm install -g yarn
 fi
 
-npm install -g "${node_packages[@]}"
+sudo npm install -g "${node_packages[@]}"
 yarn global add "${node_packages[@]}"
 
 # Go binaries

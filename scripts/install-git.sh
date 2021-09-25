@@ -1,6 +1,13 @@
 #!/bin/bash
 
-set -e
+set -eu
+
+if grep -q Ubuntu /etc/os-release; then
+  sudo add-apt-repository ppa:git-core/ppa
+  sudo apt update
+  sudo apt install git
+  exit
+fi
 
 sudo yum -y groupinstall "Development Tools"
 sudo yum -y install gettext-devel openssl-devel perl-CPAN perl-devel zlib-devel wget libcurl-devel
