@@ -14,7 +14,7 @@
 data.location=~/.task
 
 # Color theme
-include /usr/local/Cellar/task/2.5.3/share/doc/task/rc/dark-256.theme
+include /usr/local/Cellar/task/2.5.3_1/share/doc/task/rc/dark-256.theme
 
 color=on
 

@@ -679,6 +679,18 @@ let g:tagbar_type_terraform = {
     \ 'sort': 0
     \ }
 
+if executable('cmake-language-server')
+  au User lsp_setup call lsp#register_server({
+  \ 'name': 'cmake',
+  \ 'cmd': {server_info->['cmake-language-server']},
+  \ 'root_uri': {server_info->lsp#utils#path_to_uri(lsp#utils#find_nearest_parent_file_directory(lsp#utils#get_buffer_path(), 'build/'))},
+  \ 'whitelist': ['cmake'],
+  \ 'initialization_options': {
+  \   'buildDirectory': 'build',
+  \ }
+  \})
+endif
+
 " gutentags
 set statusline+=%{gutentags#statusline()}
 let g:gutentags_define_advanced_commands = 1 " Extra Debugging

@@ -120,7 +120,6 @@ local servers = {
     "dockerls",
     "tsserver",
     "bashls",
-    "cmake",
     "jedi_language_server",
     "rust_analyzer",
     "terraformls",
@@ -139,3 +138,4 @@ nvim_lsp["terraformls"].filetypes = {"terraform", "tf"}
 -- require "lspconfig".terraformls.setup {
 --     filetypes = {"terraform", "tf"}
 -- }
+--

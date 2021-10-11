@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+list_session_configs(){
+  awk '/session_name/ {print $2}' ~/.tmuxp/*.yaml
+}
+
 if [[ $# -lt 1 ]]; then
   session_name=$(tmux list-sessions -F '#{session_name}' | head -n 1)
 else
@@ -8,6 +12,8 @@ fi
 
 if [[ $session_name == ls ]]; then
   tmux list-sessions
+elif [[ $session_name == a ]]; then
+  list_session_configs
 elif [[ -f $HOME/.tmuxp/$session_name.yaml ]]; then
   tmuxp load -y -2 "$session_name"
 else
