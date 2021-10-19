@@ -98,7 +98,7 @@
   insteadOf = https://github.com/Novetta
 
 [http]
-  sslVerify = true
+  sslVerify = false
 [credential]
   helper = store
 [pull]

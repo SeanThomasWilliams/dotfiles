@@ -37,7 +37,7 @@ calendar.holidays=full
 #report.list.dateformat= a M-D
 alias.ls=list
 
-default.command=(due.before:7d or due: ) and status:pending list
+default.command=(due.before:7d or due: ) and status:pending long
 
 urgency.next.coefficient=25.0                   # +next tag
 urgency.due.coefficient=5.0                    # overdue or near due date
@@ -53,21 +53,6 @@ urgency.waiting.coefficient=-100.0              # waiting task
 
 editor=nvim
 
-uda.intheamtrelloboardid.type=string
-uda.intheamtrelloboardid.label=Inthe.AM Trello Board ID
-
-uda.intheamtrellourl.type=string
-uda.intheamtrellourl.label=Inthe.AM Trello URL
-
-uda.intheamtrelloid.type=string
-uda.intheamtrelloid.label=Inthe.AM Trello Object ID
-
-uda.intheamtrellolistid.type=string
-uda.intheamtrellolistid.label=Inthe.AM Trello List ID
-
-uda.intheamtrellodescription.type=string
-uda.intheamtrellodescription.label=Inthe.AM Trello Description
-
 uda.intheamoriginalemailsubject.type=string
 uda.intheamoriginalemailsubject.label=Inthe.AM E-mail Subject
 
@@ -82,10 +67,6 @@ uda.intheamattachments.label=Inthe.AM Attachments
 
 uda.intheamduplicateof.type=string
 uda.intheamduplicateof.label=Inthe.AM Duplicate of Task
-
-uda.intheamtrellolistname.type=string
-uda.intheamtrellolistname.label=Inthe.AM Trello List Name
-uda.intheamtrellolistname.values=To Do,Doing,Done
 
 # Incoming e-mail, SMS, etc
 urgency.user.tag.review.coefficient=99
@@ -107,24 +88,3 @@ taskd.ca=~/sync/task/ca.cert.pem
 taskd.credentials=inthe_am/seanthomaswilliams/150193cd-ee7e-4362-922d-aa5bef2cdd2a
 taskd.server=taskwarrior.inthe.am:53589
 taskd.trust=ignore hostname
-
-# Jira UDA
-uda.jira.type=string
-uda.jira.label=JIRA Issue
-
-# Bugwarrior UDAs
-uda.trellocard.type=string
-uda.trellocard.label=Trello card name
-uda.trellocardid.type=string
-uda.trellocardid.label=Trello card ID
-uda.trelloboard.type=string
-uda.trelloboard.label=Trello board name
-uda.trellolist.type=string
-uda.trellolist.label=Trello list name
-uda.trelloshortlink.type=string
-uda.trelloshortlink.label=Trello shortlink
-uda.trelloshorturl.type=string
-uda.trelloshorturl.label=Trello short URL
-uda.trellourl.type=string
-uda.trellourl.label=Trello URL
-# END Bugwarrior UDAs

@@ -1,0 +1,53 @@
+#!/bin/bash -eu
+# shellcheck disable=SC2068
+
+usage(){
+  cat >&2 <<EOF
+Find files matching the given glob
+
+Usage: $0 [options] <FILE_NAME>
+
+Arguments:
+  FILE_NAME
+    Partial file name
+
+Options:
+  -t
+    Filetype (sh, py, etc)
+  -h
+    Show usage and exit
+EOF
+}
+
+FILE_TYPE='*'
+FILE_NAME='*'
+
+while getopts ':t:h' opt; do
+  case "${opt}" in
+    t)
+      FILE_TYPE="${OPTARG}"
+      ;;
+    h)
+      usage
+      exit 0
+      ;;
+    *)
+      usage
+      exit 1
+      ;;
+  esac
+done
+
+shift $((OPTIND-1))
+
+if [[ $# -eq 1 ]]; then
+  FILE_NAME="$1"
+fi
+
+if [[ $FILE_TYPE = '*' ]]; then
+  FILE_GLOB="*${FILE_NAME}*"
+else
+  FILE_GLOB="*${FILE_NAME}*.${FILE_TYPE}"
+fi
+
+find . -type f -iname "$FILE_GLOB"

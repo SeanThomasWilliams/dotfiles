@@ -28,6 +28,8 @@ sslinfo(){
       ;;
     csr)
       openssl req -text -noout -verify -in "$cert"
+      echo >&2 "MD5:"
+      openssl req -noout -modulus -in "$cert" | openssl md5
       ;;
     *)
       echo >&2 "Unknown extension: $suffix for $cert"

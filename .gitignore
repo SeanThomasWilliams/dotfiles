@@ -1,3 +1,4 @@
+!*.manifest
 *.bak
 *.deb
 *.gz
@@ -14,9 +15,9 @@
 *.swp
 *.tar.*
 *.tar.gz
+*.temp
+*.tmp
 *.zip
-*temp
-*tmp
 .DS_Store
 .Makefile.*
 .env*
@@ -27,6 +28,10 @@
 .tern-port
 .tmuxp.yaml
 .vim-go/*
+/vim/bundle/
+/vim/init.vim
+/vim/plugged/
+/vim/tmp/
 Anaconda*.sh
 __pycache__
 init.vim
@@ -35,7 +40,3 @@ tags.files
 tags.lock
 tags.temp
 temp
-/vim/bundle/
-/vim/init.vim
-/vim/plugged/
-/vim/tmp/

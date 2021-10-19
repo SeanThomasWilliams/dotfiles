@@ -45,6 +45,10 @@ populate_args "$@"
 #echo >&2 "Connecting to ${SSH_USER}@${TARGET_HOST} using jumpbox ${SSH_PROXY_HOST} and key ${SSH_KEY_FILE}"
 
 ssh \
+    -o ConnectTimeout=5 \
+    -o ConnectionAttempts=1 \
+    -o IdentitiesOnly=yes \
+    -o StrictHostKeyChecking=no \
     -o "ProxyCommand ssh -W %h:%p ${SSH_PROXY_HOST}" \
     -i "${SSH_KEY_FILE}" \
     "${SSH_USER}@${TARGET_HOST}" "${@:2}"

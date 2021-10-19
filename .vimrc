@@ -45,7 +45,7 @@ Plug 'luochen1990/rainbow'
 Plug 'majutsushi/tagbar'
 Plug 'marijnh/tern_for_vim'
 Plug 'mustache/vim-mustache-handlebars'
-Plug 'neovim/nvim-lspconfig', { 'do': 'npm i -g pyright' }
+Plug 'neovim/nvim-lspconfig', { 'do': 'sudo npm i -g pyright' }
 Plug 'nvim-lua/completion-nvim'
 Plug 'nvim-lua/lsp-status.nvim'
 Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}  " We recommend updating the parsers on update

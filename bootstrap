@@ -22,7 +22,7 @@ for fname in "$SCRIPT_DIR"/.*; do
     fname_src="$fname.$UNAME_S"
   fi
 
-  ln -snf "$fname_src" "$fname_target"
+  ln -sfn "$fname_src" "$fname_target"
 done
 
 # Bash-completion
@@ -46,6 +46,10 @@ ln -sfn "$SCRIPT_DIR"/.ctags.d "$HOME"/.ctags.d
 # Binaries
 mkdir -p "$HOME"/bin
 ln -sfn "$SCRIPT_DIR"/bin/* "$HOME"/bin/
+for binfile in "${SCRIPT_DIR}/${UNAME_S}"/bin/*; do
+  [[ ! -f "$binfile" ]] && continue
+  ln -sfn "$binfile" "$HOME"/bin/"$(basename "$binfile")"
+done
 
 # Vim dir
 rm -f "$HOME"/.vim
