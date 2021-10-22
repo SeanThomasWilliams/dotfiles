@@ -405,7 +405,8 @@ if has('autocmd')
     autocmd FileType make setlocal noet ts=4 sw=4 sts=4 foldmethod=marker foldlevel=1
     autocmd FileType make nnoremap <silent> <leader>d :sp<CR> <c-]>
     autocmd FileType markdown setlocal wrap spell spelllang=en_us
-"    autocmd Filetype yaml setlocal makeprg=kube-linter\ lint\ %
+    autocmd FileType terraform nnoremap <leader>f :Neoformat<CR>
+    autocmd FileType hcl nnoremap <leader>f :Neoformat<CR>
   augroup end
 
   augroup Python
