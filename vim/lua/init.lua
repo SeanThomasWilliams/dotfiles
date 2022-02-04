@@ -1,6 +1,10 @@
 local nvim_lsp = require("lspconfig")
 local lsp_status = require("lsp-status")
 
+-- require("transparent").setup({
+--   enable = true, -- boolean: enable transparent
+-- })
+
 -- Treesitter
 require "nvim-treesitter.configs".setup {
     ensure_installed = "maintained", -- one of "all", "maintained" (parsers with maintainers), or a list of languages

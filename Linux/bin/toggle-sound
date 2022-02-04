@@ -2,13 +2,15 @@
 
 CARD_NAME="bluez_card.38_18_4C_06_51_52"
 
-LOFI_PROFILE="headset_head_unit"
+# HANDSFREE_PROFILE="handsfree_head_unit"
+# LOFI_PROFILE="headset_head_unit"
+LOFI_PROFILE="handsfree_head_unit"
 HIFI_PROFILE="a2dp_sink"
 
-if pacmd list-cards | grep -q "active profile: <$LOFI_PROFILE>"; then
-  echo >&2 "Switching to HiFi Profile"
-  pactl set-card-profile "$CARD_NAME" "$HIFI_PROFILE"
-else
+if pacmd list-cards | grep -q "active profile: <$HIFI_PROFILE>"; then
   echo >&2 "Switching to LoFi Profile"
   pactl set-card-profile "$CARD_NAME" "$LOFI_PROFILE"
+else
+  echo >&2 "Switching to HiFi Profile"
+  pactl set-card-profile "$CARD_NAME" "$HIFI_PROFILE"
 fi

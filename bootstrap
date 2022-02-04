@@ -40,8 +40,14 @@ for d in "$SCRIPT_DIR"/config/*; do
   ln -sfn "$d" "$HOME"/.config/"$(basename "$d")"
 done
 
-# ctags.d
-ln -sfn "$SCRIPT_DIR"/.ctags.d "$HOME"/.ctags.d
+config_dirs=(
+  .ctags.d
+  .ipython
+)
+
+for config_dir in "${config_dirs[@]}"; do
+  ln -sfn "$SCRIPT_DIR/$config_dir" "$HOME/$config_dir"
+done
 
 # Binaries
 mkdir -p "$HOME"/bin

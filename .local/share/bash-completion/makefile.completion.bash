@@ -14,13 +14,12 @@ update_cache(){
   makefile_cache="$PWD/.Makefile.cache" # Autocompletion cache
 
   if [[ ! -f "$makefile" ]]; then
-    echo >&2 "Can't find ${makefile}..."
+    echo >&2 "Can't find $makefile..."
     return
   fi
 
   # Cache output
-  make -npq __BASH_MAKE_COMPLETION__=1 .DEFAULT 2> /dev/null |\
-    grep -v "FORCE" > "${makefile_cache}.tmp" && mv "${makefile_cache}.tmp" "${makefile_cache}"
+  make -npq __BASH_MAKE_COMPLETION__=1 2>/dev/null > "$makefile_cache" || true
 
   makefile_list=("$makefile")
   if compgen -G "$PWD"/*.mk &> /dev/null; then
@@ -61,23 +60,12 @@ _make_cache_makefile_output(){
   cat "$makefile_cache"
 }
 
-_make_target_extract_script()
-{
-    local mode="$1"
-    shift
-
+_make_target_extract_script(){
     local prefix="$1"
-    local prefix_pat=$( command sed 's/[][\,.*^$(){}?+|/]/\\&/g' <<<"$prefix" )
+    local prefix_pat=$( command sed 's/[][\,.*^$(){}?+|/]/\\&/g' <<< "$prefix" )
     local basename=${prefix##*/}
     local dirname_len=$(( ${#prefix} - ${#basename} ))
-
-    if [[ $mode == -d ]]; then
-        # display mode, only output current path component to the next slash
-        local output="\2"
-    else
-        # completion mode, output full path to the next slash
-        local output="\1\2"
-    fi
+    local output="\1\2"
 
     cat <<EOF
     1,/^# * Make data base/           d;        # skip any makefile output
@@ -101,13 +89,17 @@ _make_target_extract_script()
     /^$/ {                                      # end of target block
       x;                                        # unhold target
       /^$/d;                                    # dont print blanks
-      s|^\(.\{${dirname_len}\}\)\(.\{${#basename}\}[^:/]*/\{0,1\}\)[^:]*:.*$|${output}|p;
+      # Truncate groups to the first /
+#      s|^\(.\{${dirname_len}\}\)\(.\{${#basename}\}[^:/]*/\{0,1\}\)[^:]*:.*$|${output}|p;
+      # Don't truncate by the first /
+      s|^\(.\{${dirname_len}\}\)\(.\{${#basename}\}[^:]*\)[^:]*:.*$|${output}|p;
       d;                                        # hide any bugs
     }
 
     # This pattern includes a literal tab character as \t is not a portable
     # representation and fails with BSD sed
     /^[^#	:%]\{1,\}:/ {         # found target block
+      /^FORCE:/                   d;            # special target
       /^\.PHONY:/                 d;            # special target
       /^\.SUFFIXES:/              d;            # special target
       /^\.DEFAULT:/               d;            # special target
@@ -142,8 +134,7 @@ EOF
 EOF
 }
 
-_make()
-{
+_make(){
     local cur prev words cword split
     _init_completion -s || return
 
@@ -206,22 +197,14 @@ _make()
         fi
       done
 
-      # recognise that possible completions are only going to be displayed
-      # so only the base name is shown
-      local mode=--
-      if (( COMP_TYPE != 9 )); then
-        mode=-d # display-only mode
-      fi
+      local IFS=$' \t\n' script=$( _make_target_extract_script "$cur" )
 
-      local IFS=$' \t\n' script=$( _make_target_extract_script $mode "$cur" )
       COMPREPLY=( $( LC_ALL=C _make_cache_makefile_output "$@" |\
           command sed -ne "$script" ) )
 
-      if [[ $mode != -d ]]; then
-        # Completion will occur if there is only one suggestion
-        # so set options for completion based on the first one
-        [[ $COMPREPLY == */ ]] && compopt -o nospace
-      fi
+      # Completion will occur if there is only one suggestion
+      # so set options for completion based on the first one
+      [[ $COMPREPLY == */ ]] && compopt -o nospace
     fi
 } &&
 complete -F _make make remake gmake gnumake pmake colormake

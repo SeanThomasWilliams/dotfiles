@@ -21,8 +21,8 @@ include /usr/share/taskwarrior/holidays.en-US.rc
 
 color=on
 
-# default.due=tom
 default.priority=M
+default.due=7d
 
 due=1
 monthsperline=3
@@ -31,16 +31,21 @@ calendar.holidays=full
 #report.list.description=Lists all tasks matching the specified criteria
 #report.list.columns=id,project,priority,due.relative,due,depends,recur,urgency,tags,description
 #report.list.labels=ID,Project,Pri,Rel,Due,Depends,Recur,Score,Tags,Description & Annotation
-#report.list.sort=urgency-
 # report.list.sort=due+,priority-,project+
 #report.list.filter=status:pending
 #report.list.dateformat= a M-D
 alias.ls=list
 
-default.command=(due.before:7d or due: ) and status:pending long
+report.custom.columns=id,entry.age,depends,priority,project,tags,recur,scheduled.countdown,due.relative,until.remaining,description,urgency
+report.custom.description=Most urgent tasks
+report.custom.filter=status:pending limit:page
+report.custom.labels=ID,Age,Deps,P,Project,Tag,Recur,S,Due,Until,Description,Urg
+report.custom.sort=urgency-,tags-
 
-urgency.next.coefficient=25.0                   # +next tag
-urgency.due.coefficient=5.0                    # overdue or near due date
+report.long.sort=tags-,urgency-
+
+# urgency.next.coefficient=25.0                   # +next tag
+urgency.due.coefficient=5.0                     # overdue or near due date
 urgency.blocking.coefficient=8.0                # blocking other tasks
 urgency.active.coefficient=4.0                  # already started tasks
 urgency.scheduled.coefficient=4.0               # scheduled tasks
@@ -79,7 +84,7 @@ regex=on
 
 # Priority as UDA
 uda.priority.values=H,M,,L
-urgency.priority.coefficient=6.0
+# urgency.priority.coefficient=6.0
 
 # InThe.AM
 taskd.certificate=~/sync/task/private.certificate.pem

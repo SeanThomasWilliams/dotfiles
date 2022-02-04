@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# i3 Vm
+# sudo apt install -y compton hsetroot rxvt-unicode xsel rofi fonts-noto fonts-mplus xsettingsd lxappearance scrot viewnior
+# sudo apt install -y libgpgme-dev libassuan-dev libbtrfs-dev libdevmapper-dev pkg-config
+# blueman
+
 export DEBIAN_FRONTEND=noninteractive
 #docker.io
 PACKAGES=(
@@ -9,10 +14,10 @@ PACKAGES=(
   automake
   bzip2
   cmake
-  ctags
   curl
   direnv
   dstat
+  exuberant-ctags
   fuse
   gawk
   gawk

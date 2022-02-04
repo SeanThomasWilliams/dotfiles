@@ -65,6 +65,7 @@ Plug 'tpope/vim-surround'
 Plug 'vim-perl/vim-perl'
 Plug 'vimwiki/vimwiki'
 Plug 'will133/vim-dirdiff'
+" Plug 'xiyaowong/nvim-transparent'
 
 " Required, plugins available after.
 call plug#end()
