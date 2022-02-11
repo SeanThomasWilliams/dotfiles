@@ -13,14 +13,15 @@
 [alias]
   aa = add --all
   add-branch = "!f() { BRANCH=$1; if [[ -z ${BRANCH} ]]; then echo >&2 "Specify branch name!"; exit 1; fi; git checkout -b ${BRANCH}; git push -u; }; f "
-  amp = !sh -c \"git add . && git commit --amend --no-edit && git push -f\"
+  amp = !sh -c \"git add . && git can && git push -f\"
+  ca = commit --amend
+  can = commit --amend --no-edit
   b = branch
   blg = branch --format '%(color:red)%(objectname:short)%(color:reset) %(color:green)%(committerdate:iso)%(color:reset) %(subject) %(color:bold blue)-- %(authorname)%(color:reset) %(color:yellow)(%(refname:short))%(color:reset)'
   branch-status = !git-branch-status
   ci = commit
   co = checkout
   commit-url = !git-show-commit-url
-  clean-branches = !git-clean-branches
   dc = diff --cached
   dh1 = diff HEAD~1
   di = diff

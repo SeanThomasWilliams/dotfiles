@@ -24,4 +24,4 @@ base=$(git rev-parse --abbrev-ref HEAD)
         echo "-${RIGHT_AHEAD},+${LEFT_AHEAD},$branch,$base"
       done
     done | sort -g -t ',' -k1 -k2 -k1 -u
-} | column -s, -t -x
+} | column -s, -t

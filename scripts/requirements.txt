@@ -3,8 +3,10 @@ MarkupSafe
 ansible-lint
 ansible==2.8.5
 argcomplete
+autoflake
 awscli==1.20
 awslogs
+black
 boto
 boto3
 botocore
@@ -18,6 +20,7 @@ flake8
 frosted
 ipaddress
 ipdb
+isort
 jmespath
 mypy
 neovim

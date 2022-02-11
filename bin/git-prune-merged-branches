@@ -12,6 +12,6 @@ git branch --merged | grep -v -E "\*|master|$DEFAULT_BRANCH" | xargs -n 1 echo g
 # Rebased branches
 git for-each-ref refs/heads/ "--format=%(refname:short)" |\
   grep -v "$DEFAULT_BRANCH" |\
-  xargs -P 4 -I {} bash -c "( ! git cherry $DEFAULT_BRANCH {} | grep -q '^[^-]' ) && git branch -D {}"
+  xargs -P 4 -I {} bash -c "( ! git cherry $DEFAULT_BRANCH {} | grep -q '^[^-]' ) && git branch -d {}"
 
-git gc
+git gc --aggressive

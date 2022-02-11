@@ -615,18 +615,25 @@ nmap Y y$
 if !empty(glob($HOME . '/anaconda3/bin/python3'))
   let g:python3_host_prog = $HOME . '/anaconda3/bin/python3'
 endif
-if has('python') " if dynamic py|py3, this line already activates python2.
-  let s:python_version = 2
-elseif has('python3')
+
+if has('python3') " if dynamic py|py3, this line already activates python3.
   let s:python_version = 3
+elseif has('python')
+  let s:python_version = 2
 else
   let s:python_version = 0
 endif
 
+function! ChompedSystem( ... )
+    return substitute(call('system', a:000), '\n', '', 'g')
+endfunction
+
+" Python site-packages
+let g:site_packages = ChompedSystem('python -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())"')
+
 " FZF configuration
-let $SITE_PACKAGES=expand("$HOME") . '/anaconda3/lib/python3.7/site-packages'
+nnoremap <C-p> :execute ':Files' . g:site_packages<CR>
 nnoremap <C-T> :Tags<CR>
-nnoremap <C-p> :Files $SITE_PACKAGES<CR>
 nnoremap <C-\> :split<CR> :FZF<CR>
 nnoremap <C-t> :FZF<CR>
 
@@ -877,7 +884,7 @@ let g:neoformat_only_msg_on_error = 1
 :highlight NeomakeSign guifg=Yellow guibg=#dc322f gui=bold
 let g:neomake_makeprg_buffer_output = 0
 "let g:neomake_open_list = 1
-let g:neomake_python_enabled_makers = ['python', 'mypy', 'frosted', 'flake8']
+let g:neomake_python_enabled_makers = ['python', 'frosted', 'flake8']
 let g:neomake_javascript_enabled_makers = ['eslint']
 let g:neomake_dockerfile_enabled_makers = []
 let g:neomake_error_sign = {
@@ -901,6 +908,7 @@ let g:airline_detect_modified=1
 let g:airline_detect_paste=1
 let g:airline_mode_map = {} " see source for the defaults
 
+" autopep8
 let g:autopep8_max_line_length=120
 let g:autopep8_pep8_passes=100
 let g:autopep8_aggressive=2
@@ -990,8 +998,6 @@ let g:vimwiki_list = [{
 "  \ 'path_html': '~/vimwiki/html/',
 
 autocmd FileType vimwiki set spell spelllang=en_us complete+=kspell
-
-let g:autopep8_max_line_length=120
 
 " Vimux Config
 let g:VimuxHeight = "33"

@@ -8,14 +8,16 @@ if ! command -v task &> /dev/null; then
 fi
 
 
-if [[ -z ${TASK_TAGS-} ]]; then
+if [[ -z ${PROJECT-} ]]; then
   if git remote get-url origin &> /dev/null; then
     remote_url=$(git remote get-url origin | awk -F':' '{print tolower($NF)}' | sed 's/.git//g')
-    #ORG=$(echo "$remote_url" | awk -F'/' '{print $(NF-1)}' | tr -d '[0-9]')
     REPO=$(echo "$remote_url" | awk -F'/' '{print $NF}' | tr -d '-' | tr -d '0-9')
-    #TASK_TAGS="+${ORG} +${REPO}"
-    TASK_TAGS="+${REPO}"
+    PROJECT="${REPO}"
   fi
 fi
 
-task ${TASK_TAGS-} "$@"
+if [[ -n ${PROJECT-} ]]; then
+  task project:"${PROJECT}" "$@"
+else
+  task "$@"
+fi

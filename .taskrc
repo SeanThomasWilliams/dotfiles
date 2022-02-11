@@ -14,15 +14,17 @@
 data.location=~/.task
 
 # Color theme
-include /usr/share/taskwarrior/dark-256.theme
+#include dark-violets-256.theme
+include solarized-dark-256.theme
 
 # Include US holidays
-include /usr/share/taskwarrior/holidays.en-US.rc
+include holidays.en-US.rc
 
 color=on
 
 default.priority=M
 default.due=7d
+default.project=$PROJECT
 
 due=1
 monthsperline=3
@@ -43,6 +45,8 @@ report.custom.labels=ID,Age,Deps,P,Project,Tag,Recur,S,Due,Until,Description,Urg
 report.custom.sort=urgency-,tags-
 
 report.long.sort=tags-,urgency-
+
+report.next.filter=(status:pending and due < now+29d)
 
 # urgency.next.coefficient=25.0                   # +next tag
 urgency.due.coefficient=5.0                     # overdue or near due date
@@ -93,3 +97,4 @@ taskd.ca=~/sync/task/ca.cert.pem
 taskd.credentials=inthe_am/seanthomaswilliams/150193cd-ee7e-4362-922d-aa5bef2cdd2a
 taskd.server=taskwarrior.inthe.am:53589
 taskd.trust=ignore hostname
+news.version=2.6.0

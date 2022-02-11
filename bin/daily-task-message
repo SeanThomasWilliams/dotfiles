@@ -1,0 +1,49 @@
+#!/bin/bash
+
+set -eu
+set -o pipefail
+
+create_message_for_project(){
+  local project
+  project=$1
+  echo "Tasks for project $project:"
+  task "(status:pending and due < now+7d and project:${project} and -WAITING)" export |\
+    jq -rc '.[] | [.urgency, .description]' |\
+    tr -d '[]"' |\
+    sort -rn |\
+    cut -d',' -f2- |\
+    awk '{gsub(/\\n/, "\n"); print NR") "$0}' |\
+    tr -d '\\'
+}
+
+twilio_notify(){
+  local message_body
+  message_body="$*"
+
+  if [[ -n ${DEBUG-} ]]; then
+    echo >&2 "$message_body"
+    echo >&2
+  else
+    twilio-notify "$message_body"
+  fi
+}
+
+notify_by_project(){
+  task_projects="$(task _project)"
+
+  for project in $task_projects; do
+    project_message=$(create_message_for_project "$project")
+    twilio_notify "$project_message"
+  done
+}
+
+taskrc_home=$(task _show | awk -F'=' '$1 == "data.location" {print $2}')
+daily_task_message_log_file="$taskrc_home/daily-task-message.log"
+
+exec >> "$daily_task_message_log_file" 2>&1
+
+task sync || true
+
+twilio_notify "Daily task summary for $(date '+%A, %B %_d')"
+
+notify_by_project
