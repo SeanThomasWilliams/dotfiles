@@ -11,5 +11,7 @@ hash -r
 rm -rf "$HOME/.local/pipx"
 pipx install jedi-language-server==0.35.0 --include-deps --force
 
+pipx install docker-compose --include-deps --force
+
 conda install -c conda-forge pytorch-forecasting pytorch -v -y
 conda install -c conda-forge jupyterlab ipykernel -v -y

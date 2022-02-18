@@ -12,5 +12,3 @@ sudo npm install -g \
   typescript-language-server \
   bash-language-server \
   dockerfile-language-server-nodejs
-
-pip install jedi-language-server

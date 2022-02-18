@@ -14,7 +14,9 @@ update_cache(){
   makefile_cache="$PWD/.Makefile.cache" # Autocompletion cache
 
   if [[ ! -f "$makefile" ]]; then
-    echo >&2 "Can't find $makefile..."
+    if [[ "${DEBUG-}" -eq 1 ]]; then
+      echo >&2 "No 'Makefile' present"
+    fi
     return
   fi
 
@@ -43,7 +45,9 @@ _make_cache_makefile_output(){
   makefile_cache="$PWD/.Makefile.cache" # Autocompletion cache
 
   if [[ ! -f "$makefile" ]]; then
-    echo >&2 "Can't find ${makefile}..."
+    if [[ "${DEBUG-}" -eq 1 ]]; then
+      echo >&2 "No 'Makefile' present"
+    fi
     return
   fi
 

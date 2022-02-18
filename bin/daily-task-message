@@ -6,8 +6,20 @@ set -o pipefail
 create_message_for_project(){
   local project
   project=$1
+
+  task_query="(status:pending and due < now+7d and project:${project} and -WAITING)"
+  task_count=$(task "$task_query" export | jq -c '.[]' | wc -l)
+
+  if [[ "$task_count" -eq 0 ]]; then
+    if [[ "${DEBUG-}" -eq 1 ]]; then
+      echo >&2 "No relevant tasks for ${project}!"
+    fi
+
+    return
+  fi
+
   echo "Tasks for project $project:"
-  task "(status:pending and due < now+7d and project:${project} and -WAITING)" export |\
+  task "$task_query" export |\
     jq -rc '.[] | [.urgency, .description]' |\
     tr -d '[]"' |\
     sort -rn |\
@@ -20,7 +32,7 @@ twilio_notify(){
   local message_body
   message_body="$*"
 
-  if [[ -n ${DEBUG-} ]]; then
+  if [[ "${DEBUG-}" -eq 1 ]]; then
     echo >&2 "$message_body"
     echo >&2
   else
@@ -33,7 +45,9 @@ notify_by_project(){
 
   for project in $task_projects; do
     project_message=$(create_message_for_project "$project")
-    twilio_notify "$project_message"
+    if [[ -n "${project_message-}" ]]; then
+      twilio_notify "$project_message"
+    fi
   done
 }
 
@@ -42,8 +56,7 @@ daily_task_message_log_file="$taskrc_home/daily-task-message.log"
 
 exec >> "$daily_task_message_log_file" 2>&1
 
-task sync || true
+task rc.verbose=nothing sync || true
 
 twilio_notify "Daily task summary for $(date '+%A, %B %_d')"
-
 notify_by_project
