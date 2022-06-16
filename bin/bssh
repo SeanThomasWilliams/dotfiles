@@ -36,7 +36,7 @@ if [[ $# -gt 0 ]]; then
   REMOTE_COMMAND=(sudo -E "$@")
 fi
 
-if [[ ${STAGE} == "lab" && -z "${WORKSPACE-}" ]]; then
+if [[ ${STAGE-} == "lab" && -z "${WORKSPACE-}" ]]; then
   source_script=source_aws_api_keys.sh
   if ! aws --region "$AWS_DEFAULT_REGION" sts get-caller-identity &> /dev/null; then
     source "$(command -v "$source_script")" || (echo >&2 "Cannot source ${source_script}!"; exit 1)

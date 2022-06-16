@@ -6,6 +6,21 @@
 # Workaround
 __vte_prompt_command() { true; }
 
+# ew - Edit Which
+# Quickly edit the source code of a command. This is pretty much a short
+# cut for doing --> vim $(which mycommand)
+ew(){
+  file_path=$(command -v "$1" 2>/dev/null)
+
+  if [ -z "$file_path" ]; then
+      printf "%s\n" "Error: $1 not found"
+      exit 1
+  fi
+
+  "$EDITOR" "$file_path"
+}
+export -f ew
+
 load_session_manager_settings(){
   ### session managers
 
@@ -176,6 +191,10 @@ load_alias_settings(){
   alias ssh-keygen='ssh-keygen -t rsa -b 3072'
   alias tp='command task pro:personal'
   alias tb='command task pro:business'
+  alias tt='command task $TASK_TAGS'
+  alias trv='command task pro:rv'
+  alias tw='command t +WAITING all'
+  alias k9s='setterm --linewrap off; k9s'
 
   if command -v rg > /dev/null; then
     export FZF_DEFAULT_COMMAND="rg --files"
@@ -267,6 +286,8 @@ load_extra_source_files(){
     "$HOME/.fzf.bash"
     "$HOME/.local/share/bash-completion/*.bash"
     "$HOME/anaconda3/etc/profile.d/*.sh"
+    "$HOME/.asdf/asdf.sh"
+    "$HOME/.asdf/completions/asdf.bash"
     "/usr/local/etc/profile.d/autojump.sh"
     "/usr/share/autojump/*.bash"
     "/Applications/iTerm.app/Contents/Resources/iterm2_shell_integration.bash"

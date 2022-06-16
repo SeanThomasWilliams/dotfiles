@@ -1,6 +1,6 @@
 #!/bin/bash -eux
 
-GO_VERSION="1.17"
+GO_VERSION="1.18.3"
 UNAME_S=$(uname -s | tr '[:upper:]' '[:lower:]')
 
 mkdir -p "$HOME/software"
@@ -10,5 +10,5 @@ if [[ -d "$HOME/software/go" ]]; then
 fi
 
 cd "$HOME/software"
-curl -L "https://dl.google.com/go/go${GO_VERSION}.${UNAME_S}-amd64.tar.gz" -o go.tar.gz
+curl -fSsL "https://dl.google.com/go/go${GO_VERSION}.${UNAME_S}-amd64.tar.gz" -o go.tar.gz
 tar -xvf go.tar.gz

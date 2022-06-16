@@ -1,5 +1,11 @@
-#!/bin/bash -eu
+#!/usr/bin/env bash
+#shellcheck disable=SC2086,SC2206
 
+if [[ -n ${DEBUG-} ]]; then
+  set -x
+fi
+
+set -eu
 set -o pipefail
 
 if ! command -v task &> /dev/null; then
@@ -7,17 +13,15 @@ if ! command -v task &> /dev/null; then
   exit 1
 fi
 
+TASK_ARGS=()
+TASK_PROJECT="${TASK_PROJECT:-${PROJECT-}}"
 
-if [[ -z ${PROJECT-} ]]; then
-  if git remote get-url origin &> /dev/null; then
-    remote_url=$(git remote get-url origin | awk -F':' '{print tolower($NF)}' | sed 's/.git//g')
-    REPO=$(echo "$remote_url" | awk -F'/' '{print $NF}' | tr -d '-' | tr -d '0-9')
-    PROJECT="${REPO}"
-  fi
+if [[ -n ${TASK_TAGS-} ]]; then
+  TASK_ARGS+=(${TASK_TAGS})
 fi
 
-if [[ -n ${PROJECT-} ]]; then
-  task project:"${PROJECT}" "$@"
-else
-  task "$@"
+if [[ -n ${TASK_PROJECT-} ]]; then
+  TASK_ARGS+=("project:${TASK_PROJECT}")
 fi
+
+task "${TASK_ARGS[@]}" "$@"

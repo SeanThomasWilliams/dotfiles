@@ -1,7 +1,15 @@
 #!/usr/bin/env bash
 
 list_session_configs(){
-  awk '/session_name/ {print $2}' ~/.tmuxp/*.yaml
+  echo >&2 "Configured sessions:"
+
+  awk '/session_name/ {print $2}' ~/.tmuxp/*.yaml |\
+    paste -sd' ' -
+}
+
+list_active_sessions(){
+  echo >&2 "Active sessions:"
+  tmux list-sessions
 }
 
 if [[ $# -lt 1 ]]; then
@@ -11,7 +19,8 @@ else
 fi
 
 if [[ $session_name == ls ]]; then
-  tmux list-sessions
+  list_active_sessions
+  list_session_configs
 elif [[ $session_name == a ]]; then
   list_session_configs
 elif [[ -f $HOME/.tmuxp/$session_name.yaml ]]; then

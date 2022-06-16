@@ -1,17 +1,38 @@
 #!/bin/bash
 
+set -eu
 set -o pipefail
 
-DEFAULT_BRANCH=$(git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@')
+delete_branch(){
+  local branch_name
+  branch_name=$1
 
-git fetch --prune
+  git branch -D "$branch_name"
+  git push "$GIT_REMOTE" --delete "$branch_name"
+}
+
+DEFAULT_BRANCH=$(git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@')
+GIT_REMOTE=$(git remote | head -n 1)
+
+git fetch --all --prune
 
 # Prune branches that have already been merged with master
-git branch --merged | grep -v -E "\*|master|$DEFAULT_BRANCH" | xargs -n 1 echo git branch -d
+MERGED_BRANCHES=$(git branch --merged |\
+  grep -v -E "\*|$DEFAULT_BRANCH" || true)
+for branch in $MERGED_BRANCHES; do
+  echo >&2 "Deleting merged branch: $branch"
+  delete_branch "$branch"
+done
 
 # Rebased branches
-git for-each-ref refs/heads/ "--format=%(refname:short)" |\
-  grep -v "$DEFAULT_BRANCH" |\
-  xargs -P 4 -I {} bash -c "( ! git cherry $DEFAULT_BRANCH {} | grep -q '^[^-]' ) && git branch -d {}"
+REBASED_BRANCHES=$(git for-each-ref refs/heads/ "--format=%(refname:short)" |\
+  grep -v "$DEFAULT_BRANCH" || true)
+
+for branch in $REBASED_BRANCHES; do
+  if ! git cherry "$DEFAULT_BRANCH" "$branch" | grep -q '^[^-]'; then
+    echo >&2 "Deleting rebased branch $branch"
+    delete_branch "$branch"
+  fi
+done
 
 git gc --aggressive

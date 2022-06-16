@@ -1,9 +1,14 @@
 #!/bin/bash -eu
 
+if [[ -n ${DEBUG-} ]]; then
+  set -x
+fi
+
 usage(){
   echo >&2 "Usage: SSH_PROXY_HOST=host SSH_USER=ec2-user $0 <TARGET_HOST> [<host args...>]"
   echo >&2
   echo >&2 "Environment Variables:"
+  echo >&2 "SSH_PROXY_USER: SSH proxy host user for jump connection"
   echo >&2 "SSH_PROXY_HOST: SSH host configured in $HOME/.ssh/config, used as a jump box"
   echo >&2 "SSH_KEY: Name of the SSH key file located in $HOME/.ssh/. Default: $HOME/.ssh/\${SSH_PROXY_HOST}app.pem"
   echo >&2 "SSH_USER: SSH user account for the TARGET_HOST"
@@ -38,17 +43,24 @@ populate_args(){
   fi
 
   SSH_USER=${SSH_USER:-ec2-user}
+  SSH_PROXY_USER=${SSH_PROXY_USER:-ec2-user}
 }
 
 populate_args "$@"
 
-#echo >&2 "Connecting to ${SSH_USER}@${TARGET_HOST} using jumpbox ${SSH_PROXY_HOST} and key ${SSH_KEY_FILE}"
+if [[ -n ${DISABLE_JUMPBOX-} ]]; then
+  SSH_PROXY_ARGS=()
+  echo >&2 "Connecting to ${SSH_USER}@${TARGET_HOST} using key ${SSH_KEY_FILE}"
+else
+  SSH_PROXY_ARGS=(-o "ProxyCommand ssh -W %h:%p ${SSH_PROXY_USER}@${SSH_PROXY_HOST}")
+  echo >&2 "Connecting to ${SSH_USER}@${TARGET_HOST} using jumpbox ${SSH_PROXY_HOST} and key ${SSH_KEY_FILE}"
+fi
 
 ssh \
     -o ConnectTimeout=5 \
     -o ConnectionAttempts=1 \
     -o IdentitiesOnly=yes \
     -o StrictHostKeyChecking=no \
-    -o "ProxyCommand ssh -W %h:%p ${SSH_PROXY_HOST}" \
+    "${SSH_PROXY_ARGS[@]}" \
     -i "${SSH_KEY_FILE}" \
     "${SSH_USER}@${TARGET_HOST}" "${@:2}"

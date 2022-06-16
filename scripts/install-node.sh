@@ -8,8 +8,7 @@ cleanup(){
 }
 
 trap cleanup EXIT
-
-curl --fail -m 10 -L -O "https://nodejs.org/dist/$VERSION/node-$VERSION-$DISTRO.tar.xz"
+curl -fSsL -O "https://nodejs.org/dist/$VERSION/node-$VERSION-$DISTRO.tar.xz"
 
 sudo mkdir -p /usr/local/lib/nodejs
 sudo tar -xJvf "node-$VERSION-$DISTRO.tar.xz" -C /usr/local/lib/nodejs

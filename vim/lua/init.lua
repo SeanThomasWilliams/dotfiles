@@ -7,12 +7,42 @@ local lsp_status = require("lsp-status")
 
 -- Treesitter
 require "nvim-treesitter.configs".setup {
-    ensure_installed = "maintained", -- one of "all", "maintained" (parsers with maintainers), or a list of languages
+	ensure_installed = {
+		"bash",
+		"c",
+		"cmake",
+		"css",
+		"go",
+		"html",
+		"java",
+		"javascript",
+		"json",
+		"lua",
+		"make",
+		"python",
+		"rego",
+		"scss",
+		"toml",
+		"typescript",
+		"vim",
+		"yaml",
+	},
+	ignore_install = {
+		"d",
+		"experimental",
+		"foam",
+		"help",
+		"phpdoc",
+		"slint",
+		"verilog",
+	},
     highlight = {
         enable = true, -- false will disable the whole extension
         disable = {"rust"} -- list of language that will be disabled
     }
 }
+
+require("nvim-treesitter.install").prefer_git = true
 
 -- Compe setup
 require "compe".setup {

@@ -6,14 +6,20 @@ set -o pipefail
 node_packages=(
   eslint
   jshint
-  tern
   neovim
+  tern
+
+  puppeteer
+  mermaid-filter
 )
 
 # Neovim pip
 pip install --upgrade pip
 pip install --upgrade neovim pynvim msgpack
 sudo gem install neovim && gem environment
+
+sudo npm install -g npm
+sudo npm prefix
 
 # Node neovim
 if ! command -v yarn 2> /dev/null; then

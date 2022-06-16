@@ -1,3 +1,3 @@
 #!/bin/bash
 
-curl https://rclone.org/install.sh | sudo bash
+curl -fSsL https://rclone.org/install.sh | sudo bash

@@ -3,9 +3,10 @@ set -euo pipefail
 IFS=$'\n\t'
 
 # Default timespan
-DAYS=30
+DAYS=7
 # Taskwarrior filtering
 TASK_TAGS="${TASK_TAGS:-+${PROJECT}}"
+TASK_PROJECT_NAME="${TASK_PROJECT_NAME:-${PROJECT^^}}"
 
 if [[ -n ${DEBUG-} ]]; then
   set -x
@@ -24,10 +25,14 @@ Arguments:
     Start Date (2021-01-01)
   -e
     End Date (2021-02-01)
+  -n
+    Only output information locally (no browser)
   -h
     Show usage and exit
 
 ENVIRONMENT:
+  TASK_PROJECT_NAME
+      Full name of the project to summarize
   PROJECT
       Name of the project to summarize
   GIT_REPO_URL_<NAME>
@@ -37,16 +42,19 @@ ENVIRONMENT:
 EOF
 }
 
-while getopts ':d:e:s:h' opt; do
+while getopts ':d:e:ns:h' opt; do
   case "${opt}" in
-    s)
-      START_DATE="${OPTARG}"
+    d)
+      DAYS="${OPTARG}"
       ;;
     e)
       END_DATE="${OPTARG}"
       ;;
-    d)
-      DAYS="${OPTARG}"
+    n)
+      NO_BROWSER=1
+      ;;
+    s)
+      START_DATE="${OPTARG}"
       ;;
     h)
       usage
@@ -59,16 +67,24 @@ while getopts ':d:e:s:h' opt; do
   esac
 done
 
-shift $((OPTIND-1))
+DATECMD="date"
+if command -v gdate &> /dev/null; then
+  DATECMD=gdate
+fi
 
-: "${PROJECT}"
+HEADCMD="head"
+if command -v ghead &> /dev/null; then
+  HEADCMD=ghead
+fi
+
+shift $((OPTIND-1))
 
 # Set start/end times. Push end date to tomrrow, so we don't cut off what happens today
 if [[ -z ${START_DATE-} ]]; then
-  START_DATE=$(gdate -d "-${DAYS} day" "+%Y-%m-%d")
+  START_DATE=$("$DATECMD" -d "-${DAYS} day" "+%Y-%m-%d")
 fi
 if [[ -z ${END_DATE-} ]]; then
-  END_DATE=$(gdate "+%Y-%m-%d")
+  END_DATE=$("$DATECMD" "+%Y-%m-%d")
 fi
 
 # Start query after midnight (Leaving off 'Z' for UTC/Zulu time)
@@ -79,7 +95,7 @@ QUERY_START_DATE="${START_DATE}T00:00:00"
 QUERY_END_DATE="${END_DATE}T23:59:59"
 
 # Setup Output Path
-BASE_DIR="$HOME/anr/${PROJECT}/.worklog"
+BASE_DIR="$HOME/${PROJECT}/.worklog"
 mkdir -p "$BASE_DIR"
 WORK_SUMMARY_FILE="$BASE_DIR/project-status.md"
 rm -f "$WORK_SUMMARY_FILE"
@@ -138,7 +154,7 @@ get_task_complete_report(){
     "(end.after='${QUERY_START_DATE}' and end.before='${QUERY_END_DATE}' and status:completed)" \
     worklog 2> /dev/null |\
     tail -n +4 |\
-    ghead -n -2 |\
+    "$HEADCMD" -n -2 |\
     grep -v "Submit project work report" |\
     gawk "$taskawkscript" || true
 
@@ -214,7 +230,7 @@ get_all_git_logs(){
 }
 
 generate_report(){
-  echo "## ${PROJECT^^} Work Summary for ${START_DATE} through ${END_DATE}"
+  echo "## ${TASK_PROJECT_NAME} Work Summary for ${START_DATE} through ${END_DATE}"
   echo
 
   echo "### Overall Summary"
@@ -240,7 +256,9 @@ render_report(){
     -t html \
     -o "${WORK_SUMMARY_FILE%.*}.html" "$WORK_SUMMARY_FILE"
 
-  open "${WORK_SUMMARY_FILE%.*}.html"
+  if [[ -z ${NO_BROWSER-} ]]; then
+    open "${WORK_SUMMARY_FILE%.*}.html"
+  fi
 }
 
 render_report

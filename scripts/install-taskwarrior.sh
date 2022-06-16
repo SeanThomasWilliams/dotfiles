@@ -2,7 +2,7 @@
 
 set -eux
 
-TASKWARRIOR_VERSION="2.6.1"
+TASKWARRIOR_VERSION="2.6.2"
 TASKWARRIOR_TARBALL="task-${TASKWARRIOR_VERSION}.tar.gz"
 
 mkdir -p ~/software

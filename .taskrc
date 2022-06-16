@@ -13,9 +13,18 @@
 # Files
 data.location=~/.task
 
-# Color theme
+## All themes
+#include dark-256.theme
+#include dark-blue-256.theme
+#include dark-gray-256.theme
+#include dark-gray-blue-256.theme
+#include dark-green-256.theme
+#include dark-red-256.theme
 #include dark-violets-256.theme
 include solarized-dark-256.theme
+
+# Color theme
+#include dark-256.theme
 
 # Include US holidays
 include holidays.en-US.rc
@@ -29,6 +38,21 @@ default.project=$PROJECT
 due=1
 monthsperline=3
 calendar.holidays=full
+defaultwidth=0
+
+# Worklog report
+report.worklog.sort=end
+report.worklog.columns=uuid.short,end,description
+report.worklog.description=Completed tasks
+report.worklog.filter=(status:completed)
+report.worklog.labels=UUID,Completed,Description
+
+# Completed report
+report.completed.sort=end
+report.completed.columns=uuid.short,entry,end,entry.age,tags,description
+report.completed.description=Completed tasks
+report.completed.filter=(status:completed and end.after:'-30 days')
+report.completed.labels=UUID,Created,Completed,Age,Tags,Description
 
 #report.list.description=Lists all tasks matching the specified criteria
 #report.list.columns=id,project,priority,due.relative,due,depends,recur,urgency,tags,description
@@ -62,24 +86,6 @@ urgency.waiting.coefficient=-100.0              # waiting task
 
 editor=nvim
 
-uda.intheamoriginalemailsubject.type=string
-uda.intheamoriginalemailsubject.label=Inthe.AM E-mail Subject
-
-uda.intheammergedfrom.type=string
-uda.intheammergedfrom.label=Inthe.AM Duplicate Tasks Merged
-
-uda.intheamoriginalemailid.type=numeric
-uda.intheamoriginalemailid.label=Inthe.AM E-mail ID
-
-uda.intheamattachments.type=string
-uda.intheamattachments.label=Inthe.AM Attachments
-
-uda.intheamduplicateof.type=string
-uda.intheamduplicateof.label=Inthe.AM Duplicate of Task
-
-# Incoming e-mail, SMS, etc
-urgency.user.tag.review.coefficient=99
-
 # Set case sensitive search
 search.case.sensitive=no
 
@@ -91,10 +97,11 @@ uda.priority.values=H,M,,L
 # urgency.priority.coefficient=6.0
 
 # InThe.AM
-taskd.certificate=~/sync/task/private.certificate.pem
-taskd.key=~/sync/task/private.key.pem
-taskd.ca=~/sync/task/ca.cert.pem
-taskd.credentials=inthe_am/seanthomaswilliams/150193cd-ee7e-4362-922d-aa5bef2cdd2a
-taskd.server=taskwarrior.inthe.am:53589
+taskd.certificate=~/sync/task/xeed.io/sean_williams.cert.pem
+taskd.key=~/sync/task/xeed.io/sean_williams.key.pem
+taskd.ca=~/sync/task/xeed.io/ca.cert.pem
+taskd.credentials=xeed.io/Sean Williams/3458dcbb-0eda-4ac2-a34d-17e8d7369aae
+taskd.server=pihole1.seanthomaswilliams.gmail.com.beta.tailscale.net:53589
 taskd.trust=ignore hostname
+
 news.version=2.6.0

@@ -219,6 +219,7 @@ set hidden " hide open buffers instead of closing them, when opening a new one w
 set shortmess=actI " Deactivate the PRESS ENTER OR TYPE COMMAND TO CONTINUE message
 set clipboard=unnamed " Allows copy-pasting from other apps
 set scrolloff=3 " keep moreiabbrev lmis ಠ‿ಠearch matches in the middle of the window.
+set redrawtime=10000 " time in ms for redrawing the display (default 2000)
 set sidescrolloff=1 " Add some space around the cursor when moving it near the borders of the screen
 set lazyredraw " Don't update screen during macro and script execution
 set winminheight=0
@@ -331,7 +332,7 @@ if has('autocmd')
       \ let f=expand("<afile>") |
       \ if getfsize(f) > g:large_file |
         \ set eventignore=all |
-        \ setlocal nowrap noswapfile bufhidden=unload buftype=nowrite undolevels=-1 nohidden syntax=off ft= |
+        \ setlocal wrap noswapfile bufhidden=unload buftype=nowrite nohidden syntax=off ft= |
       \ else |
         \ set eventignore-=FileType |
       \ endif
@@ -470,7 +471,7 @@ if has('autocmd')
     autocmd!
 
     " VimWIKI
-    autocmd FileType vimwiki nnoremap <silent><leader>m :VimwikiAll2HTML<CR>
+    autocmd FileType vimwiki nnoremap <silent><leader>M :VimwikiAll2HTML<CR>
 
     " Neomake
     autocmd ColorScheme *
@@ -647,6 +648,7 @@ nnoremap <leader>cd :lcd%:p:h<CR>
 
 " fix syntax hl:
 nnoremap U :syntax sync fromstart<CR>:redraw!<CR>
+nnoremap U :syntax sync fromstart<CR>:redraw!<CR>
 
 " ------------------------------------------"
 " Plugin Settings
@@ -709,64 +711,18 @@ let g:gutentags_file_list_command = {
 \  }
 \}
 let g:gutentags_add_default_project_roots = 0
-let g:gutentags_project_root = ['.git', '.pythontags', '.forcetags']
+let g:gutentags_project_root = ['.git', '.pythontags', '.forcetags', '.envrc']
 let g:gutentags_generate_on_new = 1
 let g:gutentags_generate_on_missing = 1
 let g:gutentags_generate_on_write = 1
 let g:gutentags_generate_on_empty_buffer = 0
+
+" gutentags-ctags
+let g:gutentags_ctags_exclude_wildignore = 1
+let g:gutentags_ctags_tagfile = '.tags'
 let g:gutentags_ctags_extra_args = [
       \ '--tag-relative=yes',
       \ '--fields=+ailmnS',
-      \ ]
-let g:gutentags_ctags_exclude = [
-      \ '*.git', '*.svg', '*.hg',
-      \ '*-lock.json',
-      \ '*.Master',
-      \ '*.bak',
-      \ '*.cache',
-      \ '*.class',
-      \ '*.csproj',
-      \ '*.csproj.user',
-      \ '*.css',
-      \ '*.json',
-      \ '*.less',
-      \ '*.lock',
-      \ '*.map',
-      \ '*.min.*',
-      \ '*.pdb',
-      \ '*.pyc',
-      \ '*.scss',
-      \ '*.sln',
-      \ '*.tmp',
-      \ '*.zip',
-      \ '*/tests/*',
-      \ '*build*.js',
-      \ '*bundle*.js',
-      \ '*sites/*/files/*',
-      \ '.*rc*',
-      \ 'bin',
-      \ 'bower_components',
-      \ 'build',
-      \ 'bundle',
-      \ 'cache',
-      \ 'compiled',
-      \ 'cscope.*',
-      \ 'dist',
-      \ 'docs',
-      \ 'example',
-      \ 'iso',
-      \ 'mnt',
-      \ 'node_modules',
-      \ 'scratch',
-      \ 'static',
-      \ 'tags*',
-      \ 'vendor',
-      \ '*.exe', '*.dll',
-      \ '*.mp3', '*.ogg', '*.flac',
-      \ '*.swp', '*.swo',
-      \ '*.bmp', '*.gif', '*.ico', '*.jpg', '*.png',
-      \ '*.rar', '*.zip', '*.tar', '*.tar.gz', '*.tar.xz', '*.tar.bz2',
-      \ '*.pdf', '*.doc', '*.docx', '*.ppt', '*.pptx',
       \ ]
 
 " ansible-vim
@@ -887,6 +843,7 @@ let g:neomake_makeprg_buffer_output = 0
 let g:neomake_python_enabled_makers = ['python', 'frosted', 'flake8']
 let g:neomake_javascript_enabled_makers = ['eslint']
 let g:neomake_dockerfile_enabled_makers = []
+let g:neomake_java_enabled_makers = []
 let g:neomake_error_sign = {
       \ 'text': '•',
       \ 'texthl': 'NeomakeSign',

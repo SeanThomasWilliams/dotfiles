@@ -2,7 +2,37 @@
 set -euo pipefail
 IFS=$'\n\t'
 
+TOPDIR="$PWD"
+
 # Show certificate info for the given input files or domains
+
+show_cert_bundle_info(){
+  local cert_bundle
+  cert_bundle="$TOPDIR/$1"
+
+  tmp_dir="$(mktemp -d)"
+  cd "$tmp_dir"
+
+  awk '/BEGIN CERT/,/END CERT/{ if(/BEGIN CERT/){c++}; out="cert." c ".pem"; print >out}' < "$cert_bundle"
+
+  for cert in "$tmp_dir"/*; do
+    show_cert_info "$cert"
+  done
+
+  rm -rf "$tmp_dir"
+
+  cd "$OLDPWD"
+}
+
+show_cert_info(){
+  local cert_file
+  cert_file="$1"
+
+  openssl x509 -text -noout -in "$cert_file"
+
+  echo "MD5:"
+  openssl x509 -noout -modulus -in "$cert_file" | openssl md5
+}
 
 sslinfo(){
   local cert
@@ -16,10 +46,8 @@ sslinfo(){
     pfx|p12)
       openssl pkcs12 -info -in "$cert"
       ;;
-    pem|crt)
-      openssl x509 -text -noout -in "$cert"
-      echo >&2 "MD5:"
-      openssl x509 -noout -modulus -in "$cert" | openssl md5
+    pem|crt|cer)
+      show_cert_bundle_info "$cert"
       ;;
     key)
       openssl rsa -check -in "$cert"

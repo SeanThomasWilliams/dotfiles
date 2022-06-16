@@ -3,15 +3,21 @@
 
 usage(){
   cat >&2 <<EOF
-Find files matching the given glob
+Find files
 
-Usage: $0 [options] <FILE_NAME>
+Usage: $0 [options] [FILE_NAME] [TARGET_DIR]
 
 Arguments:
   FILE_NAME
     Partial file name
+  TARGET_DIR
+    Target directory to search within
 
 Options:
+  -a
+    Search all files (even hidden files)
+  -d
+    Directory to search within (overridden by <TARGET_DIR>)
   -t
     Filetype (sh, py, etc)
   -h
@@ -19,11 +25,22 @@ Options:
 EOF
 }
 
+if [[ -n ${DEBUG-} ]]; then
+  set -x
+fi
+
 FILE_TYPE='*'
 FILE_NAME='*'
+TARGET_DIR='.'
 
-while getopts ':t:h' opt; do
+while getopts ':ad:t:h' opt; do
   case "${opt}" in
+    a)
+      ALL_FILES=1
+      ;;
+    d)
+      TARGET_DIR="${OPTARG}"
+      ;;
     t)
       FILE_TYPE="${OPTARG}"
       ;;
@@ -40,8 +57,26 @@ done
 
 shift $((OPTIND-1))
 
-if [[ $# -eq 1 ]]; then
+if [[ ! -d "$TARGET_DIR" ]]; then
+  echo >&2 "Unable to locate target directory: $TARGET_DIR"
+  echo >&2
+  usage
+  exit 1
+fi
+
+if [[ $# -gt 2 ]]; then
+  echo >&2 "Too many positional arguments: $#"
+  echo >&2 ""
+  usage
+  exit 1
+fi
+
+if [[ $# -ge 1 ]]; then
   FILE_NAME="$1"
+fi
+
+if [[ $# -ge 2 ]]; then
+  TARGET_DIR="$2"
 fi
 
 if [[ $FILE_TYPE = '*' ]]; then
@@ -50,4 +85,18 @@ else
   FILE_GLOB="*${FILE_NAME}*.${FILE_TYPE}"
 fi
 
-find . -type f -iname "$FILE_GLOB"
+# Find relevant files and strip the leading './'
+if [[ -n ${ALL_FILES-} ]]; then
+  # Find relevant files and strip the leading './'
+  find "$TARGET_DIR" \( -type f -o -type l \) \
+    -ipath "$FILE_GLOB" \
+    -printf '%p\n' 2>/dev/null |\
+    sed 's#^\./##'
+else
+  # Also remove hidden directories
+  find "$TARGET_DIR" \( -type f -o -type l \) \
+    -ipath "$FILE_GLOB" \
+    -printf '%p\n' 2>/dev/null |\
+    sed 's#^\./##' |\
+    grep -Ev '^\.[a-z]|/\.[a-z]'
+fi

@@ -1,4 +1,5 @@
 !*.manifest
+!.ipython/profile_default/ipython_config.py
 *.bak
 *.deb
 *.gz
@@ -21,10 +22,14 @@
 .DS_Store
 .Makefile.*
 .env*
+.ipython
 .netrwhist
+.rgignore
 .stignore
 .stversions/
 .tags
+.tags.files
+.tags.lock
 .tern-port
 .tmuxp.yaml
 .vim-go/*
@@ -35,10 +40,10 @@
 Anaconda*.sh
 __pycache__
 init.vim
+mermaid-filter.err
+rke2.yaml
 tags
 tags.files
 tags.lock
 tags.temp
 temp
-.ipython
-!.ipython/profile_default/ipython_config.py
