@@ -817,7 +817,7 @@ let g:neoformat_python_autoflake = {
   \ ],
   \ }
 
-let g:neoformat_enabled_python = ['isort', 'autoflake', 'black']
+let g:neoformat_enabled_python = ['isort', 'black']
 " YAML formatters
 let g:neoformat_enabled_yaml = ['beautifyk8s']
 let g:neoformat_yaml_beautifyk8s = {

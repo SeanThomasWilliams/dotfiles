@@ -1,12 +1,11 @@
 ---
+yaml-files:
+  - '*.yaml'
+  - '*.yml'
+  - '.yamllint'
 extends: default
 rules:
-  document-start:
-    level: warning
+  document-start: disable
   trailing-spaces: enable
-  truthy: enable
   line-length: disable
   indentation: disable
-  truthy:
-    allowed-values: ['true', 'false', 'True', 'False', 'yes', 'no']
-    check-keys: true

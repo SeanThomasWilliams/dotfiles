@@ -143,34 +143,50 @@ fix_path_ordering(){
   PATH="${sorted_path}"; export PATH
 }
 
+add_to_path(){
+  local path_dir
+  path_dir="$1"
+
+  PATH="${path_dir}:${PATH}";
+  export PATH
+
+  fix_path_ordering
+}
+
 add_to_path_if_exists(){
   local path_dir
   path_dir="$1"
 
   if [[ -d "$path_dir" ]]; then
     if ! echo "${PATH}" | grep -wq "${path_dir}"; then
-      PATH="${path_dir}:${PATH}";
-      export PATH
+      add_to_path "$path_dir"
     fi
   fi
-
-  fix_path_ordering
 }
 
 load_path_settings(){
-  # PATH Options. Reverse order of importance since they are prepended.
-  PATH_PARTS=(
+  # Always add these to PATH
+  PATH_APPEND=(
     "$HOME/.local/bin"
     "$HOME/anaconda3/bin"
+    "$HOME/anaconda3/condabin"
     "$HOME/bin"
-    "$HOME/bin/Sencha/Cmd"
     /usr/local/bin
+  )
+
+  # PATH Options. Reverse order of importance since they are prepended.
+  PATH_PARTS=(
+    "$HOME/bin/Sencha/Cmd"
     /usr/local/opt/libpq/bin
     /usr/local/opt/llvm/bin
   )
 
   for path_part in "${PATH_PARTS[@]}"; do
     add_to_path_if_exists "$path_part"
+  done
+
+  for path_part in "${PATH_APPEND[@]}"; do
+    add_to_path "$path_part"
   done
 
   # Shorten prompt
