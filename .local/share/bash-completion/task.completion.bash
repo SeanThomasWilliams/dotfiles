@@ -52,6 +52,11 @@
 #the following variable is substituted for by ../../test/bash_completion.t
 taskcommand='task rc.verbose:nothing rc.confirmation:no rc.hooks:off'
 
+if ! command -v task &>/dev/null; then
+  # Task is not installed
+  return
+fi
+
 _task_get_tags() {
     $taskcommand _tags
 }
