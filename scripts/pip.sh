@@ -13,5 +13,6 @@ pipx install jedi-language-server==0.35.0 --include-deps --force
 
 pipx install docker-compose --include-deps --force
 
+# ML
 conda install -c conda-forge pytorch-forecasting pytorch -v -y
 conda install -c conda-forge jupyterlab ipykernel -v -y

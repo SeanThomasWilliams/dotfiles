@@ -108,4 +108,4 @@
   recurse = true
 [init]
   defaultBranch = main
-	templateDir = /home/williamss/.git-template
+  templateDir = /home/williamss/.git-template

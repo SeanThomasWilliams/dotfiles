@@ -22,7 +22,6 @@ call plug#begin('~/.vim/plugged')
 " Plug 'zchee/deoplete-go', { 'do': 'make' }
 Plug 'Ivo-Donchev/vim-react-goto-definition'
 Plug 'SeanThomasWilliams/dwm.vim'
-Plug 'honza/vim-snippets'
 Plug 'SirVer/ultisnips'
 Plug 'airblade/vim-gitgutter'
 Plug 'arakashic/nvim-colors-solarized'
@@ -33,6 +32,8 @@ Plug 'bling/vim-airline'
 Plug 'ekalinin/Dockerfile.vim'
 Plug 'fatih/vim-go', { 'tag': '*' }
 Plug 'gagoar/StripWhiteSpaces'
+Plug 'github/copilot.vim'
+Plug 'honza/vim-snippets'
 Plug 'hrsh7th/nvim-compe'
 Plug 'jacoborus/tender.vim'
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
@@ -985,3 +986,6 @@ function! GoogleSearch()
 endfunction
 
 nmap <Leader>gs :call GoogleSearch()<CR>
+
+" Copilot config
+imap <silent><script><expr> <C-J> copilot#Accept("\<CR>")

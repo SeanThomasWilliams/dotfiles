@@ -21,13 +21,10 @@ data.location=~/.task
 #include dark-green-256.theme
 #include dark-red-256.theme
 #include dark-violets-256.theme
-include solarized-dark-256.theme
-
-# Color theme
-#include dark-256.theme
+include /usr/share/doc/task/rc/solarized-dark-256.theme
 
 # Include US holidays
-include holidays.en-US.rc
+# include holidays.en-US.rc
 
 color=on
 
@@ -70,7 +67,7 @@ report.custom.sort=urgency-,tags-
 
 report.long.sort=tags-,urgency-
 
-report.next.filter=(status:pending and due < now+29d)
+report.next.filter=(status:pending) # and due < now+29d)
 
 # urgency.next.coefficient=25.0                   # +next tag
 urgency.due.coefficient=5.0                     # overdue or near due date
@@ -103,5 +100,30 @@ taskd.ca=~/sync/task/xeed.io/ca.cert.pem
 taskd.credentials=xeed.io/Sean Williams/3458dcbb-0eda-4ac2-a34d-17e8d7369aae
 taskd.server=pihole1.seanthomaswilliams.gmail.com.beta.tailscale.net:53589
 taskd.trust=ignore hostname
+
+# Bugwarrior UDAs
+uda.jiraissuetype.type=string
+uda.jiraissuetype.label=Issue Type
+uda.jirasummary.type=string
+uda.jirasummary.label=Jira Summary
+uda.jiraurl.type=string
+uda.jiraurl.label=Jira URL
+uda.jiradescription.type=string
+uda.jiradescription.label=Jira Description
+uda.jiraid.type=string
+uda.jiraid.label=Jira Issue ID
+uda.jiraestimate.type=numeric
+uda.jiraestimate.label=Estimate
+uda.jirafixversion.type=string
+uda.jirafixversion.label=Fix Version
+uda.jiracreatedts.type=date
+uda.jiracreatedts.label=Created At
+uda.jirastatus.type=string
+uda.jirastatus.label=Jira Status
+uda.jirasubtasks.type=string
+uda.jirasubtasks.label=Jira Subtasks
+uda.jiraparent.type=string
+uda.jiraparent.label=Jira Parent
+# END Bugwarrior UDAs
 
 news.version=2.6.0

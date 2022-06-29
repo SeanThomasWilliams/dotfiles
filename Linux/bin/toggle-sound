@@ -36,12 +36,12 @@ handle_bluetooth_headset(){
 }
 
 handle_analog_headset(){
-  ACTIVE_PROFILE=$(pactl list cards|awk '!/off/ && /Active Profile/ {print $3}')
+#  ACTIVE_PROFILE=$(pactl list cards|awk '!/off/ && /Active Profile/ {print $3}')
 
-  if [[ "$ANALOG_DUPLEX_PROFILE" =~ $ACTIVE_PROFILE || "$ANALOG_DUPLEX_PROFILE" == "$ACTIVE_PROFILE" ]]; then
-    echo >&2 "Toggle HDMI profile"
-    pactl set-card-profile "$PCI_CARD_NAME" "$HDMI_PROFILE"
-  elif [[ "$HDMI_PROFILE" =~ $ACTIVE_PROFILE || "$HDMI_PROFILE" == "$ACTIVE_PROFILE" ]]; then
+#  if [[ "$ANALOG_DUPLEX_PROFILE" =~ $ACTIVE_PROFILE || "$ANALOG_DUPLEX_PROFILE" == "$ACTIVE_PROFILE" ]]; then
+#    echo >&2 "Toggle HDMI profile"
+#    pactl set-card-profile "$PCI_CARD_NAME" "$HDMI_PROFILE"
+#  elif [[ "$HDMI_PROFILE" =~ $ACTIVE_PROFILE || "$HDMI_PROFILE" == "$ACTIVE_PROFILE" ]]; then
     echo >&2 "Toggle Headset profile"
     pactl set-card-profile "$PCI_CARD_NAME" "$ANALOG_DUPLEX_PROFILE"
 
@@ -71,10 +71,6 @@ handle_analog_headset(){
         sleep 1
       done
     fi
-  else
-    echo >&2 "Unknown profile: ${ACTIVE_PROFILE}!"
-    exit 1
-  fi
 }
 
 handle_bluetooth_headset
