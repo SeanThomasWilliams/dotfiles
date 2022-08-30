@@ -2,6 +2,6 @@
 
 # kustomize (Kubernetes kustomize CLI) completion
 
-if command -v kustomize &> /dev/null; then
-  complete -C "$(command -v kustomize)" kustomize
+if command -v kustomize &>/dev/null; then
+  eval "$(kustomize completion bash)"
 fi

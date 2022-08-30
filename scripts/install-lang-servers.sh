@@ -10,5 +10,4 @@ sudo apt-get update && sudo apt-get install terraform-ls clangd
 sudo npm install -g \
   bash-language-server \
   typescript-language-server \
-  bash-language-server \
   dockerfile-language-server-nodejs

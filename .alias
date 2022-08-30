@@ -168,6 +168,7 @@ load_path_settings(){
   # Always add these to PATH
   PATH_APPEND=(
     "$HOME/.local/bin"
+    "$HOME/.istioctl/bin"
     "$HOME/anaconda3/bin"
     "$HOME/anaconda3/condabin"
     "$HOME/bin"

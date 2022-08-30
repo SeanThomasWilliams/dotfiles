@@ -6,13 +6,15 @@
 # blueman
 
 export DEBIAN_FRONTEND=noninteractive
-#docker.io
+
 PACKAGES=(
   aria2
   autoconf
   autojump
   automake
+  build-essential
   bzip2
+  checkinstall
   cmake
   curl
   direnv
@@ -22,26 +24,54 @@ PACKAGES=(
   gawk
   gawk
   gcc
+  git
   gnupg
   grep
   htop
+  i3
+  i3lock
+  i3status
   jq
   libfuse2
+  libgnutls28-dev
+  libssl-dev
   make
   maven
+  mlocate
   neovim
   net-tools
   openjdk-8-jdk
+  opensc
   openssh-server
   remake
+  rofi
   ruby
   ruby-dev
   sed
   silversearcher-ag
+  sshuttle
   taskwarrior
   tcpdump
   tmux
+  uuid
+  uuid-dev
   wget
+  zlib1g-dev
+  blueman
+  pasystray
+  pavucontrol
+  imagemagick
+  scrot
+  arandr
+  pandoc
+  texlive-fonts-extra
+  gnome-screenshot
+
+  materia-gtk-theme
+  gnome-tweaks
+  xdg-desktop-portal-gtk
+  flatpak
+  gnome-software-plugin-flatpak
 )
 
 sudo apt-get update -yyq
@@ -49,3 +79,6 @@ sudo apt-get update -yyq
 echo "${PACKAGES[@]}" | sudo -E xargs apt-get install -yyq
 
 sudo apt autoremove -yyq
+
+sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+sudo flatpak install io.github.realmazharhusain.GdmSettings -y

@@ -1,5 +1,7 @@
-#!/bin/bash -eu
+#!/usr/bin/env bash
 # shellcheck disable=SC2068
+
+set -eu -o pipefail
 
 usage(){
   cat >&2 <<EOF
@@ -18,6 +20,8 @@ Options:
     Search all files (even hidden files)
   -d
     Directory to search within (overridden by <TARGET_DIR>)
+  -n
+    Max directory depth to search
   -t
     Filetype (sh, py, etc)
   -h
@@ -33,13 +37,16 @@ FILE_TYPE='*'
 FILE_NAME='*'
 TARGET_DIR='.'
 
-while getopts ':ad:t:h' opt; do
+while getopts ':ad:n:t:h' opt; do
   case "${opt}" in
     a)
       ALL_FILES=1
       ;;
     d)
       TARGET_DIR="${OPTARG}"
+      ;;
+    n)
+      MAX_DEPTH="${OPTARG}"
       ;;
     t)
       FILE_TYPE="${OPTARG}"
@@ -85,18 +92,29 @@ else
   FILE_GLOB="*${FILE_NAME}*.${FILE_TYPE}"
 fi
 
+# Set maxdepth if directed
+FIND_GLOBAL_ARGS=(
+  "$TARGET_DIR"
+)
+
+if [[ -n ${MAX_DEPTH-} ]]; then
+  FIND_GLOBAL_ARGS+=(-maxdepth "$MAX_DEPTH")
+fi
+
+FIND_CMD=(
+  find "${FIND_GLOBAL_ARGS[@]}"
+  \( -type f -o -type l \)
+  -ipath "$FILE_GLOB"
+  -printf '%p\n'
+)
+
 # Find relevant files and strip the leading './'
 if [[ -n ${ALL_FILES-} ]]; then
   # Find relevant files and strip the leading './'
-  find "$TARGET_DIR" \( -type f -o -type l \) \
-    -ipath "$FILE_GLOB" \
-    -printf '%p\n' 2>/dev/null |\
+    "${FIND_CMD[@]}" 2>/dev/null |\
     sed 's#^\./##'
 else
-  # Also remove hidden directories
-  find "$TARGET_DIR" \( -type f -o -type l \) \
-    -ipath "$FILE_GLOB" \
-    -printf '%p\n' 2>/dev/null |\
-    sed 's#^\./##' |\
-    grep -Ev '^\.[a-z]|/\.[a-z]'
+    "${FIND_CMD[@]}" 2>/dev/null |\
+      sed 's#^\./##' |\
+      grep -Ev '^\.[a-z]|/\.[a-z]'
 fi

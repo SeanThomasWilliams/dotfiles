@@ -1,6 +1,6 @@
 #!/bin/bash -eux
 
-VERSION=v14.17.6
+VERSION=v16.16.0
 DISTRO=linux-x64
 
 cleanup(){
