@@ -6,6 +6,8 @@
 [core]
   editor = nvim
   excludesfile = ~/.gitignore
+	quotePath = false
+	commitGraph = true
 
 [color]
   ui = auto
@@ -111,3 +113,10 @@
 [init]
   defaultBranch = main
   templateDir = /home/williamss/.git-template
+[daemon]
+	receivepack = true
+[receive]
+	advertisePushOptions = true
+	procReceiveRefs = refs/for
+[gc]
+	writeCommitGraph = true

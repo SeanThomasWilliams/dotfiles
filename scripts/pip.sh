@@ -1,6 +1,8 @@
 #!/bin/bash
 
-set -ex
+set -eu
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 pip install --upgrade pip
 
