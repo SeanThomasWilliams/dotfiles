@@ -17,7 +17,7 @@
   add-branch = "!f() { BRANCH=$1; if [[ -z ${BRANCH} ]]; then echo >&2 "Specify branch name!"; exit 1; fi; git checkout -b ${BRANCH}; git push -u; }; f "
   amp = !sh -c \"git add . && git can && git push -f\"
   ca = commit --amend
-  can = commit --amend --no-edit
+  can = commit --amend --no-edit -n
   cp = cherry-pick
   cpc = cherry-pick --continue
   b = branch

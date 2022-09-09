@@ -72,6 +72,8 @@ PACKAGES=(
   xdg-desktop-portal-gtk
   flatpak
   gnome-software-plugin-flatpak
+
+  ttf-mscorefonts-installer # EULA
 )
 
 sudo apt-get update -yyq
