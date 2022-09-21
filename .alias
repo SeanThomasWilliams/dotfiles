@@ -212,6 +212,7 @@ load_alias_settings(){
   alias trv='command task pro:rv'
   alias tw='command t +WAITING all'
   alias k9s='setterm --linewrap off; k9s'
+  alias terragrunt-clear-cache='find ./ -type d -name ".terragrunt-cache" -prune -exec rm -rf {} \;'
 
   if command -v rg > /dev/null; then
     export FZF_DEFAULT_COMMAND="rg --files"
