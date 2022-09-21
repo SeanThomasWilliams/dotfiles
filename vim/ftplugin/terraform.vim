@@ -27,5 +27,9 @@ if exists('g:loaded_neomake')
                 \ 'errorformat': '%+P%f,%p%t%*[^:]:%l %m,%-Q'
                 \ }
 
-    let g:neomake_terraform_enabled_makers = ['terraform_validate', 'tflint']
+    if executable('tflint')
+        let g:neomake_terraform_enabled_makers = ['terraform_validate', 'tflint']
+    else
+        let g:neomake_terraform_enabled_makers = ['terraform_validate']
+    endif
 endif

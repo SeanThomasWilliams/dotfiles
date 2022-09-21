@@ -9,8 +9,6 @@ node_packages=(
   neovim
   tern
 
-  puppeteer
-  mermaid-filter
 )
 
 # Neovim pip

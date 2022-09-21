@@ -110,9 +110,6 @@
   rebase = true
 [submodule]
   recurse = true
-[init]
-  defaultBranch = main
-  templateDir = /home/williamss/.git-template
 [daemon]
 	receivepack = true
 [receive]
