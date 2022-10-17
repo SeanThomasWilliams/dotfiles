@@ -990,3 +990,9 @@ nmap <Leader>gs :call GoogleSearch()<CR>
 
 " Copilot config
 imap <silent><script><expr> <C-J> copilot#Accept("\<CR>")
+let g:copilot_filetypes = {
+      \ 'gitcommit': v:true,
+      \ 'markdown': v:true,
+      \ 'xml': v:true,
+      \ 'yaml': v:true,
+      \ }

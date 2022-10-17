@@ -24,6 +24,23 @@ show_cert_bundle_info(){
   cd "$OLDPWD"
 }
 
+# Decode DER certificate, convert to PEM, and show info
+show_der_cert_info(){
+  local der_cert
+  der_cert="$TOPDIR/$1"
+
+  tmp_dir="$(mktemp -d)"
+  cd "$tmp_dir"
+
+  openssl x509 -inform der -in "$der_cert" -out cert.pem
+  show_cert_info "$tmp_dir/cert.pem"
+
+  rm -rf "$tmp_dir"
+
+  cd "$OLDPWD"
+}
+
+# Show certificate info for the given input files or domains
 show_cert_info(){
   local cert_file
   cert_file="$1"
@@ -45,6 +62,9 @@ sslinfo(){
       ;;
     pfx|p12)
       openssl pkcs12 -info -in "$cert"
+      ;;
+    der)
+      show_der_cert_info "$cert"
       ;;
     pem|crt|cer)
       show_cert_bundle_info "$cert"
