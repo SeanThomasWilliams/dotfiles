@@ -35,9 +35,11 @@ Plug 'gagoar/StripWhiteSpaces'
 Plug 'github/copilot.vim'
 Plug 'honza/vim-snippets'
 Plug 'hrsh7th/nvim-compe'
+Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app && yarn install' }
 Plug 'jacoborus/tender.vim'
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 Plug 'junegunn/fzf.vim'
+Plug 'jvirtanen/vim-hcl'
 Plug 'kristijanhusak/completion-tags'
 Plug 'leafgarland/typescript-vim'
 Plug 'lilydjwg/colorizer'
@@ -66,8 +68,6 @@ Plug 'tpope/vim-surround'
 Plug 'vim-perl/vim-perl'
 Plug 'vimwiki/vimwiki'
 Plug 'will133/vim-dirdiff'
-Plug 'jvirtanen/vim-hcl'
-" Plug 'xiyaowong/nvim-transparent'
 
 " Required, plugins available after.
 call plug#end()
