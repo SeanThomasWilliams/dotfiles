@@ -20,6 +20,7 @@ PACKAGES=(
   direnv
   dstat
   exuberant-ctags
+  fonts-symbola
   fuse
   gawk
   gawk
