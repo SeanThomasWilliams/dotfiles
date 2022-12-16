@@ -48,7 +48,9 @@
   mt = mergetool
   noff = merge --no-ff
   pom = push origin master
-  pp = !sh -c \"git fetch -p && git pull --rebase && git pushall\"
+  pa = pull --all
+  pua = pushall
+  pp = !sh -c \"git pull --all && git pushall\"
   prune-all = !git remote | xargs -n 1 git remote prune
   pullff = pull --ff-only
   pushall = !git remote | xargs -n 1 git push

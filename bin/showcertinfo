@@ -4,16 +4,19 @@ IFS=$'\n\t'
 
 TOPDIR="$PWD"
 
-# Show certificate info for the given input files or domains
+if [[ ${DEBUG-} -eq 1 ]]; then
+  set -x
+fi
 
+# Show certificate info for the given input files or domains
 show_cert_bundle_info(){
   local cert_bundle
-  cert_bundle="$TOPDIR/$1"
+  cert_bundle="$(realpath "$1")"
 
   tmp_dir="$(mktemp -d)"
   cd "$tmp_dir"
 
-  awk '/BEGIN CERT/,/END CERT/{ if(/BEGIN CERT/){c++}; out="cert." c ".pem"; print >out}' < "$cert_bundle"
+  awk '/-----BEGIN/,/-----END/{ if(/-----BEGIN/){c++}; out="cert." c ".pem"; print >out}' < "$cert_bundle"
 
   for cert in "$tmp_dir"/*; do
     show_cert_info "$cert"
@@ -27,7 +30,7 @@ show_cert_bundle_info(){
 # Decode DER certificate, convert to PEM, and show info
 show_der_cert_info(){
   local der_cert
-  der_cert="$TOPDIR/$1"
+  der_cert="$(realpath "$1")"
 
   tmp_dir="$(mktemp -d)"
   cd "$tmp_dir"
@@ -51,7 +54,32 @@ show_cert_info(){
   openssl x509 -noout -modulus -in "$cert_file" | openssl md5
 }
 
-sslinfo(){
+process_by_file_content(){
+  local tmpdir tmpfile
+  tmpdir=$(mktemp -d)
+  trap "rm -rf $tmpdir" EXIT
+
+  tmpfile="$tmpdir/detect.me"
+  sed -e 's#\r#\n#g' |\
+    sed -e 's/^\s*//' > "$tmpfile"
+
+  if grep -q 'CERTIFICATE----' "$tmpfile"; then
+    newcert="$tmpdir/tls.crt"
+  elif grep -q 'CERTIFICATE REQUEST' "$tmpfile"; then
+    newcert="$tmpdir/tls.csr"
+  elif grep -q 'PRIVATE KEY' "$tmpfile"; then
+    newcert="$tmpdir/tls.key"
+  else
+    echo >&2 "Unknown file content from:"
+    echo >&2 "$tmpfile"
+    exit 1
+  fi
+
+  mv "$tmpfile" "$newcert"
+  process_by_file_extension "$newcert"
+}
+
+process_by_file_extension(){
   local cert
   cert=${1}
   suffix=${cert##*.}
@@ -99,10 +127,9 @@ for fname in "$@"; do
       openssl x509 -outform PEM > "$fname"
   fi
 
-  sslinfo "$fname"
+  process_by_file_extension "$fname"
 done
 
 if [[ ! -t 0 ]]; then
-  echo >&2 "Reading from stdin"
-  openssl x509 -text -noout -in -
+  process_by_file_content
 fi

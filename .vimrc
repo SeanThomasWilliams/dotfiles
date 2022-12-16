@@ -977,6 +977,7 @@ endfunction
 
 vmap <Leader>vs "vy :call VimuxShebangSlime()<CR>gv
 nmap <Leader>vo :call VimuxOpenRunner()<CR>
+vnoremap <Leader>ci y:tabnew <bar> setlocal buftype=nofile bufhidden=hide noswapfile <bar> r! echo '<C-R>"' <bar> showcertinfo 2>&1<CR><CR>
 
 function! GoogleSearch()
   let searchterm = expand('<cword>')
@@ -987,6 +988,9 @@ function! GoogleSearch()
 endfunction
 
 nmap <Leader>gs :call GoogleSearch()<CR>
+
+" Markdown Preview
+let g:mkdp_theme = 'dark'
 
 " Copilot config
 imap <silent><script><expr> <C-J> copilot#Accept("\<CR>")

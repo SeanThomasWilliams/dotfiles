@@ -1,10 +1,24 @@
 #!/bin/bash -ex
 
+git clone https://github.com/nelsonenzo/tmux-appimage.git
+cd tmux-appimage
+
+#### Set the desired tmux release tag and build
+export TMUX_RELEASE_TAG=3.3a
+docker build . -t tmux --build-arg TMUX_RELEASE_TAG=$TMUX_RELEASE_TAG
+
+#### extract the appimage file
+docker create -ti --name tmuxcontainer tmux bash
+docker cp tmuxcontainer:/opt/build/tmux.appimage .
+docker rm -f tmuxcontainer
+
+ls -al tmux.appimage
+chmod +x tmux.appimage
+
 mkdir -p "$HOME/bin"
+mv tmux.appimage "$HOME/bin/tmux"
 
-curl -fSsL "https://github.com/nelsonenzo/tmux-appimage/releases/download/3.0a-appimage0.1.0/tmux-3.0a-x86_64.AppImage" \
-  -o "$HOME/bin/tmux.temp"
+cd ../
+rm -rf tmux-appimage
 
-chmod u+x "$HOME/bin/tmux.temp"
-mv -v "$HOME/bin/tmux.temp" "$HOME/bin/tmux"
 "$HOME/bin/tmux" -V
