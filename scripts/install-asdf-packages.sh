@@ -22,7 +22,6 @@ PLUGIN_LIST=(
   kustomize
   make
   minio
-  neovim
   nodejs
   packer
   popeye
@@ -50,3 +49,7 @@ for plugin in "${PLUGIN_LIST[@]}"; do
   asdf install "$plugin" latest
   asdf global "$plugin" latest
 done
+
+# Patches
+asdf install nodejs 16.19.0
+asdf global nodejs 16.19.0
