@@ -80,7 +80,6 @@ load_node_settings(){
   node_bin=$(dirname "$(readlink -f "$(command -v node)")")
 
   add_to_path_if_exists "$node_bin"
-  add_to_path_if_exists "$HOME/.npm-packages/bin"
 }
 
 load_golang_settings(){
@@ -158,7 +157,7 @@ add_to_path_if_exists(){
   path_dir="$1"
 
   if [[ -d "$path_dir" ]]; then
-    if ! echo "${PATH}" | grep -wq "${path_dir}"; then
+    if echo "${PATH}" | grep -vwq "${path_dir}"; then
       add_to_path "$path_dir"
     fi
   fi
@@ -166,28 +165,20 @@ add_to_path_if_exists(){
 
 load_path_settings(){
   # Always add these to PATH
-  PATH_APPEND=(
-    "$HOME/.local/bin"
-    "$HOME/.istioctl/bin"
-    "$HOME/anaconda3/bin"
+  PATH_PREPEND=(
+    "/usr/local/bin"
+    "/usr/local/opt/libpq/bin"
+    "/usr/local/opt/llvm/bin"
     "$HOME/anaconda3/condabin"
+    "$HOME/anaconda3/bin"
     "$HOME/bin"
-    /usr/local/bin
+    "$HOME/.npm-packages/bin"
+    "$HOME/.local/bin"
+    "$HOME/.asdf/shims"
   )
 
-  # PATH Options. Reverse order of importance since they are prepended.
-  PATH_PARTS=(
-    "$HOME/bin/Sencha/Cmd"
-    /usr/local/opt/libpq/bin
-    /usr/local/opt/llvm/bin
-  )
-
-  for path_part in "${PATH_PARTS[@]}"; do
+  for path_part in "${PATH_PREPEND[@]}"; do
     add_to_path_if_exists "$path_part"
-  done
-
-  for path_part in "${PATH_APPEND[@]}"; do
-    add_to_path "$path_part"
   done
 
   # Shorten prompt

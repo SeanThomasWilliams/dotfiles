@@ -47,3 +47,4 @@ tags.files
 tags.lock
 tags.temp
 temp
+yarn.lock
