@@ -246,6 +246,7 @@ load_alias_settings(){
   alias make='make'
   alias gmake='make'
   alias remake='make'
+  export MAKEFLAGS='-j8'
 }
 
 load_history_settings(){

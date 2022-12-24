@@ -4,6 +4,7 @@ source "$HOME/.asdf/asdf.sh"
 
 PLUGIN_LIST=(
   awscli
+  cmake
   ctop
   flux2
   fzf

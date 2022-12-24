@@ -258,7 +258,9 @@ set updatetime=300
 set magic
 set hlsearch    " highlight matches
 set incsearch   " incremental searching
-set inccommand= " incremental everything
+if has('nvim')
+  set inccommand=nosplit " incremental everything
+endif
 set ignorecase  " searches are case insensitive...
 set smartcase   " ... unless they contain at least one capital letter
 " }}}
@@ -992,8 +994,8 @@ nmap <Leader>gs :call GoogleSearch()<CR>
 " Markdown Preview
 let g:mkdp_theme = 'dark'
 
-" Copilot config
-imap <silent><script><expr> <C-j> copilot#Accept("\<CR>")
+let g:copilot_no_tab_map = v:true
+imap <silent><script><expr> <C-J> copilot#Accept("\<CR>")
 imap <C-h> <Plug>(copilot-suggest)
 nmap <C-x> :Copilot panel<CR>
 imap <C-x> <C-o>:Copilot panel<CR>
