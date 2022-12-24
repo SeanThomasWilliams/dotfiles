@@ -335,6 +335,8 @@ load_shell_settings(){
     UNAME_S=$(uname -s | tr '[:upper:]' '[:lower:]')
     export UNAME_S
   fi
+
+  export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
 }
 
 load_shell_settings
