@@ -10,37 +10,35 @@ fi
 
 # Show certificate info for the given input files or domains
 show_cert_bundle_info(){
-  local cert_bundle
+  local cert_bundle tmp_dir
   cert_bundle="$(realpath "$1")"
 
   tmp_dir="$(mktemp -d)"
+  trap "rm -rf $tmp_dir" EXIT
   cd "$tmp_dir"
 
   awk '/-----BEGIN/,/-----END/{ if(/-----BEGIN/){c++}; out="cert." c ".pem"; print >out}' < "$cert_bundle"
 
-  for cert in "$tmp_dir"/*; do
+  for cert in "$tmp_dir"/*.pem; do
     show_cert_info "$cert"
   done
 
   rm -rf "$tmp_dir"
-
-  cd "$OLDPWD"
 }
 
 # Decode DER certificate, convert to PEM, and show info
 show_der_cert_info(){
-  local der_cert
+  local der_cert tmp_dir
   der_cert="$(realpath "$1")"
 
   tmp_dir="$(mktemp -d)"
+  trap "rm -rf $tmp_dir" EXIT
   cd "$tmp_dir"
 
-  openssl x509 -inform der -in "$der_cert" -out cert.pem
+  openssl x509 -inform der -in "$der_cert" -out "$tmp_dir/cert.pem"
   show_cert_info "$tmp_dir/cert.pem"
 
   rm -rf "$tmp_dir"
-
-  cd "$OLDPWD"
 }
 
 # Show certificate info for the given input files or domains
@@ -52,38 +50,41 @@ show_cert_info(){
 
   echo "MD5:"
   openssl x509 -noout -modulus -in "$cert_file" | openssl md5
+
+  rm -f "$cert_file"
 }
 
 process_by_file_content(){
-  local tmpdir tmpfile
-  tmpdir=$(mktemp -d)
-  trap "rm -rf $tmpdir" EXIT
+  local tmp_file tmp_dir
+  tmp_dir=$(mktemp -d)
+  trap "rm -rf $tmp_dir" EXIT
 
-  tmpfile="$tmpdir/detect.me"
+  tmp_file="$tmp_dir/detect.me"
   sed -e 's#\r#\n#g' |\
-    sed -e 's/^\s*//' > "$tmpfile"
+    sed -e 's/^\s*//' > "$tmp_file"
 
-  if grep -q 'CERTIFICATE----' "$tmpfile"; then
-    newcert="$tmpdir/tls.crt"
-  elif grep -q 'CERTIFICATE REQUEST' "$tmpfile"; then
-    newcert="$tmpdir/tls.csr"
-  elif grep -q 'PRIVATE KEY' "$tmpfile"; then
-    newcert="$tmpdir/tls.key"
+  if grep -q 'CERTIFICATE----' "$tmp_file"; then
+    newcert="$tmp_dir/tls.crt"
+  elif grep -q 'CERTIFICATE REQUEST' "$tmp_file"; then
+    newcert="$tmp_dir/tls.csr"
+  elif grep -q 'PRIVATE KEY' "$tmp_file"; then
+    newcert="$tmp_dir/tls.key"
   else
     echo >&2 "Unknown file content from:"
-    echo >&2 "$tmpfile"
+    echo >&2 "$tmp_file"
     exit 1
   fi
 
-  mv "$tmpfile" "$newcert"
+  mv "$tmp_file" "$newcert"
   process_by_file_extension "$newcert"
+  rm -rf "$tmp_dir"
 }
 
 process_by_file_extension(){
   local cert
   cert=${1}
   suffix=${cert##*.}
-  echo "Information for $cert:"
+  echo >&2 "Information for $(basename "$cert"):"
   case "$suffix" in
     p7b)
       openssl pkcs7 -print_certs -in "$cert"
@@ -99,12 +100,12 @@ process_by_file_extension(){
       ;;
     key)
       openssl rsa -check -in "$cert"
-      echo >&2 "MD5:"
+      echo "MD5:"
       openssl rsa -noout -modulus -in "$cert" | openssl md5
       ;;
     csr)
       openssl req -text -noout -verify -in "$cert"
-      echo >&2 "MD5:"
+      echo "MD5:"
       openssl req -noout -modulus -in "$cert" | openssl md5
       ;;
     *)
@@ -114,12 +115,16 @@ process_by_file_extension(){
   esac
 }
 
-for fname in "$@"; do
-  if [[ $fname =~ https://* ]]; then
-    tmpdir=$(mktemp -d)
+process_single_file(){
+  local cert tmp_dir domain fname
 
+  fname="$1"
+  tmp_dir=$(mktemp -d)
+  trap "rm -rf $tmp_dir" EXIT
+
+  if [[ $fname =~ https://* ]]; then
     domain="$(echo "$fname" | cut -d'/' -f3)"
-    fname="$tmpdir/${domain}.crt"
+    fname="$tmp_dir/${domain}.crt"
 
     openssl s_client -showcerts \
       -connect "$domain:443" \
@@ -128,8 +133,15 @@ for fname in "$@"; do
   fi
 
   process_by_file_extension "$fname"
-done
+  rm -rf "$tmp_dir"
+}
 
+# Check if we are piping the cert to stdin
 if [[ ! -t 0 ]]; then
   process_by_file_content
+else
+  # Process files from command line
+  for fname in "$@"; do
+    process_single_file "$fname"
+  done
 fi

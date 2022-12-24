@@ -31,6 +31,7 @@
 .tags.files
 .tags.lock
 .tern-port
+.terraform.lock.hcl
 .tmuxp.yaml
 .vim-go/*
 /vim/bundle/

@@ -993,10 +993,7 @@ nmap <Leader>gs :call GoogleSearch()<CR>
 let g:mkdp_theme = 'dark'
 
 " Copilot config
-imap <silent><script><expr> <C-J> copilot#Accept("\<CR>")
-let g:copilot_filetypes = {
-      \ 'gitcommit': v:true,
-      \ 'markdown': v:true,
-      \ 'xml': v:true,
-      \ 'yaml': v:true,
-      \ }
+imap <silent><script><expr> <C-j> copilot#Accept("\<CR>")
+imap <C-h> <Plug>(copilot-suggest)
+nmap <C-x> :Copilot panel<CR>
+imap <C-x> <C-o>:Copilot panel<CR>
