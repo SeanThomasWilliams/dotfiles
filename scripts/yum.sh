@@ -1,3 +1,7 @@
 #!/bin/bash
 
-sudo yum -y install icu uuid libuuid-devel
+sudo yum -y install \
+  autojump \
+  icu \
+  libuuid-devel \
+  uuid

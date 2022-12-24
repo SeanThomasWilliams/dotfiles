@@ -1,4 +1,7 @@
-#!/bin/bash -eu
+#!/bin/bash
+# shellcheck disable=SC2089,SC2090,2086
+
+set -euo pipefail
 
 if [[ -n ${DEBUG-} ]]; then
   set -x
@@ -49,10 +52,9 @@ populate_args(){
 populate_args "$@"
 
 if [[ -n ${DISABLE_JUMPBOX-} ]]; then
-  SSH_PROXY_ARGS=()
   echo >&2 "Connecting to ${SSH_USER}@${TARGET_HOST} using key ${SSH_KEY_FILE}"
 else
-  SSH_PROXY_ARGS=(-o "ProxyCommand ssh -W %h:%p ${SSH_PROXY_USER}@${SSH_PROXY_HOST}")
+  SSH_PROXY_ARGS="-o 'ProxyCommand ssh -W %h:%p ${SSH_PROXY_USER}@${SSH_PROXY_HOST}'"
   echo >&2 "Connecting to ${SSH_USER}@${TARGET_HOST} using jumpbox ${SSH_PROXY_HOST} and key ${SSH_KEY_FILE}"
 fi
 
@@ -61,6 +63,6 @@ ssh \
     -o ConnectionAttempts=1 \
     -o IdentitiesOnly=yes \
     -o StrictHostKeyChecking=no \
-    "${SSH_PROXY_ARGS[@]}" \
+    ${SSH_PROXY_ARGS-} \
     -i "${SSH_KEY_FILE}" \
     "${SSH_USER}@${TARGET_HOST}" "${@:2}"
