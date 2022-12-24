@@ -22,7 +22,6 @@ PLUGIN_LIST=(
   kustomize
   make
   minio
-  nodejs
   packer
   popeye
   postgres
@@ -43,13 +42,12 @@ PLUGIN_LIST=(
   yq
 )
 
+asdf install nodejs 16.19.0
+asdf global nodejs 16.19.0
+
 for plugin in "${PLUGIN_LIST[@]}"; do
   echo >&2 "Adding $plugin"
   asdf plugin add "$plugin"
   asdf install "$plugin" latest
   asdf global "$plugin" latest
 done
-
-# Patches
-asdf install nodejs 16.19.0
-asdf global nodejs 16.19.0

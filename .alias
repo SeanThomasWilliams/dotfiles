@@ -84,7 +84,7 @@ load_node_settings(){
 
 load_golang_settings(){
   # Go Settings
-  GOROOT="$HOME/software/go"
+  GOROOT="$(go env GOROOT)"
   GOPATH="$HOME/gocode"
   GOBIN="$GOPATH/bin"
 

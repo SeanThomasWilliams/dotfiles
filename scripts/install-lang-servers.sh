@@ -1,13 +1,19 @@
 #!/bin/bash
 
-# Add the HashiCorp GPG key
-curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
-# Add the official HashiCorp Linux repository
-sudo apt-add-repository -y "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
-
-sudo apt-get update && sudo apt-get install terraform-ls clangd
-
-sudo npm install -g \
+npm install -g -f \
   bash-language-server \
-  typescript-language-server \
-  dockerfile-language-server-nodejs
+  diagnostic-languageserver \
+  dockerfile-language-server-nodejs \
+  lua-fmt \
+  markdownlint \
+  prettier \
+  prettier-plugin-toml \
+  pyright \
+  typescript typescript-language-server \
+  ;
+
+pip install --upgrade \
+  cmake-language-server \
+  ;
+
+go install golang.org/x/tools/gopls@latest
