@@ -1,0 +1,127 @@
+#!/bin/bash
+# shellcheck disable=SC2034,SC2016
+
+set -u
+
+# This is your default laptop screen, detect by running `xrandr`
+INTERNAL_OUTPUT="eDP-1"
+LAPTOP_RESOLUTION="1600x1024"
+
+XRANDR=$(xrandr)
+
+HDMI1_CONNECTED=$(echo -e "$XRANDR" | awk '$2 == "connected" && $1 !~ "eDP-1" {print $1}'  | grep 'HDMI1$')
+DP_1_CONNECTED=$(echo  -e "$XRANDR" | awk '$2 == "connected" && $1 !~ "eDP-1" {print $1}'  | grep 'DP-1$')
+DP_2_CONNECTED=$(echo  -e "$XRANDR" | awk '$2 == "connected" && $1 !~ "eDP-1" {print $1}'  | grep 'DP-2$')
+DP_3_CONNECTED=$(echo  -e "$XRANDR" | awk '$2 == "connected" && $1 !~ "eDP-1" {print $1}'  | grep 'DP-3$')
+DP_4_CONNECTED=$(echo  -e "$XRANDR" | awk '$2 == "connected" && $1 !~ "eDP-1" {print $1}'  | grep 'DP-4$')
+DP_11_CONNECTED=$(echo -e "$XRANDR" | awk '$2 == "connected" && $1 !~ "eDP-1" {print $1}' | grep 'DP-1-1$')
+DP_12_CONNECTED=$(echo -e "$XRANDR" | awk '$2 == "connected" && $1 !~ "eDP-1" {print $1}' | grep 'DP-1-2$')
+DP_13_CONNECTED=$(echo -e "$XRANDR" | awk '$2 == "connected" && $1 !~ "eDP-1" {print $1}' | grep 'DP-1-3$')
+DP_21_CONNECTED=$(echo -e "$XRANDR" | awk '$2 == "connected" && $1 !~ "eDP-1" {print $1}' | grep 'DP-2-1$')
+DP_22_CONNECTED=$(echo -e "$XRANDR" | awk '$2 == "connected" && $1 !~ "eDP-1" {print $1}' | grep 'DP-2-2$')
+DP_23_CONNECTED=$(echo -e "$XRANDR" | awk '$2 == "connected" && $1 !~ "eDP-1" {print $1}' | grep 'DP-2-3$')
+DP_31_CONNECTED=$(echo -e "$XRANDR" | awk '$2 == "connected" && $1 !~ "eDP-1" {print $1}' | grep 'DP-3-1$')
+DP_32_CONNECTED=$(echo -e "$XRANDR" | awk '$2 == "connected" && $1 !~ "eDP-1" {print $1}' | grep 'DP-3-2$')
+DP_33_CONNECTED=$(echo -e "$XRANDR" | awk '$2 == "connected" && $1 !~ "eDP-1" {print $1}' | grep 'DP-3-3$')
+
+if [[ -n ${DP_31_CONNECTED-} && -n ${DP_32_CONNECTED-} && -n ${DP_33_CONNECTED-} ]]; then
+  echo >&2 "Using connected external output DP-3-1, DP-3-2, DP-3-3"
+  xrandr \
+    --output "$INTERNAL_OUTPUT" --off \
+    --output DP-3-1 --mode 1920x1080 --pos 4640x444 --rotate normal \
+    --output DP-3-2 --primary --mode 3440x1440 --pos 1200x324 --rotate normal \
+    --output DP-3-3 --mode 1920x1200 --pos 0x0 --rotate left
+  sed -i 's/set $rightmon.*/set $rightmon "DP-3-1"/' ~/.config/i3/config
+  sed -i 's/set $thirdmon.*/set $thirdmon "DP-3-3"/' ~/.config/i3/config
+elif [[ -n ${DP_11_CONNECTED-} && -n ${DP_13_CONNECTED-} && -n ${HDMI1_CONNECTED-} ]]; then
+  echo >&2 "Using connected external output DP-1-1 and DP-1-3 and HDMI1"
+  xrandr \
+    --output "$INTERNAL_OUTPUT" --off \
+    --output HDMI1 --mode 1920x1080 --pos 4640x444 --rotate normal \
+    --output DP-1-3 --primary --mode 3440x1440 --pos 1200x324 --rotate normal \
+    --output DP-1-1 --mode 1920x1200 --pos 0x0 --rotate left
+  sed -i 's/set $rightmon.*/set $rightmon "HDMI1"/' ~/.config/i3/config
+  sed -i 's/set $thirdmon.*/set $thirdmon "DP-1-1"/' ~/.config/i3/config
+elif [[ -n ${DP_11_CONNECTED-} && -n ${DP_13_CONNECTED-} && -n ${DP_3_CONNECTED-} ]]; then
+  echo >&2 "Using connected external output DP-1-1 and DP-1-3 and DP-3"
+  xrandr \
+    --output "$INTERNAL_OUTPUT" --off \
+    --output DP-1-1 --mode 1920x1080 --pos 4640x444 --rotate normal \
+    --output DP-1-3 --primary --mode 3440x1440 --pos 1200x324 --rotate normal \
+    --output DP-3 --mode 1920x1200 --pos 0x0 --rotate left
+  sed -i 's/set $rightmon.*/set $rightmon "DP-1-1"/' ~/.config/i3/config
+  sed -i 's/set $thirdmon.*/set $thirdmon "DP-3"/' ~/.config/i3/config
+elif [[ -n ${DP_21_CONNECTED-} && -n ${DP_23_CONNECTED-} && -n ${DP_4_CONNECTED-} ]]; then
+  echo >&2 "Using connected external output DP-2-1 and DP-2-3 and DP-4"
+  xrandr \
+    --output "$INTERNAL_OUTPUT" --off \
+    --output DP-2-1 --mode 1920x1080 --pos 4640x444 --rotate normal \
+    --output DP-2-3 --primary --mode 3440x1440 --pos 1200x324 --rotate normal \
+    --output DP-4 --mode 1920x1200 --pos 0x0 --rotate left
+  sed -i 's/set $rightmon.*/set $rightmon "DP-2-1"/' ~/.config/i3/config
+  sed -i 's/set $thirdmon.*/set $thirdmon "DP-4"/' ~/.config/i3/config
+elif [[ -n ${DP_11_CONNECTED-} && -n ${DP_13_CONNECTED-} && -n ${DP_4_CONNECTED-} ]]; then
+  echo >&2 "Using connected external output DP-1-1, DP-1-3 and DP-4"
+  xrandr \
+    --output "$INTERNAL_OUTPUT" --off \
+    --output DP-1 --off \
+    --output DP-1-1 --mode 1920x1080 --pos 4640x444 --rotate normal \
+    --output DP-1-2 --off \
+    --output DP-1-3 --primary --mode 3440x1440 --pos 1200x324 --rotate normal \
+    --output DP-2 --off \
+    --output DP-3 --off \
+    --output DP-4 --mode 1920x1200 --pos 0x0 --rotate left
+
+  sed -i 's/set $rightmon.*/set $rightmon "DP-1-1"/' ~/.config/i3/config
+  sed -i 's/set $thirdmon.*/set $thirdmon "DP-4"/' ~/.config/i3/config
+elif [[ -n ${DP_1_CONNECTED-} && -n ${DP_4_CONNECTED-} ]]; then
+  # Portable / RV Setup
+  echo >&2 "Using Internal, DP-4 and DP-1"
+  xrandr --output "$INTERNAL_OUTPUT" --mode "$LAPTOP_RESOLUTION" --primary --pos 0x687 \
+    --output DP-1 --mode 1920x1080 --rotate normal --pos 2489x994 \
+    --output DP-4 --mode 1280x720 --rotate normal --pos 2489x0
+  sed -i 's/set $rightmon.*/set $rightmon "DP-1"/' ~/.config/i3/config
+  sed -i 's/set $thirdmon.*/set $thirdmon "DP-4"/' ~/.config/i3/config
+elif [[ -n ${DP_2_CONNECTED-} && -n ${DP_4_CONNECTED-} ]]; then
+  # Portable / RV Setup
+  echo >&2 "Using Internal, DP-4 and DP-2"
+  xrandr --output "$INTERNAL_OUTPUT" --primary --pos 0x687 \
+    --output DP-2 --mode 1920x1080 --rotate normal --pos 2489x994 \
+    --output DP-4 --mode 1360x768 --rotate normal --pos 2489x0
+  sed -i 's/set $rightmon.*/set $rightmon "DP-2"/' ~/.config/i3/config
+  sed -i 's/set $thirdmon.*/set $thirdmon "DP-4"/' ~/.config/i3/config
+elif [[ -n ${DP_1_CONNECTED-} && -n ${DP_3_CONNECTED-} ]]; then
+  echo >&2 "Using connected external output DP-3 and DP-1"
+  xrandr --output "$INTERNAL_OUTPUT" --off \
+    --output DP-1 --mode 1920x1200 --pos 3440x0 --rotate left \
+    --output DP-3 --primary --mode 3440x1440 --pos 0x366 --rotate normal
+elif [[ -n ${DP_4_CONNECTED-} ]]; then
+  if xrandr | grep -q 3440x1440; then
+    echo >&2 "Using large display - connected external output DP-4"
+    xrandr --output "$INTERNAL_OUTPUT" --off \
+      --output DP-1 --off \
+      --output DP-2 --off \
+      --output DP-3 --off \
+      --output DP-4 --primary --mode 3440x1440
+
+    sed -i 's/set $rightmon.*/set $rightmon "DP-4"/' ~/.config/i3/config
+    sed -i 's/set $thirdmon.*/set $thirdmon "DP-4"/' ~/.config/i3/config
+  else
+    echo >&2 "Using DP-4 (TV) and internal"
+    xrandr --output "$INTERNAL_OUTPUT" --mode "$LAPTOP_RESOLUTION" --primary \
+      --output DP-4 --above "$INTERNAL_OUTPUT" --rotate normal --auto
+
+    sed -i 's/set $rightmon.*/set $rightmon "DP-4"/' ~/.config/i3/config
+    sed -i 's/set $thirdmon.*/set $thirdmon "DP-4"/' ~/.config/i3/config
+  fi
+elif [[ -n ${DP_1_CONNECTED-} ]]; then
+  echo >&2 "Using DP-1 and internal"
+  xrandr --output "$INTERNAL_OUTPUT" --mode "$LAPTOP_RESOLUTION" --primary \
+    --output DP-1 --pos 2489x212 --rotate normal --auto \
+    --output DP-2 --off \
+    --output DP-3 --off \
+    --output DP-4 --off
+else
+  echo >&2 "Using internal output $INTERNAL_OUTPUT"
+  xrandr --output "$INTERNAL_OUTPUT" --mode "$LAPTOP_RESOLUTION" --primary --brightness 1.0
+fi

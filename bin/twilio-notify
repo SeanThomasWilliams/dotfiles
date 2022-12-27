@@ -1,0 +1,23 @@
+#!/bin/bash
+# shellcheck disable=SC1090
+
+if [[ $# -lt 1 ]]; then
+  echo >&2 "Usage: $0 <Mesage Text>"
+  exit 1
+fi
+
+if [[ -z ${TWILIO_SID-} ]]; then
+  source "$HOME/.config/twilio"
+fi
+
+if [[ -n "${DEBUG-}" ]]; then
+  echo -e "$*"
+  exit 0
+fi
+
+curl -fSsL "https://api.twilio.com/2010-04-01/Accounts/$TWILIO_ACCOUNT/Messages.json" \
+  -X POST \
+  --data-urlencode "To=$TWILIO_TO" \
+  --data-urlencode "MessagingServiceSid=$TWILIO_SID" \
+  --data-urlencode "Body=$*" \
+  -u "$TWILIO_ACCOUNT:$TWILIO_AUTH_TOKEN" 1> /dev/null

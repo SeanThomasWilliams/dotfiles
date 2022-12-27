@@ -1,0 +1,25 @@
+#!/bin/bash
+
+# Rename files in a directory to a new name
+
+if [[ $# -eq 0 ]]; then
+  echo "Usage: $0 \"filename substring\" \"replacment string\""
+  echo ""
+  echo 'Example: $0 "foo" "bar"'
+  echo 'foostuff.sh -> barstuff.sh'
+  exit 1
+fi
+
+if [[ $# -eq 1 ]]; then
+  echo >&2 "Preview of matching files: "
+  find * -type f -wholename "*$1*"
+  exit
+fi
+
+find * -type f -wholename "*$1*" |\
+  while read -r file; do
+    tgt_file="${file/$1/$2}"
+    tgt_dir="$(dirname "$tgt_file")"
+    mkdir -p "$tgt_dir"
+    mv -v "$file" "${file/$1/$2}"
+  done

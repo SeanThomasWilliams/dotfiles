@@ -110,7 +110,7 @@ process_by_file_extension(){
       ;;
     *)
       echo >&2 "Unknown extension: $suffix for $cert"
-      exit 1
+      cat "$cert" | process_by_file_content
       ;;
   esac
 }
@@ -119,6 +119,13 @@ process_single_file(){
   local cert tmp_dir domain fname
 
   fname="$1"
+
+  # Exit in error if file does not exist
+  if [[ ! -f "$fname" ]]; then
+    echo >&2 "File does not exist: $fname"
+    exit 1
+  fi
+
   tmp_dir=$(mktemp -d)
   trap "rm -rf $tmp_dir" EXIT
 

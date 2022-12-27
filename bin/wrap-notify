@@ -1,0 +1,55 @@
+#!/bin/bash
+# shellcheck disable=SC1090
+
+set -euo pipefail
+
+if [[ $# -lt 1 ]]; then
+  echo "Usage: $0 command <args>"
+  exit 1
+fi
+
+# Parse options
+# the -t option enables twilio
+# the -n options enables desktpo notifications
+
+while getopts ":t" opt; do
+  case $opt in
+    t)
+      twilio=true
+      ;;
+    \?)
+      echo "Invalid option: -$OPTARG" >&2
+      exit 1
+      ;;
+  esac
+done
+
+shift $((OPTIND -1))
+
+PROG="$1"
+shift
+ARGS="$@"
+
+notify() {
+  rv=$?
+  if [[ $rv -ne 0 ]]; then
+    msg="Command '$PROG ${ARGS[*]}' failed with exit code ${rv}!"
+    echo >&2 "Notify: $msg"
+    notify-send --urgency=critical "Command $PROG" "$msg"
+    if [[ -n "${twilio:-}" ]]; then
+      twilio-notify "$msg"
+    fi
+  else
+    msg="'$PROG ${ARGS[*]}' succeeded!"
+    echo >&2 "Notify: $msg"
+    notify-send --urgency=normal "Command $PROG" "$msg"
+    if [[ -n "${twilio:-}" ]]; then
+      twilio-notify "$msg"
+    fi
+  fi
+  exit $rv
+}
+
+trap notify EXIT
+
+"$PROG" "$@"

@@ -1,0 +1,47 @@
+#!/bin/bash
+
+set -eu -o pipefail
+
+# Given the path to an SSH private key, print the fingerprint of the key
+# Handle both RSA private keys and OPENSSH private keys
+
+# Usage: get-ssh-key-fingerprint <path-to-ssh-private-key>
+
+# Example:
+# $ get-ssh-key-fingerprint ~/.ssh/id_rsa
+
+# Example output:
+
+if [[ $# -ne 1 ]]; then
+    echo "Usage: get-ssh-key-fingerprint <path-to-ssh-private-key>"
+    exit 1
+fi
+
+KEY_FILE=$1
+
+if [[ ! -f $KEY_FILE ]]; then
+    echo "File not found: $KEY_FILE"
+    exit 1
+fi
+
+# Check if the key is an RSA key
+if grep 'BEGIN RSA PRIVATE KEY' $KEY_FILE > /dev/null; then
+  echo -n "RSA $KEY_FILE: "
+  openssl rsa -in "$KEY_FILE" -pubout -outform DER 2> /dev/null |\
+    openssl md5 -c |\
+    awk '{print $2}'
+  exit 0
+fi
+
+# Check if the key is an OPENSSH key
+if grep 'BEGIN OPENSSH PRIVATE KEY' $KEY_FILE > /dev/null; then
+  echo -n "OpenSSH $KEY_FILE: "
+  ssh-keygen -ef "$KEY_FILE" -m PEM 2> /dev/null |\
+    openssl rsa -RSAPublicKey_in -outform DER 2> /dev/null |\
+    openssl md5 -c |\
+    awk '{print $2}'
+  exit 0
+fi
+
+echo >&2 "Unknown key format: $KEY_FILE"
+exit 1
