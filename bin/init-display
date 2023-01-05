@@ -5,7 +5,7 @@ set -u
 
 # This is your default laptop screen, detect by running `xrandr`
 INTERNAL_OUTPUT="eDP-1"
-LAPTOP_RESOLUTION="1600x1024"
+LAPTOP_RESOLUTION="1400x900"
 
 XRANDR=$(xrandr)
 
@@ -28,11 +28,12 @@ if [[ -n ${DP_31_CONNECTED-} && -n ${DP_32_CONNECTED-} && -n ${DP_33_CONNECTED-}
   echo >&2 "Using connected external output DP-3-1, DP-3-2, DP-3-3"
   xrandr \
     --output "$INTERNAL_OUTPUT" --off \
-    --output DP-3-1 --mode 1920x1080 --pos 4640x444 --rotate normal \
-    --output DP-3-2 --primary --mode 3440x1440 --pos 1200x324 --rotate normal \
-    --output DP-3-3 --mode 1920x1200 --pos 0x0 --rotate left
-  sed -i 's/set $rightmon.*/set $rightmon "DP-3-1"/' ~/.config/i3/config
-  sed -i 's/set $thirdmon.*/set $thirdmon "DP-3-3"/' ~/.config/i3/config
+    --output DP-3-2 --primary --mode 3440x1440 --rotate normal \
+    --output DP-3-1           --mode 1920x1080 --rotate left --left-of DP-3-2 \
+    --output DP-3-3           --mode 3440x1440 --rotate normal --right-of DP-3-2
+
+  sed -i 's/set $rightmon.*/set $rightmon "DP-3-3"/' ~/.config/i3/config
+  sed -i 's/set $thirdmon.*/set $thirdmon "DP-3-1"/' ~/.config/i3/config
 elif [[ -n ${DP_11_CONNECTED-} && -n ${DP_13_CONNECTED-} && -n ${HDMI1_CONNECTED-} ]]; then
   echo >&2 "Using connected external output DP-1-1 and DP-1-3 and HDMI1"
   xrandr \
@@ -79,7 +80,7 @@ elif [[ -n ${DP_1_CONNECTED-} && -n ${DP_4_CONNECTED-} ]]; then
   echo >&2 "Using Internal, DP-4 and DP-1"
   xrandr --output "$INTERNAL_OUTPUT" --mode "$LAPTOP_RESOLUTION" --primary --pos 0x687 \
     --output DP-1 --mode 1920x1080 --rotate normal --pos 2489x994 \
-    --output DP-4 --mode 1280x720 --rotate normal --pos 2489x0
+    --output DP-4 --mode 1360x768 --rotate normal --pos 2489x0
   sed -i 's/set $rightmon.*/set $rightmon "DP-1"/' ~/.config/i3/config
   sed -i 's/set $thirdmon.*/set $thirdmon "DP-4"/' ~/.config/i3/config
 elif [[ -n ${DP_2_CONNECTED-} && -n ${DP_4_CONNECTED-} ]]; then
