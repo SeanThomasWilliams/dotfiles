@@ -24,7 +24,6 @@ Plug 'Ivo-Donchev/vim-react-goto-definition'
 Plug 'SeanThomasWilliams/dwm.vim'
 Plug 'SirVer/ultisnips'
 Plug 'airblade/vim-gitgutter'
-Plug 'arakashic/nvim-colors-solarized'
 Plug 'benekastah/neomake'
 Plug 'benmills/vimux'
 Plug 'benmills/vimux-golang'
@@ -178,7 +177,7 @@ set tags=~/.tags,./tags           " Look for tags in this file
 " }}}
 
 " {{{ colorscheme/style options
-colorscheme github_dimmed " github_dark_default github_dark
+" colorscheme github_*
 let g:airline_theme = 'tender'
 " Enable true color
 if exists('+termguicolors')

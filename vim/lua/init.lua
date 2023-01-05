@@ -1,6 +1,8 @@
 local nvim_lsp = require("lspconfig")
 local lsp_status = require("lsp-status")
 
+require('github-theme').setup()
+
 -- require("transparent").setup({
 --   enable = true, -- boolean: enable transparent
 -- })

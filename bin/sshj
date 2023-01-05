@@ -32,12 +32,12 @@ populate_args(){
     TARGET_HOST="${target_host_split[1]}"
   fi
 
-  if [[ -z ${SSH_PROXY_HOST-} || -z ${TARGET_HOST-} ]]; then
+  if [[ -z ${TARGET_HOST-} ]]; then
     usage
     exit 1
   fi
 
-  SSH_KEY=${SSH_KEY:-${SSH_PROXY_HOST}app.pem}
+  SSH_KEY=${SSH_KEY:-${SSH_PROXY_HOST-}app.pem}
   SSH_KEY_FILE="${SSH_KEY_FILE:-$HOME/.ssh/${SSH_KEY}}"
   if [[ ! -f ${SSH_KEY_FILE} ]]; then
     echo >&2 "Unable to read SSH key file: ${SSH_KEY_FILE}"
@@ -54,6 +54,11 @@ populate_args "$@"
 if [[ -n ${DISABLE_JUMPBOX-} ]]; then
   echo >&2 "Connecting to ${SSH_USER}@${TARGET_HOST} using key ${SSH_KEY_FILE}"
 else
+  if [[ -z ${SSH_PROXY_HOST-} ]]; then
+    echo >&2 "SSH_PROXY_HOST is not set"
+    usage
+    exit 1
+  fi
   SSH_PROXY_ARGS="-o 'ProxyCommand ssh -W %h:%p ${SSH_PROXY_USER}@${SSH_PROXY_HOST}'"
   echo >&2 "Connecting to ${SSH_USER}@${TARGET_HOST} using jumpbox ${SSH_PROXY_HOST} and key ${SSH_KEY_FILE}"
 fi

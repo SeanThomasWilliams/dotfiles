@@ -2,9 +2,13 @@
 
 source "$HOME/.asdf/asdf.sh"
 
+export MAKEFLAGS=-j10
+
 PLUGIN_LIST=(
-  awscli
+  make
   cmake
+
+  awscli
   ctop
   flux2
   fzf
@@ -21,13 +25,10 @@ PLUGIN_LIST=(
   kpt
   kubectx
   kustomize
-  make
   minio
   packer
   popeye
-  postgres
   ripgrep
-  ruby
   ruby
   shellcheck
   snyk
@@ -43,12 +44,15 @@ PLUGIN_LIST=(
   yq
 )
 
+asdf plugin add nodejs
 asdf install nodejs 16.19.0
 asdf global nodejs 16.19.0
 
 for plugin in "${PLUGIN_LIST[@]}"; do
   echo >&2 "Adding $plugin"
   asdf plugin add "$plugin"
-  asdf install "$plugin" latest
   asdf global "$plugin" latest
+  asdf install "$plugin" latest
+  hash -r
+  command -v "$plugin"
 done
