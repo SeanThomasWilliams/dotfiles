@@ -1,0 +1,19 @@
+#!/bin/bash
+
+# Replace all instances of the first string with the second string in all files beneath the current directory
+
+if [[ $# -eq 0 ]]; then
+  echo "Usage: $0 <string to replace> <replacement string>"
+  echo ""
+  echo 'Example: $0 "foo" "bar" -> replaces all instances of "foo" with "bar" in file contents'
+  exit 1
+fi
+
+if [[ $# -eq 1 ]]; then
+  echo >&2 "Preview of matching files contents: "
+  grep -r "$1" *
+  exit
+fi
+
+grep -rl "$1" * |\
+  xargs sed -i "s#$1#$2#g"
