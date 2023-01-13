@@ -24,9 +24,6 @@ export -f ew
 load_session_manager_settings(){
   ### session managers
 
-  # custom session manager settings
-  alias htop="TERM=screen htop"
-
   # check the window size after each command and, if necessary, update the values of LINES and COLUMNS.
   shopt -s checkwinsize
 
@@ -174,6 +171,7 @@ load_path_settings(){
     "$HOME/anaconda3/bin"
     "$HOME/bin"
     "$HOME/.npm-packages/bin"
+    "$HOME/.yarn/bin"
     "$HOME/.local/bin"
     "$HOME/.asdf/shims"
   )
@@ -248,6 +246,16 @@ load_alias_settings(){
   alias gmake='make'
   alias remake='make'
   export MAKEFLAGS='-j8'
+
+  # Custom aliases
+  alias ..='cd ..'
+  alias ...='cd ../..'
+  alias ....='cd ../../..'
+  alias .....='cd ../../../..'
+  alias ......='cd ../../../../..'
+  alias .......='cd ../../../../../..'
+  alias ........='cd ../../../../../../..'
+  alias -- -='cd -'
 }
 
 load_history_settings(){
@@ -346,7 +354,7 @@ load_session_manager_settings
 load_editor_settings
 load_history_settings
 load_lang_settings
-load_alias_settings
 load_extra_source_files
 load_ps1_settings
+load_alias_settings
 fix_path_ordering

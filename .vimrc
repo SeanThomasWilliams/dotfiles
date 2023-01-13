@@ -11,15 +11,17 @@ set nocompatible " Required
 
 call plug#begin('~/.vim/plugged')
 " Other plugins
-" Plug 'davidhalter/jedi-vim'
-" Plug 'ervandew/supertab'
-" Plug 'numirias/semshi', {'do': ':UpdateRemotePlugins'}
-" Plug 'zchee/deoplete-jedi'
 " Plug 'RRethy/vim-illuminate'
 " Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
 " Plug 'carlitux/deoplete-ternjs', { 'do': 'npm install -g tern' }
+" Plug 'davidhalter/jedi-vim'
+" Plug 'ervandew/supertab'
 " Plug 'hashivim/vim-terraform'
+" Plug 'numirias/semshi', {'do': ':UpdateRemotePlugins'}
 " Plug 'zchee/deoplete-go', { 'do': 'make' }
+" Plug 'zchee/deoplete-jedi'
+" Plug 'kristijanhusak/completion-tags'
+" Plug 'nvim-lua/completion-nvim'
 Plug 'Ivo-Donchev/vim-react-goto-definition'
 Plug 'SeanThomasWilliams/dwm.vim'
 Plug 'SirVer/ultisnips'
@@ -36,10 +38,10 @@ Plug 'honza/vim-snippets'
 Plug 'hrsh7th/nvim-compe'
 Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app && yarn install' }
 Plug 'jacoborus/tender.vim'
+Plug 'jamessan/vim-gnupg'
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 Plug 'junegunn/fzf.vim'
 Plug 'jvirtanen/vim-hcl'
-"Plug 'kristijanhusak/completion-tags'
 Plug 'leafgarland/typescript-vim'
 Plug 'lilydjwg/colorizer'
 Plug 'ludovicchabant/vim-gutentags'
@@ -48,7 +50,6 @@ Plug 'majutsushi/tagbar'
 Plug 'marijnh/tern_for_vim'
 Plug 'mustache/vim-mustache-handlebars'
 Plug 'neovim/nvim-lspconfig', { 'do': 'npm i -g pyright' }
-"Plug 'nvim-lua/completion-nvim'
 Plug 'nvim-lua/lsp-status.nvim'
 Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}  " We recommend updating the parsers on update
 Plug 'pangloss/vim-javascript'
@@ -133,6 +134,9 @@ endif
 " Don't lose selection when shifting text in visual or select mode
 xnoremap < <gv
 xnoremap > >gv
+
+" Join lines without spaces
+nnoremap J gJ
 
 " ARROW KEYS ARE UNACCEPTABLE
 map <Left> <Nop>
@@ -995,6 +999,6 @@ let g:mkdp_theme = 'dark'
 
 let g:copilot_no_tab_map = v:true
 imap <silent><script><expr> <C-J> copilot#Accept("\<CR>")
-imap <C-h> <Plug>(copilot-suggest)
-nmap <C-x> :Copilot panel<CR>
-imap <C-x> <C-o>:Copilot panel<CR>
+inoremap <C-h> <Plug>(copilot-suggest)
+nnoremap <C-x> :Copilot panel<CR>
+inoremap <C-x> <C-o>:Copilot panel<CR>

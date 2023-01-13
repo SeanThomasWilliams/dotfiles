@@ -31,4 +31,6 @@ sudo yum install -y \
   readline-devel \
   tmux \
   unzip \
-  uuid
+  uuid \
+  lynx \
+  xmlto

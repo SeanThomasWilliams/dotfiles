@@ -8,10 +8,13 @@
 export DEBIAN_FRONTEND=noninteractive
 
 PACKAGES=(
+  arandr
   aria2
   autoconf
   autojump
   automake
+  bison
+  blueman
   build-essential
   bzip2
   checkinstall
@@ -20,23 +23,33 @@ PACKAGES=(
   direnv
   dstat
   exuberant-ctags
+  flatpak
   fonts-symbola
-  fuse
-  gawk
   gawk
   gcc
   git
+  gnome-screenshot
+  gnome-software-plugin-flatpak
+  gnome-tweaks
   gnupg
   grep
   htop
   i3
   i3lock
   i3status
+  imagemagick
   jq
-  libfuse2
+  libffi-dev
+  libfuse3-dev
+  libgdbm-dev
   libgnutls28-dev
+  libjansson-dev
+  libncurses5-dev
+  libreadline-dev
   libssl-dev
+  libyaml-dev
   make
+  materia-gtk-theme
   maven
   mlocate
   neovim
@@ -44,37 +57,27 @@ PACKAGES=(
   openjdk-8-jdk
   opensc
   openssh-server
+  pandoc
+  pasystray
+  pavucontrol
   remake
   rofi
-  ruby
-  ruby-dev
+  scrot
   sed
   silversearcher-ag
   sshuttle
   taskwarrior
   tcpdump
+  texlive-fonts-extra
   tmux
+  ttf-mscorefonts-installer
   uuid
   uuid-dev
   wget
-  zlib1g-dev
-  blueman
-  pasystray
-  pavucontrol
-  imagemagick
-  scrot
-  arandr
-  pandoc
-  texlive-fonts-extra
-  gnome-screenshot
-
-  materia-gtk-theme
-  gnome-tweaks
   xdg-desktop-portal-gtk
-  flatpak
-  gnome-software-plugin-flatpak
-
-  ttf-mscorefonts-installer # EULA
+  zlib1g-dev
+  lynx
+  xmlto
 )
 
 sudo apt-get update -yyq
@@ -84,4 +87,3 @@ echo "${PACKAGES[@]}" | sudo -E xargs apt-get install -yyq
 sudo apt autoremove -yyq
 
 sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-sudo flatpak install io.github.realmazharhusain.GdmSettings -y

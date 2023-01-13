@@ -3,11 +3,43 @@
 set -eux
 set -o pipefail
 
-# Neovim pip
-pip install --upgrade pip
-pip install --upgrade neovim pynvim msgpack
+yarn_packages=(
+  bash-language-server
+  diagnostic-languageserver
+  dockerfile-language-server-nodejs
+  eslint
+  jshint
+  lua-fmt
+  markdownlint
+  neovim
+  prettier
+  prettier-plugin-toml
+  pyright
+  tern
+  typescript
+  typescript-language-server
+)
+
+pip_packages=(
+  pip
+  cmake-language-server
+  msgpack
+  neovim
+  pynvim
+)
+
+
+# Python Packages
+pip install --upgrade "${pip_packages[@]}"
+
+# Ruby Gem deps
 gem install neovim && gem environment
+
+# Node Packages
+npm install -g -f yarn
+yarn global add --force --non-interactive "${yarn_packages[@]}"
 
 # Go binaries
 mkdir -p ~/gocode/src/github.com/
+go install golang.org/x/tools/gopls@latest
 nvim +GoInstallBinaries +qall

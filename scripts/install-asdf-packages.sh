@@ -20,7 +20,6 @@ PLUGIN_LIST=(
   k9s
   kafka
   kafkactl
-  kcat
   kcctl
   kpt
   kubectx
@@ -49,6 +48,12 @@ asdf install nodejs 16.19.0
 asdf global nodejs 16.19.0
 
 for plugin in "${PLUGIN_LIST[@]}"; do
+  if [[ -f "$HOME/.asdf/shims/$plugin" ]]; then
+    echo >&2 "Plugin $plugin already installed"
+    asdf global "$plugin" latest
+    continue
+  fi
+
   echo >&2 "Adding $plugin"
   asdf plugin add "$plugin"
   asdf global "$plugin" latest

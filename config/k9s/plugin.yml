@@ -13,7 +13,7 @@ plugin:
     background: true
     args:
       - -c
-      - "flux --context $CONTEXT $([ $(kubectl --context $CONTEXT get helmreleases -n $NAMESPACE $NAME -o=custom-columns=TYPE:.spec.suspend | tail -1) = \"true\" ] && echo \"resume\" || echo \"suspend\") helmrelease -n $NAMESPACE $NAME"
+      - "flux --context $CONTEXT $([ $(kubectl --context $CONTEXT get helmreleases -n $NAMESPACE $NAME -o=custom-columns=TYPE:.spec.suspend | tail -1) = \"true\" ] && echo \"resume\" || echo \"suspend\") helmrelease -n $NAMESPACE $NAME &> /dev/null"
   toggle-kustomization:
     shortCut: Shift-T
     confirm: false
@@ -24,7 +24,7 @@ plugin:
     background: true
     args:
       - -c
-      - "flux --context $CONTEXT $([ $(kubectl --context $CONTEXT get kustomizations -n $NAMESPACE $NAME -o=custom-columns=TYPE:.spec.suspend | tail -1) = \"true\" ] && echo \"resume\" || echo \"suspend\") kustomization -n $NAMESPACE $NAME"
+      - "flux --context $CONTEXT $([ $(kubectl --context $CONTEXT get kustomizations -n $NAMESPACE $NAME -o=custom-columns=TYPE:.spec.suspend | tail -1) = \"true\" ] && echo \"resume\" || echo \"suspend\") kustomization -n $NAMESPACE $NAME &> /dev/null"
   reconcile-git:
     shortCut: Shift-R
     confirm: false
@@ -35,7 +35,7 @@ plugin:
     background: true
     args:
     - -c
-    - "flux --context $CONTEXT reconcile source git -n $NAMESPACE $NAME"
+    - "flux --context $CONTEXT reconcile source git -n $NAMESPACE $NAME &> /dev/null"
   reconcile-hr:
     shortCut: Shift-R
     confirm: false
@@ -46,7 +46,7 @@ plugin:
     background: true
     args:
     - -c
-    - "flux --context $CONTEXT reconcile helmrelease -n $NAMESPACE $NAME"
+    - "flux --context $CONTEXT reconcile helmrelease -n $NAMESPACE $NAME --with-source &> /dev/null"
   reconcile-ks:
     shortCut: Shift-R
     confirm: false
@@ -57,7 +57,7 @@ plugin:
     background: true
     args:
     - -c
-    - "flux --context $CONTEXT reconcile kustomization -n $NAMESPACE $NAME --with-source"
+    - "flux --context $CONTEXT reconcile kustomization -n $NAMESPACE $NAME --with-source &> /dev/null"
   # Opens a shell to k3d container as root
   k3d-root-shell:
     shortCut: Shift-S
