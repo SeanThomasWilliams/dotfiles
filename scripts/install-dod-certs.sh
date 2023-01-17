@@ -24,7 +24,7 @@ elif [[ $ID == "ubuntu" ]]; then
   cd /usr/local/share/ca-certificates
   unzip -p "$CERT_ZIP" '*.pem.p7b' |\
     openssl pkcs7 -print_certs -out - |\
-    sudo awk '/BEGIN CERT/,/END CERT/{ if(/BEGIN CERT/){c++}; out="dod.ca." c ".pem"; print >out}'
+    sudo awk '/BEGIN CERT/,/END CERT/{ if(/BEGIN CERT/){c++}; out="dod.ca." c ".crt"; print >out}'
   sudo update-ca-certificates
 fi
 

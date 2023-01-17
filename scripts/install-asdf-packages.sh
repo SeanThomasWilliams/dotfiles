@@ -21,7 +21,6 @@ PLUGIN_LIST=(
   kafka
   kafkactl
   kcctl
-  kpt
   kubectx
   kustomize
   minio
@@ -46,6 +45,10 @@ PLUGIN_LIST=(
 asdf plugin add nodejs
 asdf install nodejs 16.19.0
 asdf global nodejs 16.19.0
+
+asdf plugin add kpt
+asdf install kpt v1.0.0-beta.24
+asdf global kpt v1.0.0-beta.24
 
 for plugin in "${PLUGIN_LIST[@]}"; do
   if [[ -f "$HOME/.asdf/shims/$plugin" ]]; then

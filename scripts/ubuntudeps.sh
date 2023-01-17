@@ -10,7 +10,9 @@ export DEBIAN_FRONTEND=noninteractive
 PACKAGES=(
   arandr
   aria2
+  apt-file
   autoconf
+  docker.io
   autojump
   automake
   bison
@@ -47,12 +49,13 @@ PACKAGES=(
   libncurses5-dev
   libreadline-dev
   libssl-dev
+  libtool-bin
   libyaml-dev
+  lm-sensors
   make
   materia-gtk-theme
   maven
   mlocate
-  neovim
   net-tools
   openjdk-8-jdk
   opensc
@@ -60,13 +63,11 @@ PACKAGES=(
   pandoc
   pasystray
   pavucontrol
-  remake
   rofi
   scrot
   sed
   silversearcher-ag
   sshuttle
-  taskwarrior
   tcpdump
   texlive-fonts-extra
   tmux
@@ -78,6 +79,7 @@ PACKAGES=(
   zlib1g-dev
   lynx
   xmlto
+  xclip
 )
 
 sudo apt-get update -yyq

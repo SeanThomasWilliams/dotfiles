@@ -11,7 +11,7 @@ if [[ $ID_LIKE =~ rhel ]]; then
     git gcc pkgconfig autoconf automake gettext gettext-devel readline-devel make guile lzip texinfo uconv
 elif [[ $ID_LIKE =~ debian ]]; then
   sudo apt-get install -y \
-    git gcc pkg-config autoconf automake autopoint gettext libreadline-dev make guile-2.0 texinfo lzip
+    git gcc pkg-config autoconf automake autopoint gettext libreadline-dev make guile-2.2 texinfo lzip
 fi
 
 mkdir -p ~/gocode/src/github.com/rocky
@@ -22,10 +22,12 @@ if [[ ! -d remake ]]; then
 fi
 
 cd ~/gocode/src/github.com/rocky/remake
-git clean -d -f
-git checkout remake-3-82
+git fetch
+git checkout remake-4-3
+git reset --hard remake-4-3
+git branch
 
-autoreconf -i
-./configure
-make update
-make && make check && sudo make install
+$SHELL ./autogen.sh
+
+make && make check
+sudo make install

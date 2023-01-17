@@ -17,7 +17,7 @@ order += "cpu_usage"
 order += "memory"
 order += "load"
 order += "cpu_temperature 0"
-order += "battery 0"
+#order += "battery 0"
 order += "tztime local"
 order += "volume master"
 
@@ -47,7 +47,6 @@ load {
 
 cpu_temperature 0 {
     format = "%degrees°C"
-    path = "/sys/class/hwmon/hwmon1/temp1_input"
 }
 
 battery 0 {

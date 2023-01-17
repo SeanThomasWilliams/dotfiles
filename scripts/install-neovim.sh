@@ -5,9 +5,10 @@ set -x
 set -eu
 set -o pipefail
 
+unset MAKEFLAGS
+
 # Get OS info
-NEOVIM_BASE_DIR="$HOME/.local/neovim"
-mkdir -p "$NEOVIM_BASE_DIR" "$HOME/software"
+mkdir -p "$HOME/software"
 
 pip install neovim --upgrade
 

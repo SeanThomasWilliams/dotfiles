@@ -9,11 +9,13 @@ LAPTOP_RESOLUTION="1400x900"
 
 XRANDR=$(xrandr)
 
-HDMI1_CONNECTED=$(echo -e "$XRANDR" | awk '$2 == "connected" && $1 !~ "eDP-1" {print $1}'  | grep 'HDMI1$')
-DP_1_CONNECTED=$(echo  -e "$XRANDR" | awk '$2 == "connected" && $1 !~ "eDP-1" {print $1}'  | grep 'DP-1$')
-DP_2_CONNECTED=$(echo  -e "$XRANDR" | awk '$2 == "connected" && $1 !~ "eDP-1" {print $1}'  | grep 'DP-2$')
-DP_3_CONNECTED=$(echo  -e "$XRANDR" | awk '$2 == "connected" && $1 !~ "eDP-1" {print $1}'  | grep 'DP-3$')
-DP_4_CONNECTED=$(echo  -e "$XRANDR" | awk '$2 == "connected" && $1 !~ "eDP-1" {print $1}'  | grep 'DP-4$')
+HDMI0_CONNECTED=$(echo -e "$XRANDR" | awk '$2 == "connected" && $1 !~ "eDP-1" {print $1}' | grep 'HDMI-0$')
+HDMI1_CONNECTED=$(echo -e "$XRANDR" | awk '$2 == "connected" && $1 !~ "eDP-1" {print $1}' | grep 'HDMI-1$')
+DP_0_CONNECTED=$(echo  -e "$XRANDR" | awk '$2 == "connected" && $1 !~ "eDP-1" {print $1}' | grep 'DP-0$')
+DP_1_CONNECTED=$(echo  -e "$XRANDR" | awk '$2 == "connected" && $1 !~ "eDP-1" {print $1}' | grep 'DP-1$')
+DP_2_CONNECTED=$(echo  -e "$XRANDR" | awk '$2 == "connected" && $1 !~ "eDP-1" {print $1}' | grep 'DP-2$')
+DP_3_CONNECTED=$(echo  -e "$XRANDR" | awk '$2 == "connected" && $1 !~ "eDP-1" {print $1}' | grep 'DP-3$')
+DP_4_CONNECTED=$(echo  -e "$XRANDR" | awk '$2 == "connected" && $1 !~ "eDP-1" {print $1}' | grep 'DP-4$')
 DP_11_CONNECTED=$(echo -e "$XRANDR" | awk '$2 == "connected" && $1 !~ "eDP-1" {print $1}' | grep 'DP-1-1$')
 DP_12_CONNECTED=$(echo -e "$XRANDR" | awk '$2 == "connected" && $1 !~ "eDP-1" {print $1}' | grep 'DP-1-2$')
 DP_13_CONNECTED=$(echo -e "$XRANDR" | awk '$2 == "connected" && $1 !~ "eDP-1" {print $1}' | grep 'DP-1-3$')
@@ -24,7 +26,20 @@ DP_31_CONNECTED=$(echo -e "$XRANDR" | awk '$2 == "connected" && $1 !~ "eDP-1" {p
 DP_32_CONNECTED=$(echo -e "$XRANDR" | awk '$2 == "connected" && $1 !~ "eDP-1" {print $1}' | grep 'DP-3-2$')
 DP_33_CONNECTED=$(echo -e "$XRANDR" | awk '$2 == "connected" && $1 !~ "eDP-1" {print $1}' | grep 'DP-3-3$')
 
-if [[ -n ${DP_31_CONNECTED-} && -n ${DP_32_CONNECTED-} && -n ${DP_33_CONNECTED-} ]]; then
+if [[ -n ${HDMI0_CONNECTED-} && -n ${DP_0_CONNECTED-} && -n ${DP_2_CONNECTED-} && -n ${DP_4_CONNECTED-} ]]; then
+  xrandr \
+    --output HDMI-0 --mode 2560x1080 --pos 0x1138 --rotate normal \
+    --output DP-0 --primary --mode 2560x1080 --pos 2734x0 --rotate left \
+    --output DP-2 --mode 2560x1080 --pos 3814x0 --rotate right \
+    --output DP-4 --mode 2560x1440 --pos 5056x778 --rotate normal
+
+  if ! xrandr --listmonitors | grep -q DP-02; then
+    xrandr --setmonitor DP-02 auto DP-0,DP-2
+  fi
+
+  sed -i 's/set $rightmon.*/set $rightmon "DP-4"/' ~/.config/i3/config
+  sed -i 's/set $thirdmon.*/set $thirdmon "HDMI-0"/' ~/.config/i3/config
+elif [[ -n ${DP_31_CONNECTED-} && -n ${DP_32_CONNECTED-} && -n ${DP_33_CONNECTED-} ]]; then
   echo >&2 "Using connected external output DP-3-1, DP-3-2, DP-3-3"
   xrandr \
     --output "$INTERNAL_OUTPUT" --off \
