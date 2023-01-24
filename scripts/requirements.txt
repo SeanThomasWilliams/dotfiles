@@ -1,7 +1,7 @@
 Jinja2
 MarkupSafe
 ansible-lint
-ansible==6
+ansible==7.0.0
 argcomplete
 autoflake
 awscli
