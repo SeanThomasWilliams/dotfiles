@@ -21,6 +21,8 @@ PLUGIN_LIST=(
   kafka
   kafkactl
   kcctl
+  kpt
+  kubectl
   kubectx
   kustomize
   minio
