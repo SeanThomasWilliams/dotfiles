@@ -1,5 +1,6 @@
 #!/bin/bash -ex
 
+rm -rf tmux-appimage
 git clone https://github.com/nelsonenzo/tmux-appimage.git
 cd tmux-appimage
 
