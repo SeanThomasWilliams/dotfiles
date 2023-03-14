@@ -177,7 +177,7 @@ set directory=~/.vim/tmp/swap//   " swap files
 set fileformats=unix,dos,mac      " Prefer Unix over Windows over OS 9 formats
 set history=10000                 " Command history
 set noswapfile                    " it's 2013, Vim.
-set tags=~/.tags,./tags           " Look for tags in this file
+set tags=./.tags                  " Look for tags in this file
 " }}}
 
 " {{{ colorscheme/style options
