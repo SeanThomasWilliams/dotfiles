@@ -1,15 +1,30 @@
 #!/bin/bash -eu
 # shellcheck disable=SC2016,SC1090
 
+usage(){
+  cat >&2 <<EOF
+  Usage: bssh [options] [user@]host [command]
+  Options:
+    -v, --verbose
+      Show verbose output
+    -h, --help
+      Show this help message and exit
+
+  Examples:
+    bssh -v user@host
+    bssh -v host
+    bssh -v host command
+    bssh -v user@host command
+
+EOF
+
+}
+
 if [[ $# -lt 1 ]]; then
-    echo >&2 "SSH to the EC2 Resources for the given AWS CloudFormation Stack or AWS Elastic Beanstalk Environment"
-    echo >&2 "Usage: $0 [-i IP_SELECTOR] RESOURCE_NAMES"
-    echo >&2 "RESOURCE_NAMES: AWS CloudFormation Stack or AWS Elastic Beanstalk Environment Name"
-    echo >&2 "IP_SELECTOR: Filter target IPs by the given string"
-    exit 1
+  usage
+  exit 1
 fi
 
-AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-us-gov-west-1}
 RESOURCE_NAMES=()
 IP_SELECTOR='.'
 
@@ -21,6 +36,10 @@ while [[ $# -gt 0 ]]; do
       shift # past argument
       shift # past value
       ;;
+    -v|--verbose)
+      set -x
+      shift # past argument
+      ;;
     --) # Stop parsing
       shift
       break
@@ -31,6 +50,21 @@ while [[ $# -gt 0 ]]; do
       ;;
   esac
 done
+
+if [[ -z ${AWS_DEFAULT_REGION-} ]]; then
+  if [[ ! -f "$HOME/.aws/default-region" ]]; then
+    region=$(curl -m 1 -fs http://169.254.169.254/latest/dynamic/instance-identity/document |\
+      awk -F'"' '/region/ {print $4}')
+    if [[ -n "${region-}" ]]; then
+      mkdir -p "$HOME/.aws"
+      echo "$region" > "$HOME/.aws/default-region"
+    else
+      echo "Unable to determine region. Please set AWS_DEFAULT_REGION or run from an EC2 instance." >&2
+      exit 1
+    fi
+  fi
+  AWS_DEFAULT_REGION="$(cat "$HOME/.aws/default-region")"
+fi
 
 if [[ $# -gt 0 ]]; then
   REMOTE_COMMAND=(sudo -E "$@")

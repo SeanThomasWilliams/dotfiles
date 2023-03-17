@@ -21,6 +21,14 @@ usage(){
   echo >&2 "Host Args (List, Optional): Optional list of arguments to pass to the SSH command."
 }
 
+is_jumpbox_disabled(){
+  if [[ -n ${DISABLE_JUMPBOX-} ]]; then
+    return 0
+  fi
+
+  curl -m 1 -fs http://169.254.169.254/latest/dynamic/instance-identity/document > /dev/null 2>&1
+}
+
 populate_args(){
   TARGET_HOST=${1-}
 
@@ -51,7 +59,7 @@ populate_args(){
 
 populate_args "$@"
 
-if [[ -n ${DISABLE_JUMPBOX-} ]]; then
+if is_jumpbox_disabled; then
   echo >&2 "Connecting to ${SSH_USER}@${TARGET_HOST} using key ${SSH_KEY_FILE}"
 else
   if [[ -z ${SSH_PROXY_HOST-} ]]; then
