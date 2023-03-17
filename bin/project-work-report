@@ -3,7 +3,7 @@ set -euo pipefail
 IFS=$'\n\t'
 
 # Default timespan
-DAYS=7
+DAYS=30
 # Taskwarrior filtering
 TASK_TAGS="${TASK_TAGS:-+${PROJECT}}"
 TASK_PROJECT_NAME="${TASK_PROJECT_NAME:-${PROJECT^^}}"
@@ -27,6 +27,8 @@ Arguments:
     End Date (2021-02-01)
   -n
     Only output information locally (no browser)
+  -v
+    Verbose output
   -h
     Show usage and exit
 
@@ -42,7 +44,7 @@ ENVIRONMENT:
 EOF
 }
 
-while getopts ':d:e:ns:h' opt; do
+while getopts ':d:e:ns:hv' opt; do
   case "${opt}" in
     d)
       DAYS="${OPTARG}"
@@ -55,6 +57,9 @@ while getopts ':d:e:ns:h' opt; do
       ;;
     s)
       START_DATE="${OPTARG}"
+      ;;
+    v)
+      set -x
       ;;
     h)
       usage
@@ -188,6 +193,7 @@ git_repo_log(){
   echo >&2 "Checking git repo $repo_name"
 
   GIT_CHANGES=$(git log \
+    --no-merges \
     --author="$GIT_AUTHOR" \
     --pretty=worklog \
     --after="${START_DATE}" \

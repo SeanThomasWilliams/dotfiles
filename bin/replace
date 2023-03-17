@@ -1,19 +1,128 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# shellcheck disable=SC2068
 
-# Replace all instances of the first string with the second string in all files beneath the current directory
+set -eu -o pipefail
 
-if [[ $# -eq 0 ]]; then
-  echo "Usage: $0 <string to replace> <replacement string>"
-  echo ""
-  echo 'Example: $0 "foo" "bar" -> replaces all instances of "foo" with "bar" in file contents'
+usage(){
+  cat >&2 <<EOF
+Replace all instances of the first string with the second string in all matching files
+
+Usage: $0 [options] <FIND_STRING> <REPLACE_STRING> [TARGET_DIR]
+
+Arguments:
+  FIND_STRING
+    The string to find
+  REPLACE_STRING
+    The string to replace it with
+
+Options:
+  -a
+    Search all files (even hidden files, except .git)
+  -d
+    Directory to search within (overridden by <TARGET_DIR>)
+  -n
+    File name pattern to search for
+  -n
+    Max directory depth to search
+  -t
+    Filetype (sh, py, etc)
+  -h
+    Show usage and exit
+EOF
+}
+
+if [[ -n ${DEBUG-} ]]; then
+  set -x
+fi
+
+TARGET_DIR=('.')
+IGNORE_PATTERN='^\.[a-z]|/\.[a-z]'
+
+while getopts ':ad:f:n:t:h' opt; do
+  case "${opt}" in
+    a)
+      IGNORE_PATTERN='\.git'
+      ;;
+    d)
+      TARGET_DIR=("${OPTARG}")
+      ;;
+    f)
+      FILE_NAME="${OPTARG}"
+      ;;
+    n)
+      MAX_DEPTH="${OPTARG}"
+      ;;
+    t)
+      FILE_TYPE="${OPTARG}"
+      ;;
+    h)
+      usage
+      exit 0
+      ;;
+    *)
+      usage
+      exit 1
+      ;;
+  esac
+done
+
+shift $((OPTIND-1))
+
+if [[ $# -lt 1 ]]; then
+  usage
   exit 1
 fi
 
-if [[ $# -eq 1 ]]; then
+if [[ $# -ge 1 ]]; then
+  FIND_STRING="$1"
+  shift
+fi
+
+if [[ $# -ge 1 ]]; then
+  REPLACE_STRING="$1"
+  shift
+fi
+
+if [[ $# -ge 1 ]]; then
+  TARGET_DIR=("$@")
+fi
+
+# Construct FILE_GLOB
+FILE_GLOB='*'
+if [[ -n ${FILE_NAME-} ]]; then
+  FILE_GLOB="*${FILE_NAME}*"
+fi
+
+if [[ -n ${FILE_TYPE-} ]]; then
+  FILE_GLOB="${FILE_GLOB}.${FILE_TYPE}"
+fi
+
+# Set maxdepth if directed
+FIND_GLOBAL_ARGS=(
+  "${TARGET_DIR[@]}"
+)
+
+if [[ -n ${MAX_DEPTH-} ]]; then
+  FIND_GLOBAL_ARGS+=(-maxdepth "$MAX_DEPTH")
+fi
+
+FIND_CMD=(
+  find -L "${FIND_GLOBAL_ARGS[@]}"
+  \( -type f -o -type l \)
+  -ipath "$FILE_GLOB"
+  -printf '%p\n'
+)
+
+if [[ -z ${REPLACE_STRING-} ]]; then
   echo >&2 "Preview of matching files contents: "
-  grep -r "$1" *
+  "${FIND_CMD[@]}" 2>/dev/null |\
+    sed 's#^\./##' |\
+    grep -Ev "${IGNORE_PATTERN}" |\
+    xargs grep --color -- "$FIND_STRING"
   exit
 fi
 
-grep -rl "$1" * |\
-  xargs sed -i "s#$1#$2#g"
+"${FIND_CMD[@]}" 2>/dev/null |\
+  sed 's#^\./##' |\
+  grep -Ev "${IGNORE_PATTERN}" |\
+  xargs sed -i "s#$FIND_STRING#$REPLACE_STRING#g"

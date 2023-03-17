@@ -1,12 +1,72 @@
 #!/usr/bin/env bash
-set -euo pipefail
-IFS=$'\n\t'
+# shellcheck disable=SC2064
 
-TOPDIR="$PWD"
+set -euo pipefail
+#IFS=$'\n\t'
 
 if [[ ${DEBUG-} -eq 1 ]]; then
   set -x
 fi
+
+COMMON_KEYSTORE_PASSWORDS=(
+  changeit
+  changeme
+  password
+)
+
+declare -a on_exit_items
+
+on_exit(){
+  for i in "${on_exit_items[@]}"; do
+    eval "$i"
+  done
+}
+
+add_on_exit(){
+  if [[ -z ${on_exit_items-} ]]; then
+    on_exit_items[0]="$*"
+    trap on_exit EXIT
+    return
+  fi
+
+  local n=${#on_exit_items[*]}
+  on_exit_items[n]="$*"
+}
+
+show_keystore_info(){
+  local keystore tmp_dir
+  keystore="$(realpath "$1")"
+
+  tmp_dir="$(mktemp -d)"
+  add_on_exit rm -rf "$tmp_dir"
+  cd "$tmp_dir"
+
+  for sp in "${COMMON_KEYSTORE_PASSWORDS[@]}"; do
+    if keytool -list -keystore "$keystore" -storepass "$sp" &>/dev/null; then
+      storepass="$sp"
+    fi
+  done
+
+  if [[ -z ${storepass-} ]]; then
+    echo "No password found for keystore $keystore" >&2
+    return 1
+  fi
+
+  keytool -list \
+    -storepass "$storepass" \
+    -keystore "$keystore" |\
+    awk -F, '/trustedCertEntry/ {print $1}' |\
+    while read -r alias; do
+      echo "Keystore Alias: $alias"
+      keytool -exportcert \
+        -storepass "$storepass" \
+        -keystore "$keystore" \
+        -alias "$alias" \
+        -rfc \
+        -file "$tmp_dir/${alias}.pem" 2>/dev/null
+        show_cert_info "$tmp_dir/${alias}.pem"
+      done
+}
 
 # Show certificate info for the given input files or domains
 show_cert_bundle_info(){
@@ -14,7 +74,7 @@ show_cert_bundle_info(){
   cert_bundle="$(realpath "$1")"
 
   tmp_dir="$(mktemp -d)"
-  trap "rm -rf $tmp_dir" EXIT
+  add_on_exit rm -rf "$tmp_dir"
   cd "$tmp_dir"
 
   awk '/-----BEGIN/,/-----END/{ if(/-----BEGIN/){c++}; out="cert." c ".pem"; print >out}' < "$cert_bundle"
@@ -22,8 +82,6 @@ show_cert_bundle_info(){
   for cert in "$tmp_dir"/*.pem; do
     show_cert_info "$cert"
   done
-
-  rm -rf "$tmp_dir"
 }
 
 # Decode DER certificate, convert to PEM, and show info
@@ -32,13 +90,11 @@ show_der_cert_info(){
   der_cert="$(realpath "$1")"
 
   tmp_dir="$(mktemp -d)"
-  trap "rm -rf $tmp_dir" EXIT
+  add_on_exit rm -rf "$tmp_dir"
   cd "$tmp_dir"
 
   openssl x509 -inform der -in "$der_cert" -out "$tmp_dir/cert.pem"
   show_cert_info "$tmp_dir/cert.pem"
-
-  rm -rf "$tmp_dir"
 }
 
 # Show certificate info for the given input files or domains
@@ -57,7 +113,7 @@ show_cert_info(){
 process_by_file_content(){
   local tmp_file tmp_dir
   tmp_dir=$(mktemp -d)
-  trap "rm -rf $tmp_dir" EXIT
+  add_on_exit rm -rf "$tmp_dir"
 
   tmp_file="$tmp_dir/detect.me"
   sed -e 's#\r#\n#g' |\
@@ -69,6 +125,8 @@ process_by_file_content(){
     newcert="$tmp_dir/tls.csr"
   elif grep -q 'PRIVATE KEY' "$tmp_file"; then
     newcert="$tmp_dir/tls.key"
+  elif xxd -l8 "$tmp_file" | grep -q 'feed feed 0000 0002'; then
+    newcert="$tmp_dir/keystore.jks"
   else
     echo >&2 "Unknown file content from:"
     echo >&2 "$tmp_file"
@@ -77,7 +135,6 @@ process_by_file_content(){
 
   mv "$tmp_file" "$newcert"
   process_by_file_extension "$newcert"
-  rm -rf "$tmp_dir"
 }
 
 process_by_file_extension(){
@@ -98,6 +155,9 @@ process_by_file_extension(){
     pem|crt|cer)
       show_cert_bundle_info "$cert"
       ;;
+    jks)
+      show_keystore_info "$cert"
+      ;;
     key)
       openssl rsa -check -in "$cert"
       echo "MD5:"
@@ -110,7 +170,7 @@ process_by_file_extension(){
       ;;
     *)
       echo >&2 "Unknown extension: $suffix for $cert"
-      cat "$cert" | process_by_file_content
+      process_by_file_content < "$cert"
       ;;
   esac
 }
@@ -127,7 +187,7 @@ process_single_file(){
   fi
 
   tmp_dir=$(mktemp -d)
-  trap "rm -rf $tmp_dir" EXIT
+  add_on_exit rm -rf "$tmp_dir"
 
   if [[ $fname =~ https://* ]]; then
     domain="$(echo "$fname" | cut -d'/' -f3)"

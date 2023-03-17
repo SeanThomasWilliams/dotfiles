@@ -5,9 +5,9 @@ set -eu -o pipefail
 
 usage(){
   cat >&2 <<EOF
-Find files
+Find files matching a pattern
 
-Usage: $0 [options] [FILE_NAME] [TARGET_DIR]
+Usage: $0 [options] <FILE_NAME> [TARGET_DIR]
 
 Arguments:
   FILE_NAME
@@ -17,7 +17,7 @@ Arguments:
 
 Options:
   -a
-    Search all files (even hidden files)
+    Search all files (even hidden files, except .git)
   -d
     Directory to search within (overridden by <TARGET_DIR>)
   -n
@@ -33,17 +33,16 @@ if [[ -n ${DEBUG-} ]]; then
   set -x
 fi
 
-FILE_TYPE='*'
-FILE_NAME='*'
-TARGET_DIR='.'
+TARGET_DIR=('.')
+IGNORE_PATTERN='^\.[a-z]|/\.[a-z]'
 
 while getopts ':ad:n:t:h' opt; do
   case "${opt}" in
     a)
-      ALL_FILES=1
+      IGNORE_PATTERN='\.git'
       ;;
     d)
-      TARGET_DIR="${OPTARG}"
+      TARGET_DIR=("${OPTARG}")
       ;;
     n)
       MAX_DEPTH="${OPTARG}"
@@ -64,37 +63,36 @@ done
 
 shift $((OPTIND-1))
 
-if [[ ! -d "$TARGET_DIR" ]]; then
-  echo >&2 "Unable to locate target directory: $TARGET_DIR"
-  echo >&2
-  usage
-  exit 1
-fi
-
-if [[ $# -gt 2 ]]; then
-  echo >&2 "Too many positional arguments: $#"
-  echo >&2 ""
-  usage
-  exit 1
+if [[ $# -lt 1 ]]; then
+  find -L \( -type f -o -type l \) \
+    -printf '%p\n' 2>/dev/null |\
+    sed 's#^\./##' |\
+    grep -Ev "${IGNORE_PATTERN}"
+  exit
 fi
 
 if [[ $# -ge 1 ]]; then
   FILE_NAME="$1"
+  shift
 fi
 
-if [[ $# -ge 2 ]]; then
-  TARGET_DIR="$2"
+if [[ $# -ge 1 ]]; then
+  TARGET_DIR=("$@")
 fi
 
-if [[ $FILE_TYPE = '*' ]]; then
+# Construct FILE_GLOB
+FILE_GLOB='*'
+if [[ -n ${FILE_NAME-} ]]; then
   FILE_GLOB="*${FILE_NAME}*"
-else
-  FILE_GLOB="*${FILE_NAME}*.${FILE_TYPE}"
+fi
+
+if [[ -n ${FILE_TYPE-} ]]; then
+  FILE_GLOB="${FILE_GLOB}.${FILE_TYPE}"
 fi
 
 # Set maxdepth if directed
 FIND_GLOBAL_ARGS=(
-  "$TARGET_DIR"
+  "${TARGET_DIR[@]}"
 )
 
 if [[ -n ${MAX_DEPTH-} ]]; then
@@ -102,19 +100,14 @@ if [[ -n ${MAX_DEPTH-} ]]; then
 fi
 
 FIND_CMD=(
-  find "${FIND_GLOBAL_ARGS[@]}"
+  find -L "${FIND_GLOBAL_ARGS[@]}"
   \( -type f -o -type l \)
   -ipath "$FILE_GLOB"
   -printf '%p\n'
 )
 
 # Find relevant files and strip the leading './'
-if [[ -n ${ALL_FILES-} ]]; then
-  # Find relevant files and strip the leading './'
-    "${FIND_CMD[@]}" 2>/dev/null |\
-    sed 's#^\./##'
-else
-    "${FIND_CMD[@]}" 2>/dev/null |\
-      sed 's#^\./##' |\
-      grep -Ev '^\.[a-z]|/\.[a-z]'
-fi
+"${FIND_CMD[@]}" 2>/dev/null |\
+  sed 's#^\./##' |\
+  grep -Ev "${IGNORE_PATTERN}" |\
+  grep --color "$FILE_NAME"

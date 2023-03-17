@@ -12,8 +12,13 @@ fi
 # the -t option enables twilio
 # the -n options enables desktpo notifications
 
-while getopts ":t" opt; do
+PREFIX=""
+
+while getopts ":n:t" opt; do
   case $opt in
+    n)
+      PREFIX="${OPTARG}: "
+      ;;
     t)
       twilio=true
       ;;
@@ -28,28 +33,28 @@ shift $((OPTIND -1))
 
 PROG="$1"
 shift
-ARGS="$@"
+ARGS="$*"
 
 notify() {
   rv=$?
   if [[ $rv -ne 0 ]]; then
-    msg="Command '$PROG ${ARGS[*]}' failed with exit code ${rv}!"
+    msg="Command '${PREFIX}$PROG ${ARGS[*]}' failed with exit code ${rv}!"
     echo >&2 "Notify: $msg"
     notify-send --urgency=critical "Command $PROG" "$msg"
-    if [[ -n "${twilio:-}" ]]; then
+    if [[ -n "${twilio-}" ]]; then
       twilio-notify "$msg"
     fi
   else
-    msg="'$PROG ${ARGS[*]}' succeeded!"
+    msg="Command '${PREFIX}$PROG ${ARGS[*]}' succeeded!"
     echo >&2 "Notify: $msg"
     notify-send --urgency=normal "Command $PROG" "$msg"
-    if [[ -n "${twilio:-}" ]]; then
+    if [[ -n "${twilio-}" ]]; then
       twilio-notify "$msg"
     fi
   fi
   exit $rv
 }
 
-trap notify EXIT
+trap notify EXIT ERR
 
 "$PROG" "$@"

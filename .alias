@@ -107,7 +107,7 @@ load_golang_settings(){
 load_java_settings(){
   local java_cmd java_bin java_path java_home
 
-  for java_cmd in javac java; do
+  for java_cmd in java javac; do
     # If there is no java program, try the next one
     if ! command -v "$java_cmd" &> /dev/null; then
       continue
@@ -196,13 +196,15 @@ load_alias_settings(){
   alias c="column -t -n -s ',' | less -S -R"
   alias dstat-all='dstat -larm --top-io --top-latency'
   alias ssh-keygen='ssh-keygen -t rsa -b 3072'
-  alias tp='command task pro:personal'
   alias tb='command task pro:business'
+  alias tk='command task pro:tickler'
+  alias tp='command task pro:personal'
   alias tt='command task $TASK_TAGS'
   alias trv='command task pro:rv'
   alias tw='command t +WAITING all'
   alias k9s='setterm --linewrap off; k9s'
   alias terragrunt-clear-cache='find ./ -type d -name ".terragrunt-cache" -prune -exec rm -rf {} \;'
+  alias terragrunt-clear-debug='find ./ -type f -name "terragrunt-debug.tfvars.json" -prune -exec rm -rf {} \;'
 
   if command -v rg > /dev/null; then
     export FZF_DEFAULT_COMMAND="rg --files"
@@ -232,7 +234,7 @@ load_alias_settings(){
   # Autoenable direnv
   command -v direnv &> /dev/null && eval "$(direnv hook bash)"
 
-  unalias remake gmake remake &> /dev/null
+  unalias remake gmake make &> /dev/null
 
   for make_prg in remake gmake make; do
     if command -v "$make_prg" &> /dev/null; then
@@ -242,9 +244,7 @@ load_alias_settings(){
     fi
   done
 
-  alias make='make'
-  alias gmake='make'
-  alias remake='make'
+  alias make="$MAKE_PRG"
   export MAKEFLAGS='-j8'
 
   # Custom aliases

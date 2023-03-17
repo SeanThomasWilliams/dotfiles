@@ -38,7 +38,6 @@ Plug 'honza/vim-snippets'
 Plug 'hrsh7th/nvim-compe'
 Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app && yarn install' }
 Plug 'jacoborus/tender.vim'
-Plug 'jamessan/vim-gnupg'
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 Plug 'junegunn/fzf.vim'
 Plug 'jvirtanen/vim-hcl'
@@ -135,8 +134,20 @@ endif
 xnoremap < <gv
 xnoremap > >gv
 
-" Join lines without spaces
-nnoremap J gJ
+" Like gJ, but always remove spaces
+fun! s:join_spaceless()
+    execute 'normal! gJ'
+
+    " Remove character under the cursor if it's whitespace.
+    if matchstr(getline('.'), '\%' . col('.') . 'c.') =~ '\s'
+        echom "Removing whitespace"
+        execute 'normal! dw'
+    else
+        echom "Not Removing whitespace"
+    endif
+endfun
+nnoremap J :verbose call <SID>join_spaceless()<CR>
+nnoremap <Leader>J J
 
 " ARROW KEYS ARE UNACCEPTABLE
 map <Left> <Nop>
@@ -996,6 +1007,14 @@ nmap <Leader>gs :call GoogleSearch()<CR>
 
 " Markdown Preview
 let g:mkdp_theme = 'dark'
+
+let g:copilot_filetypes = {
+      \ 'yaml': v:true,
+      \ 'markdown': v:true,
+      \ 'gitcommit': v:true,
+      \ 'gitrebase': v:true,
+      \ '.': v:true,
+      \ }
 
 let g:copilot_no_tab_map = v:true
 imap <silent><script><expr> <C-J> copilot#Accept("\<CR>")

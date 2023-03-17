@@ -1,7 +1,19 @@
 #!/bin/bash
 
 # Routes that we want to be used by the VPN link
-ROUTES="10.1.0.0/16"
+ROUTES="
+10.1.0.0/16
+158.15.0.0/16
+214.23.49.0/24
+"
+
+echo "------------------"
+echo "vpnc-script environment:"
+env | egrep '^(CISCO_|INTERNAL_IP|VPNGATEWAY|TUNDEV|IDLE_TIMEOUT|reason)' | sort
+echo "------------------"
+
+# Preserver current nameserver
+INTERNAL_IP4_DNS=$(awk '/nameserver / {print $2}' /etc/resolv.conf)
 
 # Helpers to create dotted-quad netmask strings.
 MASKS[1]="128.0.0.0"

@@ -1,101 +1,153 @@
 #!/bin/bash
 
-set -eu
-set -o pipefail
+set -euo pipefail
 
 if [[ -n ${DEBUG-} ]]; then
   set -x
 fi
 
 # Card Names
-BLUEZ_CARD_NAME="bluez_card.38_18_4C_06_51_52"
-PCI_CARD_NAME="alsa_card.pci-0000_00_1f.3"
+INTEL_CARD_NAME="HDA Intel PCH"
 
 # Card Profiles
 ANALOG_DUPLEX_PROFILE="output:analog-stereo+input:analog-stereo"
-HDMI_PROFILE="output:hdmi-stereo-extra1"
-LOFI_PROFILE="handsfree_head_unit"
-HIFI_PROFILE="a2dp_sink"
+HDMI_PROFILE="output:analog-surround-51+input:analog-stereo"
 
-# Input Ports
-HEADSET_MIC_PORT="analog-input-headset-mic"
+# Get the card id of the given card name
+get_card_id_from_card_name(){
+  pactl list cards |\
+    awk '
+      function ltrim(s) { sub(/^[ \t\r\n]+/, "", s); return s }
+      function rtrim(s) { sub(/[ \t\r\n]+$/, "", s); return s }
+      function trim(s) { return rtrim(ltrim(s)); }
 
-# Handle Bluetooth headset toggle
-handle_bluetooth_headset(){
-  if pactl list short sinks | grep -q bluez; then
-    if pacmd list-cards | grep -q "active profile: <$HIFI_PROFILE>"; then
-      echo >&2 "Switching to LoFi Profile"
-      pactl set-card-profile "$BLUEZ_CARD_NAME" "$LOFI_PROFILE"
-    else
-      echo >&2 "Switching to HiFi Profile"
-      pactl set-card-profile "$BLUEZ_CARD_NAME" "$HIFI_PROFILE"
-    fi
+      /Name: / {
+        name=$2;
+      }
 
-    exit
+      /alsa.card_name = / {
+        gsub(/"/, "", $0);
+        split($0, a, "=");
+        card_name=trim(a[2]);
+        print name " " card_name;
+      }
+    ' | grep "$1" | cut -d' ' -f1
+}
+
+# Get the card id of the given card name
+get_sink_id_from_card_name(){
+  pactl list sinks |\
+    awk '
+      function ltrim(s) { sub(/^[ \t\r\n]+/, "", s); return s }
+      function rtrim(s) { sub(/[ \t\r\n]+$/, "", s); return s }
+      function trim(s) { return rtrim(ltrim(s)); }
+
+      /Name: / {
+        name=$2;
+      }
+
+      /alsa.card_name = / {
+        gsub(/"/, "", $0);
+        split($0, a, "=");
+        card_name=trim(a[2]);
+        print name " " card_name;
+      }
+    ' | grep "$1" | cut -d' ' -f1
+}
+
+# Get the current profile for a card by id
+get_active_profile_for_card_id(){
+  pactl list cards |\
+    awk '
+      /Name: / {
+        name=$2;
+      }
+
+      /Active Profile: / && ! /: off/ {
+        print name " " $3;
+      }
+    ' | grep "$1" | cut -d' ' -f2
+}
+
+activate_hdmi_output(){
+  pactl set-card-profile "$INTEL_CARD_ID" "$HDMI_PROFILE"
+  sleep 0.1
+  pactl set-card-profile alsa_card.pci-0000_06_00.1 output:hdmi-stereo-extra2
+  sleep 0.1
+  pactl set-card-profile alsa_card.pci-0000_06_00.1 output:hdmi-stereo-extra3
+}
+
+activate_analog_output(){
+  echo >&2 "Switching to Analog Duplex Profile"
+  pactl set-card-profile "$INTEL_CARD_ID" "$ANALOG_DUPLEX_PROFILE"
+
+  echo >&2 "Check if headset is plugged in"
+  HEADSET_OUTPUT=$(pactl list sinks |\
+    awk '/analog-output-headphones.*avail/ && ! /not/ {sub(":",""); print $1; exit;}')
+
+  if [[ -n ${HEADSET_OUTPUT-} ]]; then
+    echo >&2 "Headset is plugged in!"
+    INTEL_SINK_ID=$(get_sink_id_from_card_name "$INTEL_CARD_NAME")
+    pactl set-sink-port "$INTEL_SINK_ID" "$HEADSET_OUTPUT"
+  else
+    echo >&2 "Headset is not plugged in"
   fi
+
+  echo >&2 "Activating analog mic"
+  activate_analog_mic
 }
 
 activate_analog_mic(){
   pactl list sources |\
     awk '
-      /not avail/ {next;}
-      /Name:/ {mic_source=$2; next;}
-      /analog-input-mic.*avail/ {sub(":",""); mic=$1; next;}
-      /analog-input-headset-mic.*avail/ {sub(":",""); headset_mic=$1; next;}
+      /not avail/ {
+        next;
+      }
+
+      /Name:/ {
+        if (mic_source && mic) {
+          exit;
+        }
+        mic_source=$2;
+        next;
+      }
+
+      /analog-input-.*avail/ {
+        sub(":","");
+        mic=$1;
+        next;
+      }
+
       END {
         if (mic_source){
+          print("pactl set-source-mute " mic_source " false");
           system("pactl set-source-mute " mic_source " false");
+          if (mic) {
+            print("pactl set-source-port " mic_source " " mic);
+            system("pactl set-source-port " mic_source " " mic);
+            exit;
+          }
         }
-        if (headset_mic) {
-          system("pactl set-source-port " mic_source " " headset_mic);
-          exit;
-        }
-        if (mic) {
-          system("pactl set-source-port " mic_source " " mic);
-          exit;
-        }
+        print("No analog mic found!");
         exit 1;
-      }'
+      }
+    '
 }
 
 handle_analog_headset(){
-  ACTIVE_CARD_PROFILE=$(pactl list cards |\
-    awk '
-      /Name: / {
-        name=$2;
-      }
-      /Active Profile/ && name ~ /pci/ {
-        print $3;
-      }
-    ')
-
-  if [[ "$ACTIVE_CARD_PROFILE" =~ $ANALOG_DUPLEX_PROFILE || "$ACTIVE_CARD_PROFILE" == "$ANALOG_DUPLEX_PROFILE" ]]; then
-    echo >&2 "Toggle HDMI profile"
-    pactl set-card-profile "$PCI_CARD_NAME" "$HDMI_PROFILE"
-  elif [[ $ACTIVE_CARD_PROFILE =~ $HDMI_PROFILE || "$ACTIVE_CARD_PROFILE" == "$HDMI_PROFILE" ]]; then
-    echo >&2 "Toggle Headset profile"
-    pactl set-card-profile "$PCI_CARD_NAME" "$ANALOG_DUPLEX_PROFILE"
-
-    echo >&2 "Check if headset is plugged in"
-    HEADSET_OUTPUT=$(pactl list sinks |\
-      awk '/analog-output-headphones.*avail/ && ! /not/ {sub(":",""); print $1; exit;}')
-
-    if [[ -n ${HEADSET_OUTPUT-} ]]; then
-      echo >&2 "Headset is plugged in!"
-      PCI_SINK=$(pactl list short sinks | awk '/alsa_output.pci-/ {print $2}')
-      pactl set-sink-port "$PCI_SINK" "$HEADSET_OUTPUT"
-    else
-      echo >&2 "Headset is not plugged in"
-    fi
-
-    echo >&2 "Activating analog mic"
-    activate_analog_mic
-  else # No active profile
-    echo >&2 "No active profile found!"
-    echo -e >&2 "\nCurrent: $ACTIVE_CARD_PROFILE\nHDMI: $HDMI_PROFILE\nAnalog: $ANALOG_DUPLEX_PROFILE"
-    exit 1
+  # Get the current active profile for the card
+  # If the profile is not the analog duplex profile, then switch to it
+  # If the profile is the analog duplex profile, then switch to the HDMI profile
+  if [[ "$(get_active_profile_for_card_id "$INTEL_CARD_ID")" != "$ANALOG_DUPLEX_PROFILE" ]]; then
+    activate_analog_output
+  else
+    echo >&2 "Switching to HDMI Profile"
+    activate_hdmi_output
   fi
 }
 
-handle_bluetooth_headset
+# Set dynamic variables
+INTEL_CARD_ID="$(get_card_id_from_card_name "$INTEL_CARD_NAME")"
+
+# Toggle profile
 handle_analog_headset

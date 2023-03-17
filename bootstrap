@@ -36,8 +36,14 @@ ln -sfn "$SCRIPT_DIR"/vim "$HOME"/.config/nvim
 ln -sfn "$SCRIPT_DIR"/.vimrc "$HOME"/.config/nvim/init.vim
 
 # Config dir
+mkdir -p "$HOME/.config"
 for d in "$SCRIPT_DIR"/config/*; do
-  ln -sfn "$d" "$HOME"/.config/"$(basename "$d")"
+  base_dir=$(basename "$d")
+  if [[ -d "$HOME/.config/$base_dir" ]]; then
+    echo "Skipping $base_dir, already exists"
+    continue
+  fi
+  ln -vsfn "$d" "$HOME/.config/"
 done
 
 config_dirs=(
@@ -66,3 +72,5 @@ nvim +PlugInstall! +qall
 
 # Vim Remote plugins
 nvim +UpdateRemotePlugins +qall
+
+"$SCRIPT_DIR/install-helpers"

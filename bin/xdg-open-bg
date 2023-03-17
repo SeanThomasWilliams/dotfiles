@@ -1,3 +1,8 @@
 #!/bin/bash
 
-nohup xdg-open "$@" </dev/null >/dev/null 2>&1 &
+if [[ ${DEBUG-} -eq 1 ]]; then
+  set -x
+  nohup xdg-open "$@" </dev/null
+else
+  nohup xdg-open "$@" </dev/null >/dev/null 2>&1 &
+fi
