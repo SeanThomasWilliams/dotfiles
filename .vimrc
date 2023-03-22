@@ -23,6 +23,7 @@ call plug#begin('~/.vim/plugged')
 " Plug 'kristijanhusak/completion-tags'
 " Plug 'nvim-lua/completion-nvim'
 Plug 'Ivo-Donchev/vim-react-goto-definition'
+Plug 'MunifTanjim/nui.nvim'
 Plug 'SeanThomasWilliams/dwm.vim'
 Plug 'SirVer/ultisnips'
 Plug 'airblade/vim-gitgutter'
@@ -30,6 +31,7 @@ Plug 'benekastah/neomake'
 Plug 'benmills/vimux'
 Plug 'benmills/vimux-golang'
 Plug 'bling/vim-airline'
+Plug 'dpayne/CodeGPT.nvim'
 Plug 'ekalinin/Dockerfile.vim'
 Plug 'fatih/vim-go', { 'tag': '*' }
 Plug 'gagoar/StripWhiteSpaces'
@@ -50,6 +52,7 @@ Plug 'marijnh/tern_for_vim'
 Plug 'mustache/vim-mustache-handlebars'
 Plug 'neovim/nvim-lspconfig', { 'do': 'npm i -g pyright' }
 Plug 'nvim-lua/lsp-status.nvim'
+Plug 'nvim-lua/plenary.nvim'
 Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}  " We recommend updating the parsers on update
 Plug 'pangloss/vim-javascript'
 Plug 'pearofducks/ansible-vim'

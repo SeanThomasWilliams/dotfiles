@@ -63,14 +63,6 @@ done
 
 shift $((OPTIND-1))
 
-if [[ $# -lt 1 ]]; then
-  find -L \( -type f -o -type l \) \
-    -printf '%p\n' 2>/dev/null |\
-    sed 's#^\./##' |\
-    grep -Ev "${IGNORE_PATTERN}"
-  exit
-fi
-
 if [[ $# -ge 1 ]]; then
   FILE_NAME="$1"
   shift
@@ -106,8 +98,15 @@ FIND_CMD=(
   -printf '%p\n'
 )
 
-# Find relevant files and strip the leading './'
-"${FIND_CMD[@]}" 2>/dev/null |\
-  sed 's#^\./##' |\
-  grep -Ev "${IGNORE_PATTERN}" |\
-  grep --color "$FILE_NAME"
+if [[ -n ${FILE_NAME-} ]]; then
+  # Find relevant files and strip the leading './'
+  "${FIND_CMD[@]}" 2>/dev/null |\
+    sed 's#^\./##' |\
+    grep -Ev "${IGNORE_PATTERN}" |\
+    grep --color "$FILE_NAME"
+else
+  # Don't highlight FILE_NAME
+  "${FIND_CMD[@]}" 2>/dev/null |\
+    sed 's#^\./##' |\
+    grep -Ev "${IGNORE_PATTERN}"
+fi

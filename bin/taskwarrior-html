@@ -1,0 +1,148 @@
+#!/usr/bin/env bash
+set -euo pipefail
+IFS=$'\n\t'
+
+if [[ -n ${DEBUG-} ]]; then
+  set -x
+fi
+
+# Setup Output Path
+mkdir -p "$HOME/.local/www"
+TASK_STATUS_FILE="$HOME/.local/www/index.md"
+rm -f "$TASK_STATUS_FILE"
+
+usage(){
+  cat >&2 <<EOF
+Usage: $(basename "$0") [-n]
+
+Options:
+  -n  Disable browser opening
+EOF
+}
+
+while getopts ":hn" opt; do
+  case $opt in
+    n)
+      NO_BROWSER=true
+      ;;
+    \?)
+      echo "Invalid option: -$OPTARG" >&2
+      usage
+      exit 1
+      ;;
+    h)
+      usage
+      exit 0
+      ;;
+  esac
+done
+
+read -r -d '' taskawkscript <<'EOF' || true
+BEGIN {
+  WIDTH=100
+}
+function wrap(text, padding_size){
+  padding=sprintf("%*s%s", padding_size, "", "");
+  while (length(text)>WIDTH) {
+      print substr(text,1,WIDTH) "-";
+      text=padding substr(text,WIDTH+1);
+  }
+  print text;
+}
+
+$1 ~ /^[0-9]{1,2}$/ {
+  id=$1;
+  project=$2;
+  urgency=$3;
+  $1="";
+  $2="";
+  $3="";
+  sub("^ *", "");
+  wrap(sprintf("[%2d](%3.1f): %s", id, urgency, $0), 24);
+  next;
+}
+
+$1 ~ /[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}/ {
+  date=$1;
+  $1="";
+  sub("^ *", "");
+  wrap(sprintf("%12s %s", "-", $0), 26);
+  next;
+}
+
+EOF
+
+read -r -d '' gitawkscript <<'EOF' || true
+BEGIN {
+  WIDTH=100
+}
+function wrap(text, padding_size){
+  padding=sprintf("%*s%s", padding_size, "", "");
+  while (length(text)>WIDTH) {
+      print substr(text,1,WIDTH) "-";
+      text=padding substr(text,WIDTH+1);
+  }
+  print text;
+}
+{ wrap($0, 23); }
+EOF
+
+get_project_report(){
+  local project
+  project="$1"
+
+  echo "### Project: $project"
+  echo '```'
+
+  task_query="(status:pending and due < now+30d and -WAITING and project:$project)"
+
+  task "$task_query" todo |\
+    tail -n +4 |\
+    head -n -2 |\
+    gawk "$taskawkscript"
+
+  echo '```'
+  echo
+}
+
+render_report(){
+  generate_report | tee "$TASK_STATUS_FILE"
+
+  pandoc \
+    --section-divs \
+    --template="$HOME/vimwiki/templates/GitHub.html5" \
+    -s \
+    --highlight-style=pygments \
+    --metadata pagetitle="Project-Status" \
+    -f markdown \
+    -t html \
+    -o "${TASK_STATUS_FILE%.*}.html" "$TASK_STATUS_FILE"
+
+  if [[ -z ${NO_BROWSER-} ]]; then
+    open "${TASK_STATUS_FILE%.*}.html"
+  fi
+}
+
+generate_report(){
+  echo "## Task Status"
+  echo
+
+  task_projects="$(task _project)"
+
+  for project in $task_projects; do
+    task_query="(status:pending and due < now+30d and -WAITING and project:${project})"
+    task_count=$(task "$task_query" export | jq -c '.[]' | wc -l)
+    if [[ "$task_count" -gt 0 ]]; then
+      get_project_report "$project"
+    fi
+  done
+}
+
+taskrc_home=$(task _show | awk -F'=' '$1 == "data.location" {print $2}')
+task_report_log_file="$taskrc_home/task-report.log"
+
+exec >> "$task_report_log_file" 2>&1
+
+task rc.verbose=nothing sync || true
+
+render_report

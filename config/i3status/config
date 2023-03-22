@@ -19,7 +19,7 @@ order += "load"
 order += "cpu_temperature 0"
 #order += "battery 0"
 order += "tztime local"
-order += "tztime zulu"
+#order += "tztime zulu"
 order += "volume master"
 
 wireless _first_ {

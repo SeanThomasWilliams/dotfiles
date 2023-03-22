@@ -45,6 +45,13 @@ report.worklog.description=Completed tasks
 report.worklog.filter=(status:completed)
 report.worklog.labels=UUID,Completed,Description
 
+# TODO report
+report.todo.sort=urgency-
+report.todo.columns=id,project,urgency,description
+report.todo.description=TODO tasks
+report.todo.filter=(status:pending)
+report.todo.labels=ID,Project,Urgency,Description
+
 # Completed report
 report.completed.sort=end
 report.completed.columns=uuid.short,entry,end,entry.age,tags,description
