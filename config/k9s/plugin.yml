@@ -36,17 +36,80 @@ plugin:
     args:
     - -c
     - "flux --context $CONTEXT reconcile source git -n $NAMESPACE $NAME &> /dev/null"
-  reconcile-hr:
-    shortCut: Shift-R
+  reconcile-hr-source:
+    shortCut: Shift-S
     confirm: false
-    description: Flux Reconcile
+    description: Flux Reconcile Source
     scopes:
     - helmreleases
     command: bash
     background: true
     args:
     - -c
-    - "flux --context $CONTEXT reconcile helmrelease -n $NAMESPACE $NAME --with-source &> /dev/null"
+    - |
+      # Reconcile helmchart source git repo
+      gitrepo_args=$(kubectl --context $CONTEXT get helmreleases -n $NAMESPACE $NAME \
+        -o jsonpath='-n {.spec.chart.spec.sourceRef.namespace} {.spec.chart.spec.sourceRef.name}')
+      flux --context $CONTEXT reconcile source git ${gitrepo_args}
+      # Reconcile helmchart with new source
+      flux --context $CONTEXT reconcile helmrelease -n $NAMESPACE $NAME
+  reconcile-hr:
+    shortCut: Shift-R
+    confirm: false
+    description: Flux Reconcile HelmRelease
+    scopes:
+    - helmreleases
+    command: bash
+    background: true
+    args:
+    - -c
+    - |
+      # Reconcile helmrelease by using suspend/resume
+      flux --context $CONTEXT suspend helmrelease -n $NAMESPACE $NAME
+      flux --context $CONTEXT resume helmrelease -n $NAMESPACE $NAME
+      kubectl --context $CONTEXT annotate --overwrite helmrelease/$NAME \
+        -n $NAMESPACE reconcile.fluxcd.io/requestedAt="$(date --utc +%s)"
+  reconcile-hr-parent:
+    shortCut: Shift-E
+    confirm: false
+    description: Flux Reconcile Parent
+    scopes:
+    - helmreleases
+    command: bash
+    background: true
+    args:
+    - -c
+    - |
+      kust_name=$(kubectl --context $CONTEXT get helmreleases -n $NAMESPACE $NAME \
+        -o jsonpath='{.metadata.labels.kustomize\.toolkit\.fluxcd\.io/name}')
+      kust_namespace=$(kubectl --context $CONTEXT get helmreleases -n $NAMESPACE $NAME \
+        -o jsonpath='{.metadata.labels.kustomize\.toolkit\.fluxcd\.io/namespace}')
+      if [[ -n ${kust_name-} ]]; then
+        echo >&2 "Reconciling parent Kustomization ${kust_namespace}/${kust_name}"
+        flux --context $CONTEXT reconcile kustomization -n ${kust_namespace} ${kust_name} --with-source
+      else
+        echo >&2 "No parent Kustomization found"
+      fi
+
+      hr_name=$(kubectl --context $CONTEXT get helmreleases -n $NAMESPACE $NAME \
+        -o jsonpath='{.metadata.labels.helm\.toolkit\.fluxcd\.io/name}')
+      hr_namespace=$(kubectl --context $CONTEXT get helmreleases -n $NAMESPACE $NAME \
+        -o jsonpath='{.metadata.labels.helm\.toolkit\.fluxcd\.io/namespace}')
+      if [[ -n ${hr_name-} ]]; then
+        echo >&2 "Reconciling parent HelmRelease ${hr_namespace}/${hr_name}"
+        flux --context $CONTEXT suspend helmrelease -n ${hr_namespace} ${hr_name}
+        flux --context $CONTEXT resume helmrelease -n ${hr_namespace} ${hr_name}
+        kubectl --context $CONTEXT annotate --overwrite helmrelease/${hr_name} \
+          -n ${hr_namespace} reconcile.fluxcd.io/requestedAt="$(date --utc +%s)"
+      else
+        echo >&2 "No parent HelmRelease found"
+      fi
+
+      # Reconcile helmrelease by using suspend/resume
+      flux --context $CONTEXT suspend helmrelease -n $NAMESPACE $NAME
+      flux --context $CONTEXT resume helmrelease -n $NAMESPACE $NAME
+      kubectl --context $CONTEXT annotate --overwrite helmrelease/$NAME \
+        -n $NAMESPACE reconcile.fluxcd.io/requestedAt="$(date --utc +%s)"
   reconcile-ks:
     shortCut: Shift-R
     confirm: false
@@ -68,15 +131,15 @@ plugin:
     command: bash
     background: false
     args:
-      - -c
-      - |
-        # Check dependencies
-        command -v jq >/dev/null || { echo -e "jq is not installed (https://stedolan.github.io/jq/)\nPress 'q' to close" | less; exit 1; }
-        # Extract node name and container ID
-        POD_DATA="$(kubectl get pod/$POD -o json --namespace $NAMESPACE --context $CONTEXT)"
-        # ${...} is used to prevent variable substitution by k9s (e.g. $POD_DATA)
-        NODE_NAME=$(echo "${POD_DATA}" | jq -r '.spec.nodeName')
-        CONTAINER_ID=$(echo "${POD_DATA}" | jq -r '.status.containerStatuses[] | select(.name == "$COL-NAME") | .containerID ' | grep -oP '(?<=containerd://).*')
-        echo "<<K9s-Root-Shell>> Pod: $NAMESPACE/$POD | Container: $COL-NAME (${NODE_NAME}/${CONTAINER_ID})"
-        # Credits for this approach to https://gist.github.com/mamiu/4944e10305bc1c3af84946b33237b0e9
-        docker exec -it $NODE_NAME sh -c "runc --root /run/containerd/runc/k8s.io/ exec -t -u 0 ${CONTAINER_ID} sh"
+    - -c
+    - |
+      # Check dependencies
+      command -v jq >/dev/null || { echo -e "jq is not installed (https://stedolan.github.io/jq/)\nPress 'q' to close" | less; exit 1; }
+      # Extract node name and container ID
+      POD_DATA="$(kubectl get pod/$POD -o json --namespace $NAMESPACE --context $CONTEXT)"
+      # ${...} is used to prevent variable substitution by k9s (e.g. $POD_DATA)
+      NODE_NAME=$(echo "${POD_DATA}" | jq -r '.spec.nodeName')
+      CONTAINER_ID=$(echo "${POD_DATA}" | jq -r '.status.containerStatuses[] | select(.name == "$COL-NAME") | .containerID ' | grep -oP '(?<=containerd://).*')
+      echo "<<K9s-Root-Shell>> Pod: $NAMESPACE/$POD | Container: $COL-NAME (${NODE_NAME}/${CONTAINER_ID})"
+      # Credits for this approach to https://gist.github.com/mamiu/4944e10305bc1c3af84946b33237b0e9
+      docker exec -it $NODE_NAME sh -c "runc --root /run/containerd/runc/k8s.io/ exec -t -u 0 ${CONTAINER_ID} sh"

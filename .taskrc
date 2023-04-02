@@ -30,7 +30,7 @@ include solarized-dark-256.theme
 color=on
 
 default.priority=M
-default.due=7d
+default.due=14d
 default.project=$PROJECT
 
 due=1

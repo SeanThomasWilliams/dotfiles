@@ -7,7 +7,7 @@ create_message_for_project(){
   local project
   project=$1
 
-  task_query="(status:pending and due < now+7d and project:${project} and -WAITING)"
+  task_query="(status:pending and (due: or due < now+7d) and project:${project} and -WAITING)"
   task_count=$(task "$task_query" export | jq -c '.[]' | wc -l)
 
   if [[ "$task_count" -eq 0 ]]; then

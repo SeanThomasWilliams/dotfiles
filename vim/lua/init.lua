@@ -9,35 +9,35 @@ require('github-theme').setup()
 
 -- Treesitter
 require "nvim-treesitter.configs".setup {
-	ensure_installed = {
-		"bash",
-		"c",
-		"cmake",
-		"css",
-		"go",
-		"html",
-		"java",
-		"javascript",
-		"json",
-		"lua",
-		"make",
-		"python",
-		"rego",
-		"scss",
-		"toml",
-		"typescript",
-		"vim",
-		"yaml",
-	},
-	ignore_install = {
-		"d",
-		"experimental",
-		"foam",
-		"help",
-		"phpdoc",
-		"slint",
-		"verilog",
-	},
+    ensure_installed = {
+        "bash",
+        "c",
+        "cmake",
+        "css",
+        "go",
+        "html",
+        "java",
+        "javascript",
+        "json",
+        "lua",
+        "make",
+        "python",
+        "rego",
+        "scss",
+        "toml",
+        "typescript",
+        "vim",
+        "yaml",
+    },
+    ignore_install = {
+        "d",
+        "experimental",
+        "foam",
+        "help",
+        "phpdoc",
+        "slint",
+        "verilog",
+    },
     highlight = {
         enable = true, -- false will disable the whole extension
         disable = {"rust"} -- list of language that will be disabled
@@ -122,6 +122,31 @@ local on_attach = function(client, bufnr)
   local function buf_set_keymap(...) vim.api.nvim_buf_set_keymap(bufnr, ...) end
   local function buf_set_option(...) vim.api.nvim_buf_set_option(bufnr, ...) end
 
+  -- Server capabilities spec:
+  -- https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#serverCapabilities
+  if client.server_capabilities.documentHighlightProvider then
+      vim.api.nvim_create_augroup("lsp_document_highlight", { clear = true })
+      vim.api.nvim_clear_autocmds { buffer = bufnr, group = "lsp_document_highlight" }
+      vim.api.nvim_create_autocmd("CursorHold", {
+          callback = vim.lsp.buf.document_highlight,
+          buffer = bufnr,
+          group = "lsp_document_highlight",
+          desc = "Document Highlight",
+      })
+      vim.api.nvim_create_autocmd("CursorHoldI", {
+          callback = vim.lsp.buf.document_highlight,
+          buffer = bufnr,
+          group = "lsp_document_highlight",
+          desc = "Document Highlight",
+      })
+      vim.api.nvim_create_autocmd("CursorMoved", {
+          callback = vim.lsp.buf.clear_references,
+          buffer = bufnr,
+          group = "lsp_document_highlight",
+          desc = "Clear All the References",
+      })
+  end
+
   --Enable completion triggered by <c-x><c-o>
   buf_set_option('omnifunc', 'v:lua.vim.lsp.omnifunc')
 
@@ -133,7 +158,7 @@ local on_attach = function(client, bufnr)
   buf_set_keymap('n', 'gd', '<Cmd>lua vim.lsp.buf.definition()<CR>', opts)
   buf_set_keymap('n', 'K', '<Cmd>lua vim.lsp.buf.hover()<CR>', opts)
   buf_set_keymap('n', 'gi', '<cmd>lua vim.lsp.buf.implementation()<CR>', opts)
-  -- buf_set_keymap('n', '<C-k>', '<cmd>lua vim.lsp.buf.signature_help()<CR>', opts)
+  buf_set_keymap('n', '<space>k', '<cmd>lua vim.lsp.buf.signature_help()<CR>', opts)
   buf_set_keymap('n', '<space>wa', '<cmd>lua vim.lsp.buf.add_workspace_folder()<CR>', opts)
   buf_set_keymap('n', '<space>wr', '<cmd>lua vim.lsp.buf.remove_workspace_folder()<CR>', opts)
   buf_set_keymap('n', '<space>wl', '<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<CR>', opts)

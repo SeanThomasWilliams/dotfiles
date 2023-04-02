@@ -201,7 +201,7 @@ load_alias_settings(){
   alias tp='command task pro:personal'
   alias tt='command task $TASK_TAGS'
   alias trv='command task pro:rv'
-  alias tw='command t +WAITING all'
+  alias tw='command t waiting'
   alias k9s='setterm --linewrap off; k9s'
   alias terragrunt-clear-cache='find ./ -type d -name ".terragrunt-cache" -prune -exec rm -rf {} \;'
   alias terragrunt-clear-debug='find ./ -type f -name "terragrunt-debug.tfvars.json" -prune -exec rm -rf {} \;'

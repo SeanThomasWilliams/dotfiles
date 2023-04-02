@@ -29,6 +29,10 @@ exec --no-startup-id blueman-applet
 # Printer applet
 exec --no-startup-id system-config-printer-applet
 
+# Screen Saver / Power Saving
+exec --no-startup-id xset s 1800 1800
+exec --no-startup-id xset dpms 0 0 1800
+
 # Change display settings
 exec_always --no-startup-id init-display
 
