@@ -58,6 +58,8 @@
   r = !git l -30
   ra = !git r --all
   rc = rebase --continue
+  set-remote = !git-set-remote "$1"
+  sr = set-remote
   slg = stash list --pretty=reflg
   st = status
   show-ignored-files = ls-files . --ignored --exclude-standard --others

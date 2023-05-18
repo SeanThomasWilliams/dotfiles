@@ -8,29 +8,35 @@ fi
 
 # Card Names
 INTEL_CARD_NAME="HDA Intel PCH"
+NVIDIA_CARD_NAME="HDA NVidia"
 
 # Card Profiles
 ANALOG_DUPLEX_PROFILE="output:analog-stereo+input:analog-stereo"
-HDMI_PROFILE="output:analog-surround-51+input:analog-stereo"
+INTEL_HDMI_PROFILE="output:analog-surround-51+input:analog-stereo"
+NVIDIA_HDMI_PROFILE="output:hdmi-surround"
+#NVIDIA_HDMI_PROFILE="output:hdmi-stereo"
 
 # Get the card id of the given card name
 get_card_id_from_card_name(){
   pactl list cards |\
     awk '
-      function ltrim(s) { sub(/^[ \t\r\n]+/, "", s); return s }
-      function rtrim(s) { sub(/[ \t\r\n]+$/, "", s); return s }
-      function trim(s) { return rtrim(ltrim(s)); }
+     function ltrim(s) { sub(/^[ \t\r\n]+/, "", s); return s }
+     function rtrim(s) { sub(/[ \t\r\n]+$/, "", s); return s }
+     function trim(s) { return rtrim(ltrim(s)); }
 
-      /Name: / {
-        name=$2;
-      }
+     /Name: / {
+       name=$2;
+     }
 
-      /alsa.card_name = / {
-        gsub(/"/, "", $0);
-        split($0, a, "=");
-        card_name=trim(a[2]);
-        print name " " card_name;
-      }
+     /alsa.card_name = / {
+       gsub(/"/, "", $0);
+       split($0, a, "=");
+       card_name=trim(a[2]);
+     }
+
+     /Active Profile: / && ! /off/ {
+       print name " " card_name;
+     }
     ' | grep "$1" | cut -d' ' -f1
 }
 
@@ -70,11 +76,10 @@ get_active_profile_for_card_id(){
 }
 
 activate_hdmi_output(){
-  pactl set-card-profile "$INTEL_CARD_ID" "$HDMI_PROFILE"
+  set -x
+  pactl set-card-profile "$INTEL_CARD_ID" "$INTEL_HDMI_PROFILE"
   sleep 0.1
-  pactl set-card-profile alsa_card.pci-0000_06_00.1 output:hdmi-stereo-extra2
-  sleep 0.1
-  pactl set-card-profile alsa_card.pci-0000_06_00.1 output:hdmi-stereo-extra3
+  pactl set-card-profile "$NVIDIA_CARD_ID" "$NVIDIA_HDMI_PROFILE"
 }
 
 activate_analog_output(){
@@ -148,6 +153,7 @@ handle_analog_headset(){
 
 # Set dynamic variables
 INTEL_CARD_ID="$(get_card_id_from_card_name "$INTEL_CARD_NAME")"
+NVIDIA_CARD_ID="$(get_card_id_from_card_name "$NVIDIA_CARD_NAME")"
 
 # Toggle profile
 handle_analog_headset

@@ -150,7 +150,7 @@ fun! s:join_spaceless()
     endif
 endfun
 nnoremap J :verbose call <SID>join_spaceless()<CR>
-nnoremap <Leader>J J
+nnoremap K J
 
 " ARROW KEYS ARE UNACCEPTABLE
 map <Left> <Nop>

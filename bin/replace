@@ -107,7 +107,7 @@ if [[ -n ${MAX_DEPTH-} ]]; then
 fi
 
 FIND_CMD=(
-  find -L "${FIND_GLOBAL_ARGS[@]}"
+  find "${FIND_GLOBAL_ARGS[@]}"
   -type f \
   -ipath "$FILE_GLOB"
   -printf '%p\n'

@@ -27,6 +27,7 @@ PACKAGES=(
   docker.io
   dstat
   exuberant-ctags
+  feh
   flatpak
   fonts-symbola
   gawk
