@@ -21,7 +21,7 @@ git checkout stable
 
 rm -f ~/anaconda3/bin/libtool*
 
-make CMAKE_BUILD_TYPE=RelWithDebInfo CMAKE_EXTRA_FLAGS="-DUSE_BUNDLED_LUAJIT=ON -DUSE_BUNDLED_LUAROCKS=ON"
+sudo make CMAKE_BUILD_TYPE=RelWithDebInfo CMAKE_EXTRA_FLAGS="-DUSE_BUNDLED_LUAJIT=ON -DUSE_BUNDLED_LUAROCKS=ON"
 
 sudo make install
-rm -rf ~/software/neovim.git
+sudo rm -rf "$HOME/software/neovim.git"

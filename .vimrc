@@ -10,21 +10,8 @@
 set nocompatible " Required
 
 call plug#begin('~/.vim/plugged')
-" Other plugins
-" Plug 'RRethy/vim-illuminate'
-" Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
-" Plug 'carlitux/deoplete-ternjs', { 'do': 'npm install -g tern' }
-" Plug 'davidhalter/jedi-vim'
-" Plug 'ervandew/supertab'
-" Plug 'hashivim/vim-terraform'
-" Plug 'numirias/semshi', {'do': ':UpdateRemotePlugins'}
-" Plug 'zchee/deoplete-go', { 'do': 'make' }
-" Plug 'zchee/deoplete-jedi'
-" Plug 'kristijanhusak/completion-tags'
-" Plug 'nvim-lua/completion-nvim'
 Plug 'Ivo-Donchev/vim-react-goto-definition'
 Plug 'MunifTanjim/nui.nvim'
-Plug 'SeanThomasWilliams/dwm.vim'
 Plug 'SirVer/ultisnips'
 Plug 'airblade/vim-gitgutter'
 Plug 'benekastah/neomake'
@@ -33,12 +20,13 @@ Plug 'benmills/vimux-golang'
 Plug 'bling/vim-airline'
 Plug 'dpayne/CodeGPT.nvim'
 Plug 'ekalinin/Dockerfile.vim'
+Plug 'ellisonleao/gruvbox.nvim'
 Plug 'fatih/vim-go', { 'tag': '*' }
+Plug 'folke/tokyonight.nvim', { 'branch': 'main' }
 Plug 'gagoar/StripWhiteSpaces'
 Plug 'github/copilot.vim'
 Plug 'honza/vim-snippets'
 Plug 'hrsh7th/nvim-compe'
-Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app && yarn install' }
 Plug 'jacoborus/tender.vim'
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 Plug 'junegunn/fzf.vim'
@@ -60,8 +48,9 @@ Plug 'pedrohdz/vim-yaml-folds'
 Plug 'peitalin/vim-jsx-typescript'
 Plug 'powerman/vim-plugin-AnsiEsc'
 Plug 'prettier/vim-prettier', { 'do': 'yarn install --no-lockfile' }
-Plug 'projekt0n/github-nvim-theme'
 Plug 'sbdchd/neoformat'
+Plug 'seanthomaswilliams/dwm.vim'
+Plug 'seanthomaswilliams/markdown-preview.nvim', { 'do': 'cd app && yarn install' }
 Plug 'shmup/vim-sql-syntax'
 Plug 'towolf/vim-helm'
 Plug 'tpope/vim-dispatch'
@@ -195,7 +184,7 @@ set tags=./.tags                  " Look for tags in this file
 " }}}
 
 " {{{ colorscheme/style options
-" colorscheme github_*
+colorscheme tokyonight-storm
 let g:airline_theme = 'tender'
 " Enable true color
 if exists('+termguicolors')
@@ -427,7 +416,9 @@ if has('autocmd')
     autocmd BufNewFile,BufRead *.go setlocal noet ts=4 sw=4 sts=4
     autocmd FileType make setlocal noet ts=4 sw=4 sts=4 foldmethod=marker foldlevel=1
     autocmd FileType make nnoremap <silent> <leader>d :sp<CR> <c-]>
-    autocmd FileType markdown setlocal wrap spell spelllang=en_us
+    autocmd FileType markdown setlocal wrap spell spelllang=en_us textwidth=160
+    autocmd FileType vimwiki setlocal wrap spell spelllang=en_us textwidth=160
+
     autocmd FileType terraform nnoremap <leader>f :Neoformat<CR>
     autocmd FileType hcl nnoremap <leader>f :Neoformat<CR>
   augroup end

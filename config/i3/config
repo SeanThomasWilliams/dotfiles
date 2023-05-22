@@ -272,7 +272,7 @@ for_window [all] title_window_icon on
 #for_window [all] title_window_icon on, border none
 
 #for_window [class=".*Calendar.*"] layout stacking, floating disabled
-for_window [window_role="EventSummaryDialog"] layout stacking, floating disabled
+#for_window [window_role="EventSummaryDialog"] layout stacking, floating disabled
 
 # Window Configs
 for_window [title="Sign in to Security Device"] floating enable
