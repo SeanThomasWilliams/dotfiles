@@ -260,12 +260,16 @@ load_alias_settings(){
 
 load_history_settings(){
   ### history
-  shopt -s histappend              # append new history items to .bash_history
-  export HISTCONTROL=ignorespace   # leading space hides commands from history
-  export HISTFILESIZE=10000        # increase history file size (default is 500)
-  export HISTSIZE=${HISTFILESIZE}  # increase history size (default is 500)
-  if ! [[ "${PROMPT_COMMAND:-}" =~ history ]]; then
-    PROMPT_COMMAND="history -a;history -n${PROMPT_COMMAND:+;$PROMPT_COMMAND}"
+  shopt -s histappend # append new history items to .bash_history
+
+  # We have bigly history. Some say the biggest history ever.
+  export HISTFILESIZE=10000000
+  export HISTSIZE="${HISTFILESIZE}"
+  export HISTFILE="$HOME/.bash_eternal_history"
+  export HISTCONTROL="ignoredups:erasedups:ignorespace"
+
+  if ! [[ "${PROMPT_COMMAND-}" =~ history ]]; then
+    PROMPT_COMMAND="history -a;history -n;${PROMPT_COMMAND-}"
     export PROMPT_COMMAND
   fi
 
