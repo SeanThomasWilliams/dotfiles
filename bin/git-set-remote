@@ -1,0 +1,29 @@
+#!/bin/bash
+
+set -e
+
+usage(){
+  cat <<EOF
+Usage: $0 <remote>
+
+Git remote options:
+$(git remote)
+EOF
+}
+
+if [[ $# -ne 1 ]]; then
+  usage
+  exit 1
+fi
+
+upstream="$1"
+
+if ! git remote | grep -q "$upstream"; then
+  echo >&2 "Remote '$upstream' not found"
+  usage
+  exit 1
+fi
+
+branch="$(git rev-parse --abbrev-ref HEAD)"
+
+git branch --set-upstream-to="$upstream/$branch"

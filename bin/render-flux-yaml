@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+# shellcheck disable=SC2016
+
+# This script queries the compiled flux values for a given release and merges them into a single YAML file.
+# kubectl get -n bigbang secret bigbang-monitoring-values -o yaml | yq '.data | map(@base64d) | .[]'| yq -P ea '. as $item ireduce ({}; . * $item )'
+
+set -euo pipefail
+
+# This script requires arguments to locate the helmrelease and the namespace
+
+while getopts ":r:n:" opt; do
+  case $opt in
+    r)
+      RELEASE="$OPTARG"
+      ;;
+    n)
+      NAMESPACE="$OPTARG"
+      ;;
+    \?) echo "Invalid option -$OPTARG" >&2
+    ;;
+  esac
+done
+
+if [ -z "${RELEASE}" ]; then
+  echo "Release name is required"
+  exit 1
+fi
+
+if [ -z "${NAMESPACE}" ]; then
+  echo "Namespace is required"
+  exit 1
+fi
+
+# Get the secret from the flux release and combine all of the values into a single YAML file
+values_secret_name="${NAMESPACE}-${RELEASE}-values"
+
+kubectl get -n "${NAMESPACE}" secret "${values_secret_name}" -o yaml | yq '.data | map(@base64d) | .[]'| yq -P ea '. as $item ireduce ({}; . * $item )'

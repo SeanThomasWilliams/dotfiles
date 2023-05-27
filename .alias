@@ -233,6 +233,8 @@ load_alias_settings(){
 
   # Autoenable direnv
   command -v direnv &> /dev/null && eval "$(direnv hook bash)"
+  # Silence direnv output
+  export DIRENV_LOG_FORMAT=
 
   unalias remake gmake make &> /dev/null
 

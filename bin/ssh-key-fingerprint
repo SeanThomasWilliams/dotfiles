@@ -1,0 +1,46 @@
+#!/bin/bash
+
+# This script takes a private key as input and outputs the fingerprint
+# in the format used by the AWS console.
+# If the key is invalid, this script will exit with a non-zero status.
+
+# Usage: ssh-key-fingerprint <private key file>
+
+if [[ $# -ne 1 ]]; then
+  echo >&2 "Usage: ssh-key-fingerprint <private key file>"
+  exit 1
+fi
+
+if [[ ! -f "$1" ]]; then
+  echo >&2 "File not found: $1"
+  exit 1
+fi
+
+# Check whether the key is an RSA PRIVATE KEY or OPENSSH PRIVATE KEY
+
+if [[ $(head -c 15 "$1") == "-----BEGIN RSA " ]]; then
+  # RSA key
+  key_type="RSA"
+elif [[ $(head -c 19 "$1") == "-----BEGIN OPENSSH " ]]; then
+  # OpenSSH key
+  key_type="OPENSSH"
+else
+  # echo >&2 "Invalid key type"
+  exit 1
+fi
+
+# Get the fingerprint from the private key
+if [[ $key_type == "RSA" ]]; then
+  fingerprint=$(openssl pkey -in "$1" -pubout -outform DER |\
+    openssl md5 -c |\
+    awk '{print $2}')
+elif [[ $key_type == "OPENSSH" ]]; then
+  fingerprint=$(ssh-keygen -ef "$1" -m PEM |\
+    openssl rsa -RSAPublicKey_in -outform DER 2>/dev/null |\
+    openssl md5 -c |\
+    awk '{print $2}')
+fi
+
+# Convert the fingerprint to the format used by the AWS console
+fingerprint=$(echo "$fingerprint" | tr -d ':' | sed 's/\(..\)/\1:/g' | sed 's/.$//')
+echo "$fingerprint - $(basename "$1")"
