@@ -122,3 +122,5 @@
 	procReceiveRefs = refs/for
 [gc]
 	writeCommitGraph = true
+[init]
+	defaultBranch = main

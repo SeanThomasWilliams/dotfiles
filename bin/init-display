@@ -153,18 +153,22 @@ elif [[ -n ${DP_4_CONNECTED-} ]]; then
       --output DP-4 --primary --mode 3440x1440
     update_i3_config "DP-4" "DP-4" "DP-4"
   else
-    echo >&2 "Using DP-4 (TV) and internal"
-    xrandr --output "$INTERNAL_OUTPUT" --mode "$LAPTOP_RESOLUTION" --primary \
-      --output DP-4 --above "$INTERNAL_OUTPUT" --rotate normal --auto
-    update_i3_config "DP-4" "$INTERNAL_OUTPUT" "DP-4"
+    echo >&2 "Using DP-4 and internal"
+    xrandr --output "$INTERNAL_OUTPUT" --brightness 0.5 --mode "$LAPTOP_RESOLUTION" --primary \
+      --output DP-4 --left-of "$INTERNAL_OUTPUT" --rotate normal --auto
+    update_i3_config "$INTERNAL_OUTPUT" "DP-4" "$INTERNAL_OUTPUT"
   fi
 elif [[ -n ${DP_1_CONNECTED-} ]]; then
   echo >&2 "Using DP-1 and internal"
   xrandr --output "$INTERNAL_OUTPUT" --mode "$LAPTOP_RESOLUTION" --primary \
-    --output DP-1 --pos 2489x212 --rotate normal --auto
+    --output DP-1 --pos 2489x212 --rotate normal --mode 1360x768 || \
+    xrandr --output "$INTERNAL_OUTPUT" --mode "$LAPTOP_RESOLUTION" --primary \
+      --output DP-1 --pos 2489x212 --rotate normal --auto
   update_i3_config "DP-1" "$INTERNAL_OUTPUT" "DP-1"
 else
-  echo >&2 "Using internal output $INTERNAL_OUTPUT"
-  xrandr --output "$INTERNAL_OUTPUT" --mode "$LAPTOP_RESOLUTION" --primary --brightness 1.0
+  echo >&2 "Using internal output $INTERNAL_OUTPUT at $LAPTOP_RESOLUTION"
+  xrandr --output "$INTERNAL_OUTPUT" --mode "$LAPTOP_RESOLUTION" --primary \
+    --brightness 0.3 \
+    --set "scaling mode" "Full"
   update_i3_config "$INTERNAL_OUTPUT" "$INTERNAL_OUTPUT" "$INTERNAL_OUTPUT"
 fi
