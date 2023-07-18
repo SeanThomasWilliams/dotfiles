@@ -10,6 +10,7 @@ PLUGIN_LIST=(
 
   awscli
   ctop
+  delta
   flux2
   fzf
   golang

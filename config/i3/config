@@ -130,6 +130,8 @@ bindsym $mod+f fullscreen toggle
 bindsym $mod+s layout stacking
 bindsym $mod+w layout tabbed
 bindsym $mod+e layout toggle split
+# Toggle between stacking/tabbed/splith/splitv:
+bindsym $mod+y layout toggle all
 
 # toggle tiling / floating
 bindsym $mod+Shift+space floating toggle
@@ -165,12 +167,9 @@ set $rightmon "DP-4"
 set $primarymon "HDMI-0"
 
 # Keybind to move workspace to other monitor
-bindsym $mod+Shift+p      move workspace to output $primarymon
-bindsym $mod+Shift+$right move workspace to output $rightmon
-bindsym $mod+Shift+$left  move workspace to output $leftmon
-
-# Toggle between stacking/tabbed/splith/splitv:
-bindsym $mod+y layout toggle all
+#bindsym $mod+Shift+p      move workspace to output $primarymon
+#bindsym $mod+Shift+$right move workspace to output $rightmon
+#bindsym $mod+Shift+$left  move workspace to output $leftmon
 
 # urgent switch
 bindsym $mod+u [urgent=latest] focus
@@ -276,7 +275,7 @@ for_window [all] title_window_icon on
 
 # Window Configs
 for_window [title="Sign in to Security Device"] floating enable
-for_window [class="[Gg]oogle-chrome"] layout stacking, title_format "Google Chrome"
+#for_window [class="[Gg]oogle-chrome"] layout stacking, title_format "Google Chrome"
 for_window [class="[Ff]irefox"] layout stacking
 for_window [class="[Zz]oom.*"] layout stacking
 for_window [class="gnome-terminal-server"] title_format "Terminal"

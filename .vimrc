@@ -886,10 +886,11 @@ let g:autopep8_disable_show_diff=1
 let g:autopep8_on_save = 1
 
 " vim-dirdiff
-let g:DirDiffExcludes = ".git,certs,images,README.md,*.war,*.rpm"
-let g:DirDiffIgnore = ""
 let g:DirDiffAddArgs = "-w" " ignore white space in diff
 let g:DirDiffEnableMappings = 1
+let g:DirDiffExcludes = "*.*ar,*.bak,*.crt,*.csr,*.enc*,*.lock*,*.gz,*.key,*.manifest,*.pem,*.pid,*.pub,*.rpm,.Makefile.*,.ssh,.asdf,.git*,.tags*,.terraform,artifact*,bin,images,kubeconfig,mirror,packer-*,retag-*,rpm-*,s3-*,tmp"
+let g:DirDiffIgnore = ""
+let g:DirDiffSort = 1
 
 " supertab
 " let g:SuperTabDefaultCompletionType = "<c-n>"

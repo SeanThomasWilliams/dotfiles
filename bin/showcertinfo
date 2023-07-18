@@ -127,6 +127,12 @@ process_by_file_content(){
     newcert="$tmp_dir/tls.key"
   elif xxd -l8 "$tmp_file" | grep -q 'feed feed 0000 0002'; then
     newcert="$tmp_dir/keystore.jks"
+  elif base64 --decode < "$tmp_file" &> /dev/null; then
+    newcert="$tmp_dir/tls.crt"
+    content=$(fold -w 65 < "$tmp_file")
+    echo '-----BEGIN CERTIFICATE-----' > "$tmp_file"
+    echo "$content" >> "$tmp_file"
+    echo '-----END CERTIFICATE-----' >> "$tmp_file"
   else
     echo >&2 "Unknown file content from:"
     echo >&2 "$tmp_file"

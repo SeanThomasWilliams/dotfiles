@@ -8,6 +8,7 @@
   excludesfile = ~/.gitignore
 	quotePath = false
 	commitGraph = true
+	pager = delta
 
 [color]
   ui = auto
@@ -75,6 +76,7 @@
 
 [diff]
   tool = nvimdiff
+  colorMoved = default
 
 [difftool "nvimdiff"]
   cmd = "nvim -d -u ~/.vimrc \"$LOCAL\" \"$REMOTE\""
@@ -88,6 +90,10 @@
 [mergetool]
   prompt = false
   keepBackup = false
+
+[delta]
+  navigate = true    # use n and N to move between diff sections
+  hyperlinks = true
 
 [pretty]
   lg = %C(red)%h%C(reset) - %C(green)%ci%C(reset) %s %C(bold blue)-- %an%C(reset)%C(yellow)%d%C(reset)

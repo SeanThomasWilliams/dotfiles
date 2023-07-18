@@ -33,35 +33,54 @@ if [[ -n ${DEBUG-} ]]; then
   set -x
 fi
 
-TARGET_DIR=('.')
-IGNORE_PATTERN='^\.[a-z]|/\.[a-z]'
+DEFAULT_TARGET_DIR=(*)
+TARGET_DIR=()
+IGNORE_PATTERN='.*/\..*cache|.*/\.DS_Store|.*/\.git|.*/\.pnpm|.*/\.terraform|.*/mod|.*/node_modules|.*/vendor'
 
-while getopts ':ad:n:t:h' opt; do
-  case "${opt}" in
-    a)
-      IGNORE_PATTERN='\.git'
+# Use longer getopt format for portability
+
+# $@ is all command line parameters passed to the script.
+# -o is for short options like -v
+# -l is for long options with double dash like --version
+# the comma separates different long options
+# -a is for long options with single dash like -version
+options=$(getopt -o "ad:n:t:hv" -l "all,dir:,name:,type:,help,verbose" -n "$0" -- "$@")
+
+# set --:
+# If no arguments follow this option, then the positional parameters are unset. Otherwise, the positional parameters
+# are set to the arguments, even if some of them begin with a ‘-’.
+eval set -- "$options"
+
+while true; do
+  case "$1" in
+    -a|--all)
+      IGNORE_PATTERN='.*/\.git'
       ;;
-    d)
-      TARGET_DIR=("${OPTARG}")
+    -d|--dir)
+      shift
+      TARGET_DIR+=("$1")
       ;;
-    n)
-      MAX_DEPTH="${OPTARG}"
+    -n|--name)
+      shift
+      MAX_DEPTH="$1"
       ;;
-    t)
-      FILE_TYPE="${OPTARG}"
+    -t|--type)
+      shift
+      FILE_TYPE="$1"
       ;;
-    h)
+    -h|--help)
       usage
       exit 0
       ;;
-    *)
-      usage
-      exit 1
+    -v|--verbose)
+      set -xv  # Set xtrace and verbose mode.
       ;;
+    --)
+      shift
+      break;;
   esac
+  shift
 done
-
-shift $((OPTIND-1))
 
 if [[ $# -ge 1 ]]; then
   FILE_NAME="$1"
@@ -69,7 +88,7 @@ if [[ $# -ge 1 ]]; then
 fi
 
 if [[ $# -ge 1 ]]; then
-  TARGET_DIR=("$@")
+  TARGET_DIR+=("$@")
 fi
 
 # Construct FILE_GLOB
@@ -79,7 +98,12 @@ if [[ -n ${FILE_NAME-} ]]; then
 fi
 
 if [[ -n ${FILE_TYPE-} ]]; then
+  FILE_NAME="\.${FILE_TYPE}|${FILE_NAME-}"
   FILE_GLOB="${FILE_GLOB}.${FILE_TYPE}"
+fi
+
+if [[ -z ${TARGET_DIR-} ]]; then
+  TARGET_DIR=("${DEFAULT_TARGET_DIR[@]}")
 fi
 
 # Set maxdepth if directed
@@ -92,7 +116,12 @@ if [[ -n ${MAX_DEPTH-} ]]; then
 fi
 
 FIND_CMD=(
-  find -L "${FIND_GLOBAL_ARGS[@]}"
+  find
+  -L
+  "${FIND_GLOBAL_ARGS[@]}"
+  -regextype posix-egrep
+  \!
+  \( -type d -regex "$IGNORE_PATTERN" -prune \)
   \( -type f -o -type l \)
   -ipath "$FILE_GLOB"
   -printf '%p\n'
@@ -101,12 +130,8 @@ FIND_CMD=(
 if [[ -n ${FILE_NAME-} ]]; then
   # Find relevant files and strip the leading './'
   "${FIND_CMD[@]}" 2>/dev/null |\
-    sed 's#^\./##' |\
-    grep -Ev "${IGNORE_PATTERN}" |\
-    grep --color "$FILE_NAME"
+    grep --color -E "$FILE_NAME"
 else
   # Don't highlight FILE_NAME
-  "${FIND_CMD[@]}" 2>/dev/null |\
-    sed 's#^\./##' |\
-    grep -Ev "${IGNORE_PATTERN}"
+  "${FIND_CMD[@]}" 2>/dev/null
 fi
