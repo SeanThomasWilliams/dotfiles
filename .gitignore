@@ -8,6 +8,7 @@
 *.key
 *.log
 *.md5sum
+*.mjs
 *.old
 *.png
 *.pyc

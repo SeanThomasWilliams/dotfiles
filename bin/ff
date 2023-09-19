@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# shellcheck disable=SC2068
+# shellcheck disable=SC2068,SC2046
 
 set -eu -o pipefail
 
@@ -18,6 +18,8 @@ Arguments:
 Options:
   -a
     Search all files (even hidden files, except .git)
+  -e
+    Edit the files found
   -d
     Directory to search within (overridden by <TARGET_DIR>)
   -n
@@ -35,7 +37,9 @@ fi
 
 DEFAULT_TARGET_DIR=(*)
 TARGET_DIR=()
-IGNORE_PATTERN='.*/\..*cache|.*/\.DS_Store|.*/\.git|.*/\.pnpm|.*/\.terraform|.*/mod|.*/node_modules|.*/vendor'
+IGNORE_PATTERN='.*/\..*cache|.*/\.DS_Store|.*/\.git|.*/\.direnv|.*/\.pnpm|.*/\.terraform|.*/mod|.*node_modules|.*/vendor'
+IGNORE_PATTERN+='|^\..*cache|^\.DS_Store|^\.git|^\.direnv|^/\.pnpm|^/\.terraform|^mod|^node_modules|^vendor'
+EDITOR="${EDITOR:-vim}"
 
 # Use longer getopt format for portability
 
@@ -44,7 +48,7 @@ IGNORE_PATTERN='.*/\..*cache|.*/\.DS_Store|.*/\.git|.*/\.pnpm|.*/\.terraform|.*/
 # -l is for long options with double dash like --version
 # the comma separates different long options
 # -a is for long options with single dash like -version
-options=$(getopt -o "ad:n:t:hv" -l "all,dir:,name:,type:,help,verbose" -n "$0" -- "$@")
+options=$(getopt -o "ad:en:t:hv" -l "all,dir:,edit,name:,type:,help,verbose" -n "$0" -- "$@")
 
 # set --:
 # If no arguments follow this option, then the positional parameters are unset. Otherwise, the positional parameters
@@ -59,6 +63,9 @@ while true; do
     -d|--dir)
       shift
       TARGET_DIR+=("$1")
+      ;;
+    -e|--edit)
+      EDIT_FILES=1
       ;;
     -n|--name)
       shift
@@ -134,4 +141,8 @@ if [[ -n ${FILE_NAME-} ]]; then
 else
   # Don't highlight FILE_NAME
   "${FIND_CMD[@]}" 2>/dev/null
+fi
+
+if [[ -n ${EDIT_FILES-} ]]; then
+  "$EDITOR" $("${FIND_CMD[@]}")
 fi

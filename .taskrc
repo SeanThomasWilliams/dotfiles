@@ -22,7 +22,8 @@ data.location=~/.task
 #include dark-green-256.theme
 #include dark-red-256.theme
 #include dark-violets-256.theme
-include solarized-dark-256.theme
+#include solarized-dark-256.theme
+include /usr/share/doc/task/rc/solarized-dark-256.theme
 
 # Include US holidays
 # include holidays.en-US.rc

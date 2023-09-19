@@ -28,6 +28,7 @@ Plug 'github/copilot.vim'
 Plug 'honza/vim-snippets'
 Plug 'hrsh7th/nvim-compe'
 Plug 'jacoborus/tender.vim'
+Plug 'jose-elias-alvarez/null-ls.nvim'
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 Plug 'junegunn/fzf.vim'
 Plug 'jvirtanen/vim-hcl'
@@ -398,6 +399,7 @@ if has('autocmd')
     autocmd!
 
     " Filetypes
+    autocmd BufNewFile,BufRead */.kube/config setlocal ft=yaml
     autocmd BufNewFile,BufRead .alias* setlocal ft=sh
     autocmd BufNewFile,BufRead *.config setlocal ft=yaml et ts=2 sw=2 sts=2
     autocmd BufNewFile,BufRead *.j2 setlocal ft=yaml et ts=2 sw=2 sts=2

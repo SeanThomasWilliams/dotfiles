@@ -54,10 +54,10 @@ DP_33_CONNECTED=$(echo -e "$XRANDR" | awk '$2 == "connected" && $1 !~ "eDP-1" {p
 HDMI0_CONNECTED=$(echo -e "$XRANDR" | awk '$2 == "connected" && $1 !~ "eDP-1" {print $1}' | grep 'HDMI-0$')
 HDMI1_CONNECTED=$(echo -e "$XRANDR" | awk '$2 == "connected" && $1 !~ "eDP-1" {print $1}' | grep 'HDMI-1$')
 
-if command -v nvidia-settings &> /dev/null; then
-  echo >&2 "Setting NVidia full composition pipeline"
-  nvidia-settings --assign CurrentMetaMode="nvidia-auto-select { ForceFullCompositionPipeline = On }"
-fi
+#if command -v nvidia-settings &> /dev/null; then
+#  echo >&2 "Setting NVidia full composition pipeline"
+#  nvidia-settings --assign CurrentMetaMode="nvidia-auto-select { ForceFullCompositionPipeline = On }"
+#fi
 
 if [[ -n ${HDMI0_CONNECTED-} && -n ${DP_0_CONNECTED-} && -n ${DP_2_CONNECTED-} && -n ${DP_4_CONNECTED-} ]]; then
   xrandr \
@@ -85,6 +85,20 @@ elif [[ -n ${DP_0_CONNECTED-} && -n ${DP_4_CONNECTED-} && -n ${HDMI0_CONNECTED-}
     --output DP-0             --mode 2560x1080 --rotate normal --left-of  HDMI-0 \
     --output DP-4             --mode 2560x1440 --rotate normal --right-of HDMI-0
   update_i3_config "DP-0" "HDMI-0" "DP-4"
+elif [[ -n ${DP_0_CONNECTED-} && -n ${HDMI0_CONNECTED-} ]]; then
+  echo >&2 "Using connected external output HDMI-0 (primary) and DP-0 (right)"
+  # 3800x2160
+  xrandr \
+    --output HDMI-0 --primary --mode 3840x2160 --rotate normal \
+    --output DP-0             --mode 2560x1440 --rotate normal --right-of HDMI-0
+  update_i3_config "DP-0" "HDMI-0" "DP-0"
+elif [[ -n ${DP_4_CONNECTED-} && -n ${HDMI0_CONNECTED-} ]]; then
+  echo >&2 "Using connected external output HDMI-0 (primary) and DP-4 (right)"
+  # 3840x2160
+  xrandr \
+    --output HDMI-0 --primary --mode 2560x1440 --rotate normal \
+    --output DP-4             --mode 2560x1440 --rotate normal --right-of HDMI-0
+  update_i3_config "DP-4" "HDMI-0" "DP-4"
 elif [[ -n ${DP_31_CONNECTED-} && -n ${DP_32_CONNECTED-} && -n ${DP_33_CONNECTED-} ]]; then
   echo >&2 "Using connected external output DP-3-1, DP-3-2, DP-3-3"
   xrandr \

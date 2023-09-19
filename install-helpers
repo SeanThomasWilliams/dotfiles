@@ -21,10 +21,10 @@ yarn_packages=(
 )
 
 pip_packages=(
-  pip
   cmake-language-server
   msgpack
   neovim
+  pip
   pynvim
 )
 
@@ -42,4 +42,5 @@ yarn global add --force --non-interactive "${yarn_packages[@]}"
 # Go binaries
 mkdir -p ~/gocode/src/github.com/
 go install golang.org/x/tools/gopls@latest
+go install github.com/mattn/efm-langserver@latest
 nvim +GoInstallBinaries +qall

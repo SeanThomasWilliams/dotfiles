@@ -21,6 +21,7 @@ PACKAGES=(
   blueman
   build-essential
   bzip2
+  cec-utils
   checkinstall
   cmake
   curl
@@ -47,6 +48,7 @@ PACKAGES=(
   i3status
   imagemagick
   jq
+  libaio1
   libbcpkix-java
   libbcprov-java
   libbctls-java

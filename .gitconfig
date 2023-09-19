@@ -20,6 +20,7 @@
   ca = commit --amend
   cap = !sh -c \"git can && git push -f\"
   can = commit --amend --no-edit -n
+  commitnow = "!git commit --amend --date \"`date +%s`\" #"
   cp = cherry-pick
   cpc = cherry-pick --continue
   b = branch
@@ -45,6 +46,7 @@
   head = !git log -1
   lg = log --pretty=lg
   ls = log --author='Sean Williams' --no-merges --stat --pretty=medium
+  ld = log --author='Sean Williams' --no-merges --pretty=fuller
   lsp = !git ls -p
   new = !sh -c 'git log $1@{1}..$1@{0} "$@"'
   mt = mergetool
@@ -63,6 +65,7 @@
   sr = set-remote
   slg = stash list --pretty=reflg
   st = status
+  showd = show --pretty=fuller
   show-ignored-files = ls-files . --ignored --exclude-standard --others
   show-untracked-files = ls-files . --exclude-standard --others
   undo = reset --hard

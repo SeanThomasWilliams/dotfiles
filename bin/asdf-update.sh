@@ -26,6 +26,7 @@ if [[ $# -eq 0 ]] ; then
   exit 1
 fi
 
+cd "$HOME"
 PLUGIN_NAME=$1
 
 # Check if plugin is installed

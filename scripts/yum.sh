@@ -10,6 +10,7 @@ sudo yum install -y \
   autoconf \
   autojump \
   automake \
+  cmake \
   curl \
   gcc \
   gcc-c++ \
@@ -19,18 +20,21 @@ sudo yum install -y \
   libuuid-devel \
   libyaml \
   libyaml-devel \
+  lynx \
   make \
   mlocate \
   ncurses \
   ncurses-devel \
   ncurses-libs \
+  openscap-scanner \
+  openscap-utils \
   openssl-devel \
   openssl-libs \
   patch \
   pkgconfig \
+  python3 \
   readline-devel \
   tmux \
   unzip \
   uuid \
-  lynx \
   xmlto

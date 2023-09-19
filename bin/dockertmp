@@ -5,11 +5,13 @@ usage(){
   cat >&2 <<EOF
 Run a temporary docker container and clean-up
 
-Usage: $0 [-s <SHELL>] [-v <MOUNT_PATH>[:<CONTAINER_PATH>]] [-i] [-h] <CONTAINER> <ARGS>
+Usage: $0 [-s <SHELL>] [-v <MOUNT_PATH>[:<CONTAINER_PATH>]] [-i] [-h] [-l] <CONTAINER> <ARGS>
 
 Arguments:
-  -i
-    Interactive session
+  -l
+    Run privileged
+  -n
+    Non-interactive session
   -p PORT
     Port to expose
   -e ENV
@@ -26,17 +28,20 @@ EOF
 }
 
 declare -a DOCKER_OPTS
-DOCKER_SHELL="/bin/bash"
+DOCKER_SHELL="bash"
 DOCKER_OPTS+=("--init" "--rm" "-i" "-t")
-INTERACTIVE=0
+INTERACTIVE=1
 
-while getopts ':e:ip:s:u:v:h' opt; do
+while getopts ':e:lnp:s:u:v:h' opt; do
   case "${opt}" in
+    l)
+      DOCKER_OPTS+=("--privileged")
+      ;;
     e)
       DOCKER_OPTS+=("-e" "${OPTARG}")
       ;;
-    i)
-      INTERACTIVE=1
+    n)
+      INTERACTIVE=0
       ;;
     p)
       DOCKER_OPTS+=("-p" "${OPTARG}:${OPTARG}")
@@ -75,8 +80,8 @@ if [[ -n ${MOUNT_PATH-} ]]; then
     rhs_mount="/mnt"
   fi
 
-  if [[ ! -d ${lhs_mount} ]]; then
-    echo >&2 "Invalid usage: '-v ${MOUNT_PATH}'. '$lhs_mount' is not a directory!"
+  if [[ ! -d ${lhs_mount} && ! -f ${lhs_mount} ]]; then
+    echo >&2 "Invalid usage: '-v ${MOUNT_PATH}'. '$lhs_mount' is not a file or directory!"
     echo >&2
     usage
     exit 1
