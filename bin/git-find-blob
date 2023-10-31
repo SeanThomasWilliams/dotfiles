@@ -1,0 +1,14 @@
+#!/bin/sh
+
+set -e
+
+cd "$(git rev-parse --show-toplevel)"
+
+obj_name="$1"
+shift
+
+git log --all "$@" --pretty=tformat:'%T %h %s' | while read -r tree commit subject; do
+  if git ls-tree -r $tree | grep -q "$obj_name" ; then
+    echo $commit "$subject"
+  fi
+done

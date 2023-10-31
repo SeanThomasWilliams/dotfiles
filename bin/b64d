@@ -1,0 +1,33 @@
+#!/bin/bash
+
+# Base64 decode strings or files
+# For each argument on the command line, test if it is a file or a string
+# If it is a file, decode the contents of the file
+# If it is a string, decode the string
+# If it is neither, print an error message
+# If there are no arguments, print an error message
+
+if [[ $# -eq 0 ]]; then
+  echo >&2 "Usage: $0 [string1] [string2] ... [stringN] [file1] [file2] ... [fileN]"
+  exit 1
+fi
+
+log(){
+  if [[ ${DEBUG-} -eq 1 ]]; then
+    echo >&2 "$@"
+  fi
+}
+
+for arg in $(echo "$@" | tr ',' ' '); do
+  if [[ -f "$arg" ]]; then
+    log "Decoding file: $arg"
+    base64 --decode "$arg"
+    echo ""
+  elif [[ -n "$arg" ]]; then
+    log "Decoding string: $arg"
+    echo "$arg" | base64 --decode
+    echo ""
+  else
+    echo >&2 "Error: $arg is not a file or a string"
+  fi
+done

@@ -140,7 +140,7 @@ fun! s:join_spaceless()
     endif
 endfun
 nnoremap J :verbose call <SID>join_spaceless()<CR>
-nnoremap K J
+nnoremap H J
 
 " ARROW KEYS ARE UNACCEPTABLE
 map <Left> <Nop>
@@ -336,14 +336,13 @@ if has('autocmd')
     "   eventignore+=FileType (no syntax highlighting etc assumes FileType always on)
     "   noswapfile (save copy of file)
     "   bufhidden=unload (save memory when other file is viewed)
-    "   buftype=nowritefile (is read-only)
     "   undolevels=-1 (no undo possible)
     "   \ set eventignore+=FileType |
     au BufReadPre *
       \ let f=expand("<afile>") |
       \ if getfsize(f) > g:large_file |
         \ set eventignore=all |
-        \ setlocal wrap noswapfile bufhidden=unload buftype=nowrite nohidden syntax=off ft= |
+        \ setlocal wrap noswapfile bufhidden=unload nohidden syntax=off ft= |
       \ else |
         \ set eventignore-=FileType |
       \ endif

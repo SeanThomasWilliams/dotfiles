@@ -54,10 +54,10 @@ DP_33_CONNECTED=$(echo -e "$XRANDR" | awk '$2 == "connected" && $1 !~ "eDP-1" {p
 HDMI0_CONNECTED=$(echo -e "$XRANDR" | awk '$2 == "connected" && $1 !~ "eDP-1" {print $1}' | grep 'HDMI-0$')
 HDMI1_CONNECTED=$(echo -e "$XRANDR" | awk '$2 == "connected" && $1 !~ "eDP-1" {print $1}' | grep 'HDMI-1$')
 
-#if command -v nvidia-settings &> /dev/null; then
-#  echo >&2 "Setting NVidia full composition pipeline"
-#  nvidia-settings --assign CurrentMetaMode="nvidia-auto-select { ForceFullCompositionPipeline = On }"
-#fi
+if command -v nvidia-settings &> /dev/null; then
+  echo >&2 "Setting NVidia full composition pipeline"
+  nvidia-settings --assign CurrentMetaMode="nvidia-auto-select { ForceFullCompositionPipeline = On }"
+fi
 
 if [[ -n ${HDMI0_CONNECTED-} && -n ${DP_0_CONNECTED-} && -n ${DP_2_CONNECTED-} && -n ${DP_4_CONNECTED-} ]]; then
   xrandr \

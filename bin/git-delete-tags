@@ -1,0 +1,8 @@
+#!/bin/bash
+
+UPSTREAM=$(git rev-parse --symbolic-full-name --abbrev-ref '@{u}' | cut -d'/' -f1)
+
+for tag in $(git tag -l "$1"); do
+  git tag -d "$tag"
+  git push --delete "$UPSTREAM" "$tag"
+done

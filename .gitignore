@@ -18,6 +18,7 @@
 *.tar.*
 *.tar.gz
 *.temp
+*.tgz
 *.tmp
 *.zip
 .DS_Store

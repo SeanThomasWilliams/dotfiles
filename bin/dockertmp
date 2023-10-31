@@ -29,7 +29,7 @@ EOF
 
 declare -a DOCKER_OPTS
 DOCKER_SHELL="bash"
-DOCKER_OPTS+=("--init" "--rm" "-i" "-t")
+DOCKER_OPTS+=("--init" "--rm")
 INTERACTIVE=1
 
 while getopts ':e:lnp:s:u:v:h' opt; do
@@ -69,7 +69,7 @@ done
 shift $((OPTIND-1))
 
 if [[ $INTERACTIVE == 1 ]]; then
-  DOCKER_OPTS+=("--entrypoint" "$DOCKER_SHELL")
+  DOCKER_OPTS+=("--entrypoint" "$DOCKER_SHELL" "-i" "-t")
 fi
 
 if [[ -n ${MOUNT_PATH-} ]]; then

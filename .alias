@@ -56,11 +56,8 @@ load_python_settings(){
 
 load_ansible_settings(){
   if command -v ansible &> /dev/null; then
-    export ANSIBLE_ACTION_WARNINGS=0
-    export ANSIBLE_ANY_ERRORS_FATAL=1
     export ANSIBLE_CALLBACK_WHITELIST="timer,profile_roles,profile_tasks,aws_resource_actions,counter_enabled"
     export ANSIBLE_COMMAND_WARNINGS=0
-    export ANSIBLE_COW_SELECTION=random
     export ANSIBLE_DEPRECATION_WARNINGS=0
     export ANSIBLE_LOAD_CALLBACK_PLUGINS=1
     export ANSIBLE_PIPELINING=1
@@ -301,6 +298,7 @@ load_lang_settings(){
   export LC_MONETARY="en_US.UTF-8"
   export LC_NUMERIC="en_US.UTF-8"
   export LC_TIME="en_US.UTF-8"
+  export TZ='America/New_York'
 }
 
 

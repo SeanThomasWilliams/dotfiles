@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -euo pipefail
+set -eu
 
 # This script will take the plugin name as an argument and add it to asdf if it is not already installed
 # Then the script will update the plugin to the latest version
@@ -29,8 +29,16 @@ fi
 cd "$HOME"
 PLUGIN_NAME=$1
 
+# Check if asdf has a plugin named PLUGIN_NAME
+if ! asdf plugin list all | grep -q "^${PLUGIN_NAME} "; then
+  echo >&2 "asdf does not have a plugin named '${PLUGIN_NAME}'"
+  echo >&2 "Similar plugins:"
+  asdf plugin list all | grep "$PLUGIN_NAME"
+  exit 1
+fi
+
 # Check if plugin is installed
-if asdf plugin list | grep -q $PLUGIN_NAME; then
+if asdf plugin list | grep -q "^$PLUGIN_NAME"; then
   echo >&2 "$PLUGIN_NAME is already installed"
 else
   echo >&2 "$PLUGIN_NAME is not installed"

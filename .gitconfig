@@ -33,7 +33,6 @@
   dh1 = diff HEAD~1
   di = diff
   ds = diff --staged
-  remove-tags = "!f() { git tag -l ${1} | xargs -I % echo \"git tag -d % && git push --delete origin %\" | sh; }; f"
   delete-branch = !sh -c \"git branch -D "$1" && git push -d origin "$1"\"
   add-tag = !sh -c \"git tag "$1" && git push origin --tags\"
   fa = fetch --all
@@ -131,5 +130,7 @@
 	procReceiveRefs = refs/for
 [gc]
 	writeCommitGraph = true
+  pruneExpire = now
+  aggressive = true
 [init]
 	defaultBranch = main
