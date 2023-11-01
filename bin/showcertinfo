@@ -186,12 +186,6 @@ process_single_file(){
 
   fname="$1"
 
-  # Exit in error if file does not exist
-  if [[ ! -f "$fname" ]]; then
-    echo >&2 "File does not exist: $fname"
-    exit 1
-  fi
-
   tmp_dir=$(mktemp -d)
   add_on_exit rm -rf "$tmp_dir"
 
@@ -203,6 +197,12 @@ process_single_file(){
       -connect "$domain:443" \
       -servername "$domain" </dev/null 2>/dev/null |\
       openssl x509 -outform PEM > "$fname"
+  fi
+
+  # Exit in error if file does not exist
+  if [[ ! -f "$fname" ]]; then
+    echo >&2 "File does not exist: $fname"
+    exit 1
   fi
 
   process_by_file_extension "$fname"
