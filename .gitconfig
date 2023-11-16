@@ -45,7 +45,7 @@
   head = !git log -1
   lg = log --pretty=lg
   ls = log --author='Sean Williams' --no-merges --stat --pretty=medium
-  ld = log --author='Sean Williams' --no-merges --pretty=fuller
+  ld = log --no-merges --pretty=fuller
   lsp = !git ls -p
   new = !sh -c 'git log $1@{1}..$1@{0} "$@"'
   mt = mergetool

@@ -2,12 +2,18 @@
 
 set -e
 
-if [[ $# -ne 1 ]]; then
-    echo "Specify new branch name!"
-    exit 1;
+if [[ $# -lt 1 ]]; then
+  echo >&2 "Usage: git-add-branch <branch-name> [remote-name]";
+  exit 1;
 fi
 
 BRANCH=$1
 
-git checkout -b $BRANCH
-git push -u
+if [[ $# -gt 1 ]]; then
+    REMOTE=$2
+else
+    REMOTE=origin
+fi
+
+git checkout -b "$BRANCH"
+git push -u "$REMOTE" "$BRANCH"

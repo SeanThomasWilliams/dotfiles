@@ -10,45 +10,43 @@
 set nocompatible " Required
 
 call plug#begin('~/.vim/plugged')
-Plug 'Ivo-Donchev/vim-react-goto-definition'
-Plug 'MunifTanjim/nui.nvim'
-Plug 'SirVer/ultisnips'
 Plug 'airblade/vim-gitgutter'
 Plug 'benekastah/neomake'
-Plug 'benmills/vimux'
-Plug 'benmills/vimux-golang'
 Plug 'bling/vim-airline'
-Plug 'dpayne/CodeGPT.nvim'
 Plug 'ekalinin/Dockerfile.vim'
 Plug 'ellisonleao/gruvbox.nvim'
 Plug 'fatih/vim-go', { 'tag': '*' }
 Plug 'folke/tokyonight.nvim', { 'branch': 'main' }
 Plug 'gagoar/StripWhiteSpaces'
-Plug 'github/copilot.vim'
 Plug 'honza/vim-snippets'
-Plug 'hrsh7th/nvim-compe'
+Plug 'hrsh7th/cmp-buffer'
+Plug 'hrsh7th/cmp-cmdline'
+Plug 'hrsh7th/cmp-nvim-lsp'
+Plug 'hrsh7th/cmp-path'
+Plug 'hrsh7th/nvim-cmp'
+Plug 'Ivo-Donchev/vim-react-goto-definition'
+Plug 'MunifTanjim/nui.nvim'
 Plug 'jacoborus/tender.vim'
 Plug 'jose-elias-alvarez/null-ls.nvim'
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 Plug 'junegunn/fzf.vim'
-Plug 'jvirtanen/vim-hcl'
 Plug 'leafgarland/typescript-vim'
 Plug 'lilydjwg/colorizer'
 Plug 'ludovicchabant/vim-gutentags'
-Plug 'luochen1990/rainbow'
 Plug 'majutsushi/tagbar'
-Plug 'marijnh/tern_for_vim'
 Plug 'mustache/vim-mustache-handlebars'
 Plug 'neovim/nvim-lspconfig', { 'do': 'npm i -g pyright' }
 Plug 'nvim-lua/lsp-status.nvim'
 Plug 'nvim-lua/plenary.nvim'
 Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}  " We recommend updating the parsers on update
 Plug 'pangloss/vim-javascript'
+Plug 'SirVer/ultisnips'
 Plug 'pearofducks/ansible-vim'
 Plug 'pedrohdz/vim-yaml-folds'
 Plug 'peitalin/vim-jsx-typescript'
 Plug 'powerman/vim-plugin-AnsiEsc'
 Plug 'prettier/vim-prettier', { 'do': 'yarn install --no-lockfile' }
+Plug 'quangnguyen30192/cmp-nvim-ultisnips'
 Plug 'sbdchd/neoformat'
 Plug 'seanthomaswilliams/dwm.vim'
 Plug 'seanthomaswilliams/markdown-preview.nvim', { 'do': 'cd app && yarn install' }
@@ -60,7 +58,8 @@ Plug 'tpope/vim-surround'
 Plug 'vim-perl/vim-perl'
 Plug 'vimwiki/vimwiki'
 Plug 'will133/vim-dirdiff'
-
+Plug 'zbirenbaum/copilot-cmp'
+Plug 'zbirenbaum/copilot.lua'
 " Required, plugins available after.
 call plug#end()
 
@@ -459,10 +458,6 @@ if has('autocmd')
 
     " React-goto-definition
     autocmd FileType javascript nmap <leader>rd :call ReactGotoDef()<CR>
-    " Tern
-    autocmd FileType javascript nmap <leader>d :TernDefSplit<CR>
-    autocmd FileType javascript nmap <leader>D :TernDef<CR>
-    autocmd FileType javascript nmap <leader>i :TernDoc<CR>
   augroup end
 
   augroup ConfigFiles
@@ -667,15 +662,6 @@ nnoremap U :syntax sync fromstart<CR>:redraw!<CR>
 " Plugin Settings
 " ----------------------------------------- "
 
-" LSP + Tag Completion
-" Or combine with lsp
-"autocmd BufEnter * lua require'completion'.on_attach()
-"
-"let g:completion_chain_complete_list = {
-"      \ 'default': [
-"      \    {'complete_items': ['lsp', 'tags']},
-"      \  ]}
-
 " tagbar
 nnoremap <silent> <leader>b :TagbarToggle<CR>
 " autocmd FileType * nested :call tagbar#autoopen(0)
@@ -742,45 +728,6 @@ let g:gutentags_ctags_extra_args = [
 let g:ansible_unindent_after_newline = 1
 let g:ansible_extra_keywords_highlight = 1
 
-" Deoplete
-" let g:deoplete#omni_patterns = {}
-" let g:deoplete#auto_complete_delay = 50
-" let g:deoplete#min_pattern_length = 1
-" let g:deoplete#max_list = 100
-" let g:deoplete#smart_case = 1
-" let g:deoplete#enable_at_startup = 1
-" let g:deoplete#file#enable_buffer_path = 1
-
-" Deoplete Jedi/Python
-" let g:deoplete#sources#jedi#show_docstring = 1
-" let g:jedi#completions_command = "<C-Space>"
-" let g:jedi#documentation_command = "K"
-" let g:jedi#goto_assignments_command = "<leader>g"
-" let g:jedi#goto_command = "<leader>d"
-" let g:jedi#goto_definitions_command = ""
-" let g:jedi#rename_command = "<leader>r"
-" let g:jedi#show_call_signatures = 1
-" let g:jedi#smart_auto_mappings = 1
-" let g:jedi#usages_command = "<leader>n"
-
-" Deoplete Golang
-" let g:deoplete#sources#go#sort_class = ['package', 'func', 'type', 'var', 'const']
-" let g:deoplete#sources#go#json_directory = $HOME . '.vim/deocache'
-" let g:deoplete#sources#go#use_cache = 1
-
-" Deoplete javascript/ternjs
-" let g:deoplete#sources#ternjs#timeout = 1
-" Whether to include the types of the completions in the result data. Default: 0
-" let g:deoplete#sources#ternjs#types = 1
-" let g:deoplete#sources#ternjs#case_insensitive = 1
-
-" call deoplete#initialize()
-
-" tern_for_vim.
-let g:tern#command = ["tern"]
-let g:tern#arguments = ["--persistent"]
-let g:tern_request_timeout = 6000
-
 " Go settings
 let g:go_gocode_propose_source = 1
 let g:go_auto_type_info = 1
@@ -795,11 +742,6 @@ let g:go_def_mapping_enabled = 0
 let g:go_def_reuse_buffer = 1
 let g:go_echo_commands_disabled = ['godef']
 let g:go_echo_command_info = 0
-
-" Tern
-let g:tern_map_keys = 1
-let g:tern_map_prefix = '<leader>'
-let g:tern_show_argument_hints='on_hold'
 
 " vim-illuminate
 " Time in milliseconds (default 250)
@@ -893,33 +835,12 @@ let g:DirDiffExcludes = "*.*ar,*.bak,*.crt,*.csr,*.enc*,*.lock*,*.gz,*.key,*.man
 let g:DirDiffIgnore = ""
 let g:DirDiffSort = 1
 
-" supertab
-" let g:SuperTabDefaultCompletionType = "<c-n>"
-
-" snippets
-" let g:neosnippet#enable_snipmate_compatibility = 1
-" let g:completion_enable_snippet = 'Neosnippet'
-"let g:neosnippet#snippets_directory='~/.vim/plugged/vim-snippets/snippets'
-"let g:UltiSnipsSnippetDirectories=[expand("$HOME/.vim/plugged/vim-snippets/snippets")]
-" let g:UltiSnipsExpandTrigger="<C-x><C-s>"
-
 " terraform
 let g:terraform_align = 1
 let g:terraform_commentstring = '//%s'
 let g:terraform_fmt_on_save = 1
 let g:terraform_completion_keys = 0
 let g:terraform_registry_module_completion = 1
-
-" C-k to execute snippet
-" imap <C-s> <Plug>(neosnippet_expand)
-" imap <C-k> <Plug>(neosnippet_expand_or_jump)
-" smap <C-k> <Plug>(neosnippet_expand_or_jump)
-" xmap <C-k> <Plug>(neosnippet_expand_target)
-
-"" Expand the completed snippet trigger by <CR>.
-"imap <expr><CR>
-"      \ (pumvisible() && neosnippet#expandable()) ?
-"      \ "\<Plug>(neosnippet_expand)" : "\<CR>"
 
 " For conceal markers.
 if has('conceal')
