@@ -10,6 +10,7 @@ INTERACTIVE_PACKAGES=(
 )
 
 PACKAGES=(
+  amazon-ecr-credential-helper
   apt-file
   arandr
   aria2

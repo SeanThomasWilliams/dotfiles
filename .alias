@@ -350,6 +350,7 @@ load_shell_settings(){
   fi
 
   export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
+  export DOCKER_CONFIG="$HOME/.docker"
 }
 
 load_shell_settings

@@ -7,4 +7,3 @@
 [[ -z "$PS1" ]] && return
 
 [ -f ~/.alias ] && source ~/.alias
-[ -f ~/.fzf.bash ] && source ~/.fzf.bash
