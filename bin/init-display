@@ -175,14 +175,14 @@ elif [[ -n ${DP_4_CONNECTED-} ]]; then
 elif [[ -n ${DP_1_CONNECTED-} ]]; then
   echo >&2 "Using DP-1 and internal"
   xrandr --output "$INTERNAL_OUTPUT" --mode "$LAPTOP_RESOLUTION" --primary \
-    --output DP-1 --pos 2489x212 --rotate normal --mode 1360x768 || \
+    --output DP-1 --pos 2489x212 --rotate normal --brightness 1.0 --mode 1920x1080 || \
     xrandr --output "$INTERNAL_OUTPUT" --mode "$LAPTOP_RESOLUTION" --primary \
       --output DP-1 --pos 2489x212 --rotate normal --auto
   update_i3_config "DP-1" "$INTERNAL_OUTPUT" "DP-1"
 else
   echo >&2 "Using internal output $INTERNAL_OUTPUT at $LAPTOP_RESOLUTION"
   xrandr --output "$INTERNAL_OUTPUT" --mode "$LAPTOP_RESOLUTION" --primary \
-    --brightness 0.3 \
+    --brightness 0.4 \
     --set "scaling mode" "Full"
   update_i3_config "$INTERNAL_OUTPUT" "$INTERNAL_OUTPUT" "$INTERNAL_OUTPUT"
 fi

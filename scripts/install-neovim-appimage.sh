@@ -16,4 +16,4 @@ chmod u+x nvim.appimage
 ./nvim.appimage --appimage-extract
 
 rm -f "$HOME/bin/nvim"
-ln -s "$APPIMAGE_DIR/squashfs-root/usr/bin/nvim" "$HOME/bin/nvim"
+sudo cp -rv "$APPIMAGE_DIR"/squashfs-root/usr/* /usr/
