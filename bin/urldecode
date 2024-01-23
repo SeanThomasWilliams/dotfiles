@@ -1,12 +1,39 @@
 #!/bin/bash
 
-# Decode URL string
+set -euo pipefail
 
+usage(){
+  cat >&2 <<EOF
+  Usage: $0 [file | arg | -h]
+
+  Decode URL strings from stdin, a file or a URL and print to stdout.
+EOF
+}
+
+while getopts ":h" opt; do
+  case $opt in
+    h)
+      usage
+      exit 0
+      ;;
+    \?)
+      echo "Invalid option: -$OPTARG" >&2
+      usage
+      exit 1
+      ;;
+  esac
+done
+
+# If no arguments are given, read from stdin.
+# If an argument is given, read from the file or decode the argument.
 infile="${1:-/dev/stdin}"
-outfile="${2:-/dev/stdout}"
 
 python -c "
 import sys
 import urllib.parse
-print(urllib.parse.unquote_plus(sys.stdin.read()))
-" < "$infile" > "$outfile"
+try:
+  with open(sys.argv[1], 'r') as f:
+    print(urllib.parse.unquote_plus(f.read()).strip())
+except FileNotFoundError:
+  print(urllib.parse.unquote_plus(sys.argv[1]).strip())
+" "$infile"

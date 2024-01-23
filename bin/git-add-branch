@@ -3,7 +3,7 @@
 set -e
 
 if [[ $# -lt 1 ]]; then
-  echo >&2 "Usage: git-add-branch <branch-name> [remote-name]";
+  echo >&2 "Usage: $0 <branch-name> [remote-name]";
   exit 1;
 fi
 

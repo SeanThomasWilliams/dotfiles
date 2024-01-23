@@ -14,7 +14,7 @@ export FILTER_BRANCH_SQUELCH_WARNING=1
 
 ALL=0
 DEBUG=0
-COMMITS=5
+COMMITS=1
 LIMITCHUNKS=20
 
 if [[ -z "${EDITOR-}" ]]; then
@@ -26,8 +26,8 @@ usage(){
 Usage: $(basename $0) [options]
 
 Options:
-  -c, --commits <number>  Number of commits to redate. Default: 5
-  -l, --limit <number>    Number of commits to redate per chunk. Default: 20
+  -c, --commits <number>  Number of commits to redate. Default: ${COMMITS}
+  -l, --limit <number>    Number of commits to redate per chunk. Default: ${LIMITCHUNKS}
   -d, --debug             Enable debug mode
   -a, --all               Redate all commits
 
@@ -41,11 +41,6 @@ Examples:
 EOF
 
 }
-
-if [[ $# -eq 0 ]]; then
-  usage
-  exit 1
-fi
 
 while [[ $# -ge 1 ]]; do
   key="$1"

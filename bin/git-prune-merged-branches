@@ -1,14 +1,35 @@
 #!/bin/bash
+#shellcheck disable=SC2076
 
 set -eu
 set -o pipefail
 
 git fetch --all --prune
 
+protected_branches=(
+  c1-prod
+  c1-zone-a
+  c1-zone-b
+  dev
+  develop
+  hotfix
+  main
+  master
+  prod
+  release
+  test
+)
+
 gone_branches=$(git for-each-ref --format '%(refname) %(upstream:track)' refs/heads |\
   awk '$2 == "[gone]" {sub("refs/heads/", "", $1) ; print $1}')
 
 for branch in $gone_branches; do
+  echo >&2 "Deleting branch $branch"
+  # Check if branch is protected
+  if [[ " ${protected_branches[*]} " =~ " ${branch} " ]]; then
+    echo >&2 "Branch $branch is protected"
+    continue
+  fi
   git branch -D "$branch"
 done
 

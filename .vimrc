@@ -34,6 +34,7 @@ Plug 'leafgarland/typescript-vim'
 Plug 'lilydjwg/colorizer'
 Plug 'ludovicchabant/vim-gutentags'
 Plug 'majutsushi/tagbar'
+Plug 'mbbill/undotree'
 Plug 'mustache/vim-mustache-handlebars'
 Plug 'neovim/nvim-lspconfig', { 'do': 'npm i -g pyright' }
 Plug 'nvim-lua/lsp-status.nvim'
@@ -76,16 +77,16 @@ endif
 
 " Commenting blocks of code.
 let b:comment_leader = '# '
-autocmd FileType c,cpp,go,java,scala    let b:comment_leader = '// '
-autocmd FileType yaml,sh,ruby,python    let b:comment_leader = '# '
-autocmd FileType terraform              let b:comment_leader = '# '
-autocmd FileType conf,fstab             let b:comment_leader = '# '
-autocmd FileType tex                    let b:comment_leader = '% '
-autocmd FileType mail                   let b:comment_leader = '> '
-autocmd FileType vim                    let b:comment_leader = '" '
+autocmd FileType yaml,sh,ruby,python  let b:comment_leader = '# '
+autocmd FileType terraform,conf,fstab let b:comment_leader = '# '
+autocmd FileType c,cpp,go,java,scala  let b:comment_leader = '// '
+autocmd FileType tex                  let b:comment_leader = '% '
+autocmd FileType sql,lua              let b:comment_leader = '-- '
+autocmd FileType mail                 let b:comment_leader = '> '
+autocmd FileType vim                  let b:comment_leader = '" '
 " Comment and uncomment
-noremap <silent> <leader>cc :<C-B>silent <C-E>s/^/<C-R>=escape(b:comment_leader,'\/')<CR>/<CR>:nohlsearch<CR>
-noremap <silent> <leader>cu :<C-B>silent <C-E>s/^\V<C-R>=escape(b:comment_leader,'\/')<CR>//e<CR>:nohlsearch<CR>
+noremap <silent> <leader>C :<C-B>silent <C-E>s/^/<C-R>=escape(b:comment_leader,'\/')<CR>/<CR>:nohlsearch<CR>
+noremap <silent> <leader>c :<C-B>silent <C-E>s/^\V<C-R>=escape(b:comment_leader,'\/')<CR>//e<CR>:nohlsearch<CR>
 
 " Vim-Script Configurations
 let g:indent_guides_guide_size = 1 " Only use one column to show indent
@@ -300,10 +301,12 @@ set wildignorecase
 set wildignore+=*.o,*.out,*.obj,.git,*.rbc,*.rbo,*.class,.svn,*.gem          " general programming
 set wildignore+=*.zip,*.tar.gz,*.tar.bz2,*.rar,*.tar.xz                      " compressed files
 set wildignore+=*/vendor/gems/*,*/vendor/cache/*,*/.bundle/*,*/.sass-cache/* " vendor and sass
-set wildignore+=*/node_modules/*
-set wildignore+=*.swp,*~,._*
+set wildignore+=*/node_modules/*                 " Node modules
+set wildignore+=*/dist/*,*/assets/*              " Compiled js code and assets
+set wildignore+=tf.plan,*.terraform*             " Terraform
+set wildignore+=*.swp,*~,._*                     " Swap and tmp files
 set wildignore+=*.aux,*.out,*.toc                " LaTeX intermediate files
-set wildignore+=*.jpg,*.bmp,*.gif,*.png,*.jpeg   " binary images
+set wildignore+=*.jpg,*.bmp,*.gif,*.png,*.jpeg,*.svg   " binary images
 set wildignore+=*.luac                           " Lua byte code
 set wildignore+=*.min.*                          " Minified web artifacts
 set wildignore+=*.o,*.obj,*.exe,*.dll,*.manifest " compiled object files
@@ -414,6 +417,7 @@ if has('autocmd')
     autocmd BufNewFile,Bufread *.spect setlocal ft=spec
     autocmd BufNewFile,Bufread *.wsgi setlocal ft=python
     autocmd BufNewFile,BufRead *.go setlocal noet ts=4 sw=4 sts=4
+    autocmd FileType crontab setlocal wrap textwidth=0
     autocmd FileType make setlocal noet ts=4 sw=4 sts=4 foldmethod=marker foldlevel=1
     autocmd FileType make nnoremap <silent> <leader>d :sp<CR> <c-]>
     autocmd FileType markdown setlocal wrap spell spelllang=en_us textwidth=160
@@ -657,6 +661,9 @@ nnoremap <leader>cd :lcd%:p:h<CR>
 " fix syntax hl:
 nnoremap U :syntax sync fromstart<CR>:redraw!<CR>
 nnoremap U :syntax sync fromstart<CR>:redraw!<CR>
+
+" Toggle undo tree
+nnoremap <leader>u :UndotreeToggle<CR>
 
 " ------------------------------------------"
 " Plugin Settings

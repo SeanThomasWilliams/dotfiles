@@ -1,4 +1,17 @@
 #!/bin/bash
 
-git branch -D $1
-git push origin --delete $1
+if [[ $# -lt 1 ]]; then
+  echo >&2 "Usage: $0 <branch-name> [remote-name]";
+  exit 1;
+fi
+
+BRANCH=$1
+
+if [[ $# -gt 1 ]]; then
+    REMOTE=$2
+else
+    REMOTE=origin
+fi
+
+git branch -D "$BRANCH"
+git push "$REMOTE" --delete "$BRANCH"

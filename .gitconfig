@@ -134,3 +134,7 @@
   aggressive = true
 [init]
 	defaultBranch = main
+[advice]
+	skippedCherryPicks = false
+[checkout]
+	defaultRemote = origin

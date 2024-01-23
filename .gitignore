@@ -8,7 +8,6 @@
 *.key
 *.log
 *.md5sum
-*.mjs
 *.old
 *.png
 *.pyc
@@ -34,7 +33,6 @@
 .tags.files
 .tags.lock
 .tern-port
-.terraform.lock.hcl
 .tmuxp.yaml
 .vim-go/*
 /vim/bundle/
