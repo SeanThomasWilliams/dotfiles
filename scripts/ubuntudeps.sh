@@ -123,10 +123,10 @@ PACKAGES=(
 
 sudo apt-get update -yyq
 
-echo "${INTERACTIVE_PACKAGES[@]}" | sudo -E xargs apt-get install -yyq
+sudo -E apt-get install -yyq "${INTERACTIVE_PACKAGES[@]}"
 
 #export DEBIAN_FRONTEND=noninteractive
-echo "${PACKAGES[@]}" | sudo -E xargs apt-get install -yyq
+sudo -E apt-get install -yyq "${PACKAGES[@]}"
 
 sudo apt autoremove -yyq
 
