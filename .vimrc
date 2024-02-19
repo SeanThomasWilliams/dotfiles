@@ -14,6 +14,10 @@ Plug 'airblade/vim-gitgutter'
 Plug 'benekastah/neomake'
 Plug 'bling/vim-airline'
 Plug 'ekalinin/Dockerfile.vim'
+Plug 'Ivo-Donchev/vim-react-goto-definition'
+Plug 'MunifTanjim/nui.nvim'
+Plug 'SirVer/ultisnips'
+Plug 'ThePrimeagen/harpoon', { 'branch': 'harpoon2' }
 Plug 'ellisonleao/gruvbox.nvim'
 Plug 'fatih/vim-go', { 'tag': '*' }
 Plug 'folke/tokyonight.nvim', { 'branch': 'main' }
@@ -24,8 +28,6 @@ Plug 'hrsh7th/cmp-cmdline'
 Plug 'hrsh7th/cmp-nvim-lsp'
 Plug 'hrsh7th/cmp-path'
 Plug 'hrsh7th/nvim-cmp'
-Plug 'Ivo-Donchev/vim-react-goto-definition'
-Plug 'MunifTanjim/nui.nvim'
 Plug 'jacoborus/tender.vim'
 Plug 'jose-elias-alvarez/null-ls.nvim'
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
@@ -41,7 +43,6 @@ Plug 'nvim-lua/lsp-status.nvim'
 Plug 'nvim-lua/plenary.nvim'
 Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}  " We recommend updating the parsers on update
 Plug 'pangloss/vim-javascript'
-Plug 'SirVer/ultisnips'
 Plug 'pearofducks/ansible-vim'
 Plug 'pedrohdz/vim-yaml-folds'
 Plug 'peitalin/vim-jsx-typescript'
@@ -653,7 +654,7 @@ nnoremap <C-t> :FZF<CR>
 " Rg configuration
 nnoremap <leader>a :execute 'Rg '.input('Rg: ')<CR>
 nnoremap <leader>A :Rg <C-r><C-w><CR>
-nnoremap <leader>l :execute 'Locate "'.input('Locate: ').'"'<CR>
+" nnoremap <leader>l :execute 'Locate "'.input('Locate: ').'"'<CR>
 
 " Change to directory of current file
 nnoremap <leader>cd :lcd%:p:h<CR>

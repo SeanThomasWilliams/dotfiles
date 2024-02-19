@@ -5,6 +5,8 @@
 # sudo apt install -y libgpgme-dev libassuan-dev libbtrfs-dev libdevmapper-dev pkg-config
 # blueman
 
+
+
 INTERACTIVE_PACKAGES=(
   postfix
 )
@@ -25,13 +27,16 @@ PACKAGES=(
   cec-utils
   checkinstall
   cmake
+  compton
   curl
   direnv
-  docker.io
   dstat
+  dunst
   exuberant-ctags
   feh
   flatpak
+  fonts-mplus
+  fonts-noto
   fonts-symbola
   gawk
   gcc
@@ -43,10 +48,14 @@ PACKAGES=(
   gnupg
   gnutls-bin
   grep
+  hsetroot
   htop
   i3
   i3lock
+  i3lock
   i3status
+  i3status
+  i3-wm
   imagemagick
   jq
   libaio1
@@ -68,6 +77,7 @@ PACKAGES=(
   libxslt-dev
   libyaml-dev
   lm-sensors
+  lxappearance
   lynx
   make
   materia-gtk-theme
@@ -83,10 +93,14 @@ PACKAGES=(
   pavucontrol
   postfix
   rofi
+  rofi
+  rxvt-unicode
+  scrot
   scrot
   sed
   silversearcher-ag
   sshuttle
+  suckless-tools
   tcpdump
   texlive-fonts-extra
   tmux
@@ -94,6 +108,7 @@ PACKAGES=(
   unzip
   uuid
   uuid-dev
+  viewnior
   virtualbox
   virtualbox-guest-additions-iso
   wget
@@ -101,6 +116,8 @@ PACKAGES=(
   xclip
   xdg-desktop-portal-gtk
   xmlto
+  xsel
+  xsettingsd
   zlib1g-dev
 )
 

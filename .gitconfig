@@ -138,3 +138,7 @@
 	skippedCherryPicks = false
 [checkout]
 	defaultRemote = origin
+[column]
+	ui = auto
+[branch]
+	sort = -committerdate

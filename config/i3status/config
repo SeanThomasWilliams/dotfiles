@@ -7,81 +7,103 @@
 # If the above line is not correctly displayed, fix your editor first!
 
 general {
-    colors = true
-    interval = 5
+  output_format = "i3bar"
+  colors = false
+  markup = pango
+  interval = 5
+  color_good = '#2f343f'
+  color_degraded = '#ebcb8b'
+  color_bad = '#ba5e57'
 }
 
-order += "wireless _first_"
-order += "ethernet _first_"
-order += "memory"
-order += "cpu_usage"
+#order += "wireless _first_"
+#order += "ethernet _first_"
+#order += "memory"
+#order += "cpu_usage"
+#order += "load"
+#order += "cpu_temperature 0"
+#order += "battery 1"
+#order += "tztime local"
+#order += "tztime zulu"
+#order += "volume master"
+
 order += "load"
 order += "cpu_temperature 0"
-#order += "battery 0"
-order += "tztime local"
-#order += "tztime zulu"
+order += "disk /"
+# order += "disk /data"
+order += "wireless _first_"
+order += "ethernet _first_"
 order += "volume master"
+# order += "battery 1"
+order += "tztime local"
 
 wireless _first_ {
-    format_up = "%ip (%essid)"
-    format_down = ""
+  format_up = "<span background='#b48ead'> 📡 %essid </span>"
+  format_down = ""
 }
 
 ethernet _first_ {
-    format_up = "%ip (%speed)"
-    format_down = ""
-}
-
-cpu_usage {
-    format = "CPU: %usage"
+  format_up = "<span background='#88c0d0'> 🌐 %ip </span>"
+  format_down = ""
 }
 
 memory {
-    format = "%used"
-    threshold_degraded = "20%"
-    format_degraded = "MEMORY < %available"
+  format = "%used"
+  threshold_degraded = "20%"
+  format_degraded = "MEMORY < %available"
+}
+
+cpu_usage {
+  format = "CPU: %usage"
 }
 
 load {
-    format = "%1minL"
+  format = "<span background='#f59335'> 🛠️ %1min Load </span>"
 }
 
 cpu_temperature 0 {
-    format = "%degrees°C"
+  format = "<span background='#bf616a'> 🌡️ %degrees °C </span>"
+  path = "/sys/class/thermal/thermal_zone0/temp"
 }
 
-battery 0 {
-    format = "%status %percentage %remaining %emptytime"
-    format_down = "❌ NO BAT"
-    status_chr = "⚡ CHR"
-    status_bat = "🔋 BAT"
-    status_unk = "❓ UNK"
-    status_full = "✔ FULL"
+battery 1 {
+  format = "<span background='#a3be8c'> %status %percentage </span>"
+  format_down = "🪫 NO BAT"
+  status_chr = "⚡ CHR"
+  status_bat = "🔋 BAT"
+  status_unk = "❓ UNK"
+  status_full = "✔ FULL"
 
-    integer_battery_capacity = true
-    low_threshold = 20
-    hide_seconds = true
-    last_full_capacity = true
-    path = "/sys/class/power_supply/BAT1/uevent"
+  last_full_capacity = true
+  integer_battery_capacity = true
+  low_threshold = 10
+  hide_seconds = true
+  last_full_capacity = true
+  path = "/sys/class/power_supply/BAT%d/uevent"
 }
-
 
 tztime local {
-    format = "%a %Y-%m-%d %H:%M:%S"
+  format = "<span background='#81a1c1'> %time </span>"
+  format_time = "🕒 %a %Y-%m-%d %H:%M:%S"
 }
 
 tztime zulu {
-    format = "%Y-%m-%dT%H:%M:%SZ"
-    timezone = "Etc/UTC"
+  format = "%Y-%m-%dT%H:%M:%SZ"
+  timezone = "Etc/UTC"
 }
 
 volume master {
-    format = "♪: %volume"
-    format_muted = "♪: muted (%volume)"
-    device = "default"
+  format = "<span background='#5bcbab'> 🔊 %volume </span>"
+  format_muted = "<span background='#5bcbab'> 🔇 Muted </span>"
+  device = "default"
+  mixer = "Master"
+  mixer_idx = 0
 }
 
-# Unused
 disk "/" {
-    format = "%avail"
+  format = "<span background='#fec7cd'> 💾 %free Free </span>"
+}
+
+disk "/data" {
+  format = "<span background='#a1d569'> 💽 %free Free </span>"
 }

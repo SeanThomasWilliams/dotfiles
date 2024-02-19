@@ -29,7 +29,8 @@
     # the top and down respectively.
     # The width can be negative.  In this case the actual width is the
     # screen width minus the width defined in within the geometry option.
-    geometry = "300x5-30+20"
+    # geometry = "300x5-30+20"
+    geometry = "250x50-24+24"
 
     # Show how many messages are currently hidden (because of geometry).
     indicate_hidden = yes
@@ -51,17 +52,17 @@
     # Draw a line of "separator_height" pixel height between two
     # notifications.
     # Set to 0 to disable.
-    separator_height = 2
+    separator_height = 0
 
     # Padding between text and separator.
-    padding = 8
+    padding = 16
 
     # Horizontal padding.
-    horizontal_padding = 8
+    horizontal_padding = 24
 
     # Defines width in pixels of frame around the notification window.
     # Set to 0 to disable.
-    frame_width = 3
+    frame_width = 2
 
     # Defines color of the frame around the notification window.
     frame_color = "#aaaaaa"
@@ -75,7 +76,7 @@
     separator_color = frame
 
     # Sort messages by urgency.
-    sort = yes
+    sort = no
 
     # Don't remove messages, if the user is idle (no mouse or keyboard input)
     # for longer than idle_threshold seconds.
@@ -86,11 +87,11 @@
 
     ### Text ###
 
-    font = Monospace 9
+    font = Monospace 12
 
     # The spacing between lines.  If the height is smaller than the
     # font height, it will get raised to the font height.
-    line_height = 0
+    line_height = 4
 
     # Possible values are:
     # full: Allow a small subset of html markup in notifications:
@@ -153,18 +154,18 @@
     ignore_newline = no
 
     # Stack together notifications with the same content
-    stack_duplicates = true
+    stack_duplicates = false
 
     # Hide the count of stacked notifications with the same content
-    hide_duplicate_count = false
+    hide_duplicate_count = yes
 
     # Display indicators for URLs (U) and actions (A).
-    show_indicators = yes
+    show_indicators = no
 
     ### Icons ###
 
     # Align icons left/right/off
-    icon_position = left
+    icon_position = off
 
     # Scale small icons up to this size, set to 0 to disable. Helpful
     # for e.g. small files or high-dpi screens. In case of conflict,
@@ -175,7 +176,8 @@
     max_icon_size = 32
 
     # Paths to default icons.
-    icon_path =/usr/share/icons/HighContrast/16x16/status/:/usr/share/icons/HighContrast/16x16/devices/:/usr/share/icons/HighContrast/16x16/apps/
+    #icon_path =/usr/share/icons/HighContrast/16x16/status/:/usr/share/icons/HighContrast/16x16/devices/:/usr/share/icons/HighContrast/16x16/apps/
+    icon_path = /usr/share/icons/gnome/16x16/status/:/usr/share/icons/gnome/16x16/devices/
 
     ### History ###
 
@@ -275,11 +277,10 @@
     # Xev might be helpful to find names for keys.
 
     # Close notification.
-    # close = mod1+space
+    close = ctrl+space
 
     # Close all notifications.
-    # close_all = ctrl+shift+space
-    # close_all = ctrl+mod1+space
+    close_all = ctrl+shift+space
 
     # Redisplay last message(s).
     # On the US keyboard layout "grave" is normally above TAB and left
@@ -287,21 +288,20 @@
     # history = ctrl+mod4+h
 
     # Context menu.
-    # context = ctrl+mod1+c
+    context = ctrl+shift+period
 
 [urgency_low]
-    # IMPORTANT: colors have to be defined in quotation marks.
-    # Otherwise the "#" and following would be interpreted as a comment.
-    background = "#263238"
-    foreground = "#556064"
-    timeout = 10
+    background = "#2f343f"
+    foreground = "#d8dee8"
+    timeout = 2
 
 [urgency_normal]
-    background = "#263238"
-    foreground = "#F9FAF9"
-    timeout = 10
+    background = "#2f343f"
+    foreground = "#d8dee8"
+    timeout = 4
 
 [urgency_critical]
-    background = "#D62929"
-    foreground = "#F9FAF9"
-    timeout = 0
+    background = "#2f343f"
+    foreground = "#d8dee8"
+    frame_color = "#bf616a"
+    timeout = 0gg

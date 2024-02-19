@@ -1,8 +1,8 @@
-# $HOME/.k9s/plugin.yml
+# $XDG_CONFIG_HOME/k9s/plugins.yaml
 # move selected line to chosen resource in K9s, then:
 # Shift-T (with confirmation) to toggle helm releases or kustomizations suspend and resume
 # Shift-R (no confirmation) to reconcile a git source or a helm release or a kustomization
-plugin:
+plugins:
   toggle-helmrelease:
     shortCut: Shift-T
     confirm: false
@@ -64,11 +64,7 @@ plugin:
     args:
     - -c
     - |
-      # Reconcile helmrelease by using suspend/resume
-      flux --context $CONTEXT suspend helmrelease -n $NAMESPACE $NAME
-      flux --context $CONTEXT resume helmrelease -n $NAMESPACE $NAME
-      kubectl --context $CONTEXT annotate --overwrite helmrelease/$NAME \
-        -n $NAMESPACE reconcile.fluxcd.io/requestedAt="$(date --utc +%s)"
+      flux --context $CONTEXT reconcile helmrelease -n $NAMESPACE $NAME --force
   reconcile-hr-parent:
     shortCut: Shift-E
     confirm: false

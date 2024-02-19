@@ -137,7 +137,7 @@ FIND_CMD=(
 if [[ -n ${FILE_NAME-} ]]; then
   # Find relevant files and strip the leading './'
   "${FIND_CMD[@]}" 2>/dev/null |\
-    grep --color -E "$FILE_NAME"
+    grep --color -i -E "$FILE_NAME"
 else
   # Don't highlight FILE_NAME
   "${FIND_CMD[@]}" 2>/dev/null

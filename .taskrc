@@ -30,9 +30,16 @@ include /usr/share/doc/task/rc/solarized-dark-256.theme
 
 color=on
 
+# Preferences
+alias.burndown=burndown.daily
+active.indicator=<
+weekstart=Monday
 default.priority=M
-default.due=14d
-default.project=$PROJECT
+default.command=ready
+
+# ready [default]
+report.ready.columns=id,priority,due.relative,project,tags.list,description,urgency,start.active,recur.indicator
+report.ready.labels=ID,P,Due,Project,Tags,Description,Urg,A,R
 
 due=1
 monthsperline=3
@@ -78,17 +85,13 @@ report.long.sort=tags-,urgency-
 
 report.next.filter=(status:pending) # and due < now+29d)
 
-# urgency.next.coefficient=25.0                   # +next tag
-urgency.due.coefficient=5.0                     # overdue or near due date
-urgency.blocking.coefficient=8.0                # blocking other tasks
-urgency.active.coefficient=4.0                  # already started tasks
-urgency.scheduled.coefficient=4.0               # scheduled tasks
-urgency.age.coefficient=0.0                     # Urgency coefficient for age
-urgency.annotations.coefficient=1.0             # has annotations
-urgency.tags.coefficient=1.0                    # has tags
-urgency.project.coefficient=1.0                 # assigned to any project
-urgency.blocked.coefficient=-50.0               # blocked by other tasks
-urgency.waiting.coefficient=-100.0              # waiting task
+# Custom attributes
+
+urgency.annotations.coefficient=0.5 # Default 1
+urgency.tags.coefficient=0.0 # Default 1
+urgency.age.coefficient=0.5 # Default 2
+urgency.blocked.coefficient=-15 # Default: -5
+urgency.due.coefficient=10 # Default: 12.0
 
 editor=nvim
 
@@ -100,7 +103,8 @@ regex=on
 
 # Priority as UDA
 uda.priority.values=H,M,,L
-# urgency.priority.coefficient=6.0
+urgency.uda.priority.L.coefficient=0
+urgency.uda.priority..coefficient=1.8
 
 # InThe.AM
 taskd.certificate=~/sync/task/xeed.io/sean_williams.cert.pem
@@ -175,3 +179,9 @@ uda.gitlabweight.label=Gitlab Weight
 # END Bugwarrior UDAs
 
 news.version=2.6.0
+uda.reviewed.type=date
+uda.reviewed.label=Reviewed
+report._reviewed.description=Tasksh review report.  Adjust the filter to your needs.
+report._reviewed.columns=uuid
+report._reviewed.sort=reviewed+,modified+
+report._reviewed.filter=( reviewed.none: or reviewed.before:now-6days ) and ( +PENDING or +WAITING )

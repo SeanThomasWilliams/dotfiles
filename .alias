@@ -168,6 +168,7 @@ load_path_settings(){
     "$HOME/anaconda3/bin"
     "$HOME/bin"
     "$HOME/.npm-packages/bin"
+    "$HOME/.cargo/bin"
     "$HOME/.yarn/bin"
     "$HOME/.local/bin"
     "$HOME/.asdf/shims"

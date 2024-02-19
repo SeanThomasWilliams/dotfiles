@@ -1,6 +1,7 @@
 local nvim_lsp = require("lspconfig")
 local lsp_status = require("lsp-status")
 local cmp = require('cmp')
+local harpoon = require("harpoon")
 
 local has_words_before = function()
   if vim.api.nvim_buf_get_option(0, "buftype") == "prompt" then return false end
@@ -265,3 +266,18 @@ for _, lsp in ipairs(servers) do
 end
 
 nvim_lsp["terraformls"].filetypes = {"terraform", "tf", "hcl"}
+
+-- Harpoon2
+harpoon:setup()
+
+vim.keymap.set("n", "<leader>r", function() harpoon:list():append() end)
+vim.keymap.set("n", "<C-e>", function() harpoon.ui:toggle_quick_menu(harpoon:list()) end)
+
+vim.keymap.set("n", "<leader>1", function() harpoon:list():select(1) end)
+vim.keymap.set("n", "<leader>2", function() harpoon:list():select(2) end)
+vim.keymap.set("n", "<leader>3", function() harpoon:list():select(3) end)
+vim.keymap.set("n", "<leader>4", function() harpoon:list():select(4) end)
+
+-- Toggle previous & next buffers stored within Harpoon list
+vim.keymap.set("n", "<C-N>", function() harpoon:list():next() end)
+vim.keymap.set("n", "<C-M>", function() harpoon:list():prev() end)
