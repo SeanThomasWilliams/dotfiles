@@ -78,8 +78,6 @@ endif
 
 " Commenting blocks of code.
 let b:comment_leader = '# '
-autocmd FileType yaml,sh,ruby,python  let b:comment_leader = '# '
-autocmd FileType terraform,conf,fstab let b:comment_leader = '# '
 autocmd FileType c,cpp,go,java,scala  let b:comment_leader = '// '
 autocmd FileType tex                  let b:comment_leader = '% '
 autocmd FileType sql,lua              let b:comment_leader = '-- '
@@ -423,6 +421,7 @@ if has('autocmd')
     autocmd FileType make nnoremap <silent> <leader>d :sp<CR> <c-]>
     autocmd FileType markdown setlocal wrap spell spelllang=en_us textwidth=160
     autocmd FileType vimwiki setlocal wrap spell spelllang=en_us textwidth=160
+    autocmd FileType gitconfig setlocal noet ts=8
 
     autocmd FileType terraform nnoremap <leader>f :Neoformat<CR>
     autocmd FileType hcl nnoremap <leader>f :Neoformat<CR>

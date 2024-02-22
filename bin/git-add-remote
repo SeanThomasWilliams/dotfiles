@@ -1,0 +1,38 @@
+#!/bin/bash
+
+set -euo pipefail
+
+if [[ ${DEBUG:-} -eq 1 ]]; then
+  set -x
+fi
+
+REMOTE_NAME="upstream"
+
+if [[ $# -lt 1 ]]; then
+  cat >&2 <<EOF
+Usage: $0 <remote-url-base> [remote-name]"
+
+This script will create a new remote and push the current branch to it.
+
+Arguments:
+  remote-url-base: The base URL of the remote repository. This should be something like "https://github.com/username".
+  remote-name: The name of the remote to create. This will default to "$REMOTE_NAME".
+EOF
+
+  exit 1
+fi
+
+REMOTE_URL_BASE="$1"
+
+if [[ $# -gt 1 ]]; then
+    REMOTE="$2"
+else
+    REMOTE=upstream
+fi
+
+# Get the last part of the current remote origin
+current_repo_name=$(git remote get-url origin | sed -E 's/.*\/([^\/]+)\.git$/\1/')
+
+git remote add "$REMOTE" "$REMOTE_URL_BASE/$current_repo_name.git"
+
+echo >&2 "Added remote $REMOTE pointing to $REMOTE_URL_BASE/$current_repo_name.git"

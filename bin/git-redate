@@ -9,6 +9,9 @@ is_git_repo() {
 
 is_git_repo
 
+TOP_DIR=$(git rev-parse --show-toplevel)
+cd "$TOP_DIR"
+
 # Squelch the warning about filter branch
 export FILTER_BRANCH_SQUELCH_WARNING=1
 

@@ -21,6 +21,16 @@ ew(){
 }
 export -f ew
 
+git-wt(){
+  if [[ -z $1 ]]; then
+    selected=$(git worktree list --porcelain | awk -F'/' '/^worktree/ {print $NF}' | fzf)
+  else
+    selected="$1"
+  fi
+  cd "$(git worktree list | awk -v ws="$selected" '$NF == "["ws"]" {print $1}')"
+}
+export -f git-wt
+
 load_session_manager_settings(){
   ### session managers
 
@@ -30,6 +40,7 @@ load_session_manager_settings(){
   # term settings
   export TERM="${TERM:-screen-256color}"
   export TMUX_TMPDIR="$HOME/.local"
+  alias ts="tmux-sessionizer"
 }
 
 load_editor_settings(){

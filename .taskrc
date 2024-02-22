@@ -40,6 +40,7 @@ default.command=ready
 # ready [default]
 report.ready.columns=id,priority,due.relative,project,tags.list,description,urgency,start.active,recur.indicator
 report.ready.labels=ID,P,Due,Project,Tags,Description,Urg,A,R
+report.ready.sort=urgency-
 
 due=1
 monthsperline=3
@@ -87,11 +88,11 @@ report.next.filter=(status:pending) # and due < now+29d)
 
 # Custom attributes
 
-urgency.annotations.coefficient=0.5 # Default 1
+urgency.annotations.coefficient=0.2 # Default 1
 urgency.tags.coefficient=0.0 # Default 1
-urgency.age.coefficient=0.5 # Default 2
+urgency.age.coefficient=0.3 # Default 2
 urgency.blocked.coefficient=-15 # Default: -5
-urgency.due.coefficient=10 # Default: 12.0
+urgency.due.coefficient=6 # Default: 12.0
 
 editor=nvim
 

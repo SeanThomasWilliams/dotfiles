@@ -6,7 +6,6 @@
 # blueman
 
 
-
 INTERACTIVE_PACKAGES=(
   postfix
 )
@@ -29,7 +28,9 @@ PACKAGES=(
   cmake
   compton
   curl
+  dconf-editor
   direnv
+  dnsmasq
   dstat
   dunst
   exuberant-ctags
@@ -49,11 +50,10 @@ PACKAGES=(
   gnutls-bin
   grep
   hsetroot
+  hstr
   htop
   i3
   i3lock
-  i3lock
-  i3status
   i3status
   i3-wm
   imagemagick
@@ -85,17 +85,17 @@ PACKAGES=(
   mlocate
   ncal
   net-tools
+  nfs-common
   openjdk-8-jdk
   opensc
   openssh-server
   pandoc
+  parallel
   pasystray
   pavucontrol
   postfix
   rofi
-  rofi
   rxvt-unicode
-  scrot
   scrot
   sed
   silversearcher-ag
@@ -103,12 +103,14 @@ PACKAGES=(
   suckless-tools
   tcpdump
   texlive-fonts-extra
+  thunderbird
   tmux
   ttf-mscorefonts-installer
   unzip
   uuid
   uuid-dev
   viewnior
+  vim
   virtualbox
   virtualbox-guest-additions-iso
   wget
@@ -123,11 +125,23 @@ PACKAGES=(
 
 sudo apt-get update -yyq
 
-sudo -E apt-get install -yyq "${INTERACTIVE_PACKAGES[@]}"
+sudo apt-get install -yyq "${INTERACTIVE_PACKAGES[@]}"
 
 #export DEBIAN_FRONTEND=noninteractive
-sudo -E apt-get install -yyq "${PACKAGES[@]}"
-
-sudo apt autoremove -yyq
+sudo apt-get install -yyq "${PACKAGES[@]}"
 
 sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+
+# Install nvidia drivers
+if lspci | grep -q -i nvidia; then
+  echo >&2 "Nvidia card detected"
+  sudo apt-get install "linux-headers-$(uname -r)"
+  curl -fSsL https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-keyring_1.1-1_all.deb -o /tmp/cuda-keyring.deb
+  sudo dpkg -i /tmp/cuda-keyring.deb
+  rm -f /tmp/cuda-keyring.deb
+
+  sudo apt-get update -yyq
+  sudo apt-get install -yyq cuda-toolkit nvidia-container-runtime
+fi
+
+sudo apt autoremove -yyq

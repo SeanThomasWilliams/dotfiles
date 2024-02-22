@@ -1,144 +1,157 @@
 [user]
-  name = Sean Williams
-  email = sean@xeed.io
-  signingkey = D911E4AB259CE385
+	name = Sean Williams
+	email = sean@xeed.io
+	signingkey = D911E4AB259CE385
 
 [core]
-  editor = nvim
-  excludesfile = ~/.gitignore
+	editor = nvim
+	excludesfile = ~/.gitignore
 	quotePath = false
 	commitGraph = true
 	pager = delta
 
 [color]
-  ui = auto
+	ui = auto
 
 [alias]
-  aa = add --all
-  add-branch = "!f() { BRANCH=$1; if [[ -z ${BRANCH} ]]; then echo >&2 "Specify branch name!"; exit 1; fi; git checkout -b ${BRANCH}; git push -u; }; f "
-  amp = !sh -c \"git add . && git can && git push -f\"
-  ca = commit --amend
-  cap = !sh -c \"git can && git push -f\"
-  can = commit --amend --no-edit -n
-  commitnow = "!git commit --amend --date \"`date +%s`\" #"
-  cp = cherry-pick
-  cpc = cherry-pick --continue
-  b = branch
-  blg = branch --format '%(color:red)%(objectname:short)%(color:reset) %(color:green)%(committerdate:iso)%(color:reset) %(subject) %(color:bold blue)-- %(authorname)%(color:reset) %(color:yellow)(%(refname:short))%(color:reset)'
-  branch-status = !git-branch-status
-  ci = commit
-  co = checkout
-  commit-url = !git-show-commit-url
-  dc = diff --cached
-  dh1 = diff HEAD~1
-  di = diff
-  ds = diff --staged
-  delete-branch = !sh -c \"git branch -D "$1" && git push -d origin "$1"\"
-  add-tag = !sh -c \"git tag "$1" && git push origin --tags\"
-  fa = fetch --all
-  ff = merge --ff-only
-  file-url = !git-show-file-url
-  find-file = !git-find-file
-  glg = log --graph --abbrev-commit --decorate --all --pretty=glg
-  glgs = log --graph --abbrev-commit --decorate --pretty=glg
-  h = !git head
-  head = !git log -1
-  lg = log --pretty=lg
-  ls = log --author='Sean Williams' --no-merges --stat --pretty=medium
-  ld = log --no-merges --pretty=fuller
-  lsp = !git ls -p
-  new = !sh -c 'git log $1@{1}..$1@{0} "$@"'
-  mt = mergetool
-  noff = merge --no-ff
-  pom = push origin master
-  pa = pull --all
-  pua = pushall
-  pp = !sh -c \"git pull --all && git pushall\"
-  prune-all = !git remote | xargs -n 1 git remote prune
-  pullff = pull --ff-only
-  pushall = !git remote | xargs -n 1 git push
-  r = !git l -30
-  ra = !git r --all
-  rc = rebase --continue
-  set-remote = !git-set-remote "$1"
-  sr = set-remote
-  slg = stash list --pretty=reflg
-  st = status
-  showd = show --pretty=fuller
-  show-ignored-files = ls-files . --ignored --exclude-standard --others
-  show-untracked-files = ls-files . --exclude-standard --others
-  undo = reset --hard
-  up = !sh -c \"git commit -a -m \"Before rebase\" && git pull --rebase && git reset head^\"
-  wu = log --stat origin..@{0}
-  wup = log -p origin..@{0}
-  change-commits = "!f() { VAR=$1; OLD=$2; NEW=$3; shift 3; git filter-branch -f --env-filter \"if [ \\\"$`echo $VAR`\\\" = '$OLD' ]; then export $VAR='$NEW'; fi\" $@; }; f "
+	aa = add --all
+	add-branch = "!f() { BRANCH=$1; if [[ -z ${BRANCH} ]]; then echo >&2 "Specify branch name!"; exit 1; fi; git checkout -b ${BRANCH}; git push -u; }; f "
+	add-tag = !sh -c \"git tag "$1" && git push origin --tags\"
+	amp = !sh -c \"git add . && git can && git push -f\"
+	b = branch
+	blg = branch --format '%(color:red)%(objectname:short)%(color:reset) %(color:green)%(committerdate:iso)%(color:reset) %(subject) %(color:bold blue)-- %(authorname)%(color:reset) %(color:yellow)(%(refname:short))%(color:reset)'
+	branch-status = !git-branch-status
+	ca = commit --amend
+	can = commit --amend --no-edit -n
+	cap = !sh -c \"git can && git push -f\"
+	change-commits = "!f() { VAR=$1; OLD=$2; NEW=$3; shift 3; git filter-branch -f --env-filter \"if [ \\\"$`echo $VAR`\\\" = '$OLD' ]; then export $VAR='$NEW'; fi\" $@; }; f "
+	ci = commit
+	co = checkout
+	commit-url = !git-show-commit-url
+	commitnow = "!git commit --amend --date \"`date +%s`\" #"
+	cp = cherry-pick
+	cpc = cherry-pick --continue
+	dc = diff --cached
+	delete-branch = !sh -c \"git branch -D "$1" && git push -d origin "$1"\"
+	dh1 = diff HEAD~1
+	di = diff
+	ds = diff --staged
+	fa = fetch --all
+	ff = merge --ff-only
+	file-url = !git-show-file-url
+	find-file = !git-find-file
+	glg = log --graph --abbrev-commit --decorate --all --pretty=glg
+	glgs = log --graph --abbrev-commit --decorate --pretty=glg
+	h = !git head
+	head = !git log -1
+	ld = log --no-merges --pretty=fuller
+	lg = log --pretty=lg
+	ls = log --author='Sean Williams' --no-merges --stat --pretty=medium
+	lsp = !git ls -p
+	mt = mergetool
+	new = !sh -c 'git log $1@{1}..$1@{0} "$@"'
+	noff = merge --no-ff
+	pa = pull --all
+	pom = push origin master
+	pp = !sh -c \"git pull --all && git pushall\"
+	prune-all = !git remote | xargs -n 1 git remote prune
+	pua = pushall
+	pullff = pull --ff-only
+	pushall = !git remote | xargs -n 1 git push
+	r = !git l -30
+	ra = !git r --all
+	rc = rebase --continue
+	set-remote = !git-set-remote "$1"
+	show-ignored-files = ls-files . --ignored --exclude-standard --others
+	show-untracked-files = ls-files . --exclude-standard --others
+	showd = show --pretty=fuller
+	slg = stash list --pretty=reflg
+	sr = set-remote
+	st = status
+	undo = reset --hard
+	up = !sh -c \"git commit -a -m \"Before rebase\" && git pull --rebase && git reset head^\"
+	wu = log --stat origin..@{0}
+	wup = log -p origin..@{0}
 
 [difftool]
-  prompt = false
+	prompt = false
 
 [diff]
-  tool = nvimdiff
-  colorMoved = default
+	tool = nvimdiff
+	colorMoved = default
 
 [difftool "nvimdiff"]
-  cmd = "nvim -d -u ~/.vimrc \"$LOCAL\" \"$REMOTE\""
+	cmd = "nvim -d -u ~/.vimrc \"$LOCAL\" \"$REMOTE\""
 
 [merge]
-  tool = nvimdiff
+	tool = nvimdiff
+	conflictStyle = diff3
 
 [mergetool "nvimdiff"]
-  cmd = "nvim -d -u ~/.vimrc \"$MERGED\" \"$LOCAL\""
+	cmd = "nvim -d -u ~/.vimrc \"$MERGED\" \"$LOCAL\""
 
 [mergetool]
-  prompt = false
-  keepBackup = false
+	prompt = false
+	keepBackup = false
 
 [delta]
-  navigate = true    # use n and N to move between diff sections
-  hyperlinks = true
+	navigate = true    # use n and N to move between diff sections
+	hyperlinks = true
 
 [pretty]
-  lg = %C(red)%h%C(reset) - %C(green)%ci%C(reset) %s %C(bold blue)-- %an%C(reset)%C(yellow)%d%C(reset)
-  glg = %C(bold blue)%h%C(reset) - %C(bold green)(%ar)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an <%ae>%C(reset)%C(bold yellow)%d%C(reset)
-  worklog = [%as](%h): %s
-  reflg = %C(red)%h%C(reset) %C(green)%ci%C(reset) %s %C(bold blue)-- %an%C(reset) %C(yellow)(%gd)%C(reset)
+	lg = %C(red)%h%C(reset) - %C(green)%ci%C(reset) %s %C(bold blue)-- %an%C(reset)%C(yellow)%d%C(reset)
+	glg = %C(bold blue)%h%C(reset) - %C(bold green)(%ar)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an <%ae>%C(reset)%C(bold yellow)%d%C(reset)
+	worklog = [%as](%h): %s
+	reflg = %C(red)%h%C(reset) %C(green)%ci%C(reset) %s %C(bold blue)-- %an%C(reset) %C(yellow)(%gd)%C(reset)
 
 [push]
-  default = current
+	default = current
 
 [filter "lfs"]
-  clean = git-lfs clean -- %f
-  smudge = git-lfs smudge -- %f
-  process = git-lfs filter-process
-  required = true
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true
 
 [url "git@github.com:Novetta"]
-  insteadOf = https://github.com/Novetta
+	insteadOf = https://github.com/Novetta
 
 [http]
-  sslVerify = false
+	sslVerify = false
+	followRedirects = true
+
 [credential]
-  helper = store
+	helper = store
+
 [pull]
-  rebase = true
+	rebase = true
+
 [submodule]
-  recurse = true
+	recurse = true
+
 [daemon]
 	receivepack = true
+
 [receive]
 	advertisePushOptions = true
 	procReceiveRefs = refs/for
+
 [gc]
 	writeCommitGraph = true
-  pruneExpire = now
-  aggressive = true
+	pruneExpire = now
+	aggressive = true
+
 [init]
 	defaultBranch = main
+
 [advice]
 	skippedCherryPicks = false
+
 [checkout]
 	defaultRemote = origin
+
 [column]
 	ui = auto
+
 [branch]
 	sort = -committerdate

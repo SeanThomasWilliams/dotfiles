@@ -1,0 +1,50 @@
+#!/bin/bash
+
+usage(){
+  cat >&2 <<EOF
+    Usage: $0 input1 input2 ... output
+EOF
+}
+
+# This script takes a list of input files and concatenates them using ffmpeg.
+
+# Example: ffmpeg -f concat -safe 0 -i concat.txt -c copy out.mp4
+
+while getopts "h" opt; do
+  case $opt in
+    h)
+      usage
+      exit 0
+      ;;
+    *)
+      usage
+      exit 1
+      ;;
+  esac
+done
+
+# Remove the options we parsed above.
+shift $((OPTIND-1))
+
+# Get the input and output files. Inputs are all the arguments except the last.
+inputs=("${@:1:$#-1}")
+output="${@:$#}"
+
+echo >&2 "Inputs: ${inputs[@]}"
+echo >&2 "Output: $output"
+
+# Create a temporary file to hold the list of input files.
+concat=$(mktemp)
+
+# Write the list of input files to the temporary file.
+for input in "${inputs[@]}"; do
+  echo "file '$(realpath "$input")'" >> "$concat"
+done
+
+cat "$concat"
+
+# Concatenate the input files.
+ffmpeg -f concat -safe 0 -i "$concat" -c copy "$output"
+
+# Remove the temporary file.
+rm "$concat"

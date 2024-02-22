@@ -1,0 +1,20 @@
+#!/bin/bash
+
+set -euo pipefail
+set -x
+
+TOP_DIR=$(git rev-parse --show-toplevel)
+REPO_NAME=$(basename "$TOP_DIR")
+GIT_BRANCH=$(git branch --show-current)
+
+cd "$TOP_DIR/.."
+
+rm -rf "$REPO_NAME.old"
+mv "$REPO_NAME" "$REPO_NAME.old"
+cp -r "$REPO_NAME.old/.git" "$REPO_NAME"
+rm -rf "$REPO_NAME.old"
+cd "$REPO_NAME"
+git config --bool core.bare true
+
+echo >&2 "Adding worktree for branch $GIT_BRANCH"
+git worktree add "$GIT_BRANCH"

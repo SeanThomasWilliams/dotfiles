@@ -44,7 +44,6 @@
 Anaconda*.sh
 __pycache__
 asdf/
-bin/
 init.vim
 mermaid-filter.err
 rke2.yaml
