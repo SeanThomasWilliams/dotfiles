@@ -421,7 +421,7 @@ if has('autocmd')
     autocmd FileType make nnoremap <silent> <leader>d :sp<CR> <c-]>
     autocmd FileType markdown setlocal wrap spell spelllang=en_us textwidth=160
     autocmd FileType vimwiki setlocal wrap spell spelllang=en_us textwidth=160
-    autocmd FileType gitconfig setlocal noet ts=8
+    autocmd FileType gitconfig setlocal noet ts=8 sw=8 sts=0
 
     autocmd FileType terraform nnoremap <leader>f :Neoformat<CR>
     autocmd FileType hcl nnoremap <leader>f :Neoformat<CR>
@@ -484,6 +484,9 @@ if has('autocmd')
 
     " VimWIKI
     autocmd FileType vimwiki nnoremap <silent><leader>M :VimwikiAll2HTML<CR>
+
+    " Mardown Preview
+    autocmd FileType markdown nnoremap <leader>p :MarkdownPreview<CR>
 
     " Neomake
     autocmd ColorScheme *

@@ -72,6 +72,7 @@ find "${DIR_NAME[@]}" -type f \( -name '*.log' -o -name '*.tmp.*' \) -print -del
 find /tmp -maxdepth 1 -name 'transcode*.log' -mtime +7 -print -delete
 
 NUM_GPU=$(nvidia-smi -L | wc -l)
+NUM_JOBS=$((NUM_GPU*3))
 
 if [[ ${USE_XARGS-} ]]; then
   find "${DIR_NAME[@]}" \
@@ -88,9 +89,9 @@ else
     sort -z |\
     parallel \
     -0 \
-    -j${NUM_GPU} \
+    -j${NUM_JOBS} \
     transcode.sh \
       "${TRANSCODE_ARGS[@]}" \
       -g \
-      -i '{=$_=sprintf("%d",$job->slot()-1)=}' "{}" 2>&1 | tee -a "$LOG_FILE"
+      -i "{=\$_=sprintf(\"%d\",(\$job->slot()-1)%${NUM_GPU})=}" "{}" 2>&1 | tee -a "$LOG_FILE"
 fi

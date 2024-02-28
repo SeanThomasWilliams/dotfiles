@@ -183,15 +183,14 @@ esac
 
 if [[ $GPU_MODE -eq 1 ]]; then
   echo >&2 "GPU-${GPU_INDEX} Transcoding: '$INPUT_FILE'"
-  SOURCE_ARGS="-hwaccel cuda"
+  SOURCE_ARGS="-hwaccel_device ${GPU_INDEX} -hwaccel cuda -hwaccel_output_format auto"
   if [[ $VIDEO_ENCODING == "x264" ]]; then
     VIDEO_ARGS=(-pix_fmt yuv420p -c:v h264_nvenc -profile:v high)
   else
     VIDEO_ARGS=(-pix_fmt p010le -c:v hevc_nvenc)
   fi
-  VIDEO_ARGS+=(-preset p6 -metadata composer="transcode.sh GPU")
-  export CUDA_VISIBLE_DEVICES="$GPU_INDEX"
-  export CUDA_DEVICE_MAX_CONNECTIONS=2
+  VIDEO_ARGS+=(-temporal-aq 1 -rc-lookahead 20 -preset p6 -metadata composer="transcode.sh GPU")
+  # export CUDA_DEVICE_MAX_CONNECTIONS=2
 else
   echo >&2 "CPU Transcoding: '$INPUT_FILE'"
   SOURCE_ARGS="-hwaccel none"

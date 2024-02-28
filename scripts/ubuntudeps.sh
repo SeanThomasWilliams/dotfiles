@@ -31,6 +31,8 @@ PACKAGES=(
   dconf-editor
   direnv
   dnsmasq
+  docker-buildx
+  docker.io
   dstat
   dunst
   exuberant-ctags

@@ -14,6 +14,7 @@
 *.retry
 *.rpm
 *.swp
+*.svg
 *.tar.*
 *.tar.gz
 *.temp

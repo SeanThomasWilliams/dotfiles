@@ -33,7 +33,8 @@ pip_packages=(
 pip install --upgrade "${pip_packages[@]}"
 
 # Ruby Gem deps
-gem install neovim && gem environment
+gem install neovim
+gem environment
 
 # Node Packages
 npm install -g -f yarn

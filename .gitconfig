@@ -20,14 +20,12 @@
 	amp = !sh -c \"git add . && git can && git push -f\"
 	b = branch
 	blg = branch --format '%(color:red)%(objectname:short)%(color:reset) %(color:green)%(committerdate:iso)%(color:reset) %(subject) %(color:bold blue)-- %(authorname)%(color:reset) %(color:yellow)(%(refname:short))%(color:reset)'
-	branch-status = !git-branch-status
 	ca = commit --amend
 	can = commit --amend --no-edit -n
 	cap = !sh -c \"git can && git push -f\"
 	change-commits = "!f() { VAR=$1; OLD=$2; NEW=$3; shift 3; git filter-branch -f --env-filter \"if [ \\\"$`echo $VAR`\\\" = '$OLD' ]; then export $VAR='$NEW'; fi\" $@; }; f "
 	ci = commit
 	co = checkout
-	commit-url = !git-show-commit-url
 	commitnow = "!git commit --amend --date \"`date +%s`\" #"
 	cp = cherry-pick
 	cpc = cherry-pick --continue
@@ -38,16 +36,16 @@
 	ds = diff --staged
 	fa = fetch --all
 	ff = merge --ff-only
-	file-url = !git-show-file-url
-	find-file = !git-find-file
 	glg = log --graph --abbrev-commit --decorate --all --pretty=glg
 	glgs = log --graph --abbrev-commit --decorate --pretty=glg
-	h = !git head
-	head = !git log -1
+	h = head
+	head = log -1
 	ld = log --no-merges --pretty=fuller
 	lg = log --pretty=lg
 	ls = log --author='Sean Williams' --no-merges --stat --pretty=medium
-	lsp = !git ls -p
+	lsp = ls -p
+	wtls = worktree list
+	wtrm = worktree list
 	mt = mergetool
 	new = !sh -c 'git log $1@{1}..$1@{0} "$@"'
 	noff = merge --no-ff
@@ -58,8 +56,6 @@
 	pua = pushall
 	pullff = pull --ff-only
 	pushall = !git remote | xargs -n 1 git push
-	r = !git l -30
-	ra = !git r --all
 	rc = rebase --continue
 	set-remote = !git-set-remote "$1"
 	show-ignored-files = ls-files . --ignored --exclude-standard --others
@@ -70,6 +66,7 @@
 	st = status
 	undo = reset --hard
 	up = !sh -c \"git commit -a -m \"Before rebase\" && git pull --rebase && git reset head^\"
+	wt = "!f() { case \"$1\" in add) shift; git add-worktree \"$@\" ;; ls) shift; git worktree list \"$@\" ;; rm) shift; git worktree remove \"$@\" ;; *) git worktree \"$@\" ;; esac; }; f"
 	wu = log --stat origin..@{0}
 	wup = log -p origin..@{0}
 
@@ -155,3 +152,6 @@
 
 [branch]
 	sort = -committerdate
+
+[worktree]
+	guessRemote = true

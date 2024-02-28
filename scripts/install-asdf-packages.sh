@@ -5,7 +5,6 @@ source "$HOME/.asdf/asdf.sh"
 export MAKEFLAGS=-j10
 
 PLUGIN_LIST=(
-  make
   cmake
 
   awscli
@@ -19,16 +18,14 @@ PLUGIN_LIST=(
   jq
   k3d
   k9s
-  kafka
   kafkactl
   kcctl
-  kpt
   kubectl
   kubectx
   kustomize
   minio
+  nodejs
   packer
-  popeye
   ripgrep
   ruby
   shellcheck
@@ -45,14 +42,6 @@ PLUGIN_LIST=(
   yq
 )
 
-asdf plugin add nodejs
-asdf install nodejs 16.19.0
-asdf global nodejs 16.19.0
-
-asdf plugin add kpt
-asdf install kpt v1.0.0-beta.24
-asdf global kpt v1.0.0-beta.24
-
 for plugin in "${PLUGIN_LIST[@]}"; do
   if [[ -f "$HOME/.asdf/shims/$plugin" ]]; then
     echo >&2 "Plugin $plugin already installed"
@@ -67,3 +56,9 @@ for plugin in "${PLUGIN_LIST[@]}"; do
   hash -r
   command -v "$plugin"
 done
+
+asdf install nodejs 16.19.0
+
+asdf plugin add kpt
+asdf install kpt v1.0.0-beta.24
+asdf global kpt v1.0.0-beta.24
