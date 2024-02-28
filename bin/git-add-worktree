@@ -1,0 +1,42 @@
+#!/bin/bash
+
+set -euo pipefail
+
+if [[ $# -lt 1 ]]; then
+  echo >&2 "Usage: $0 [-b branch-name] [-r remote-name] <worktree-name>";
+  exit 1
+fi
+
+remote_name="origin"
+
+# Parse options
+while getopts ":b:r:" opt; do
+  case $opt in
+    b)
+      branch_name=$OPTARG
+      ;;
+    r)
+      remote_name=$OPTARG
+      ;;
+    *)
+      echo >&2 "Invalid option: -$OPTARG"
+      exit 1
+      ;;
+  esac
+done
+
+shift $((OPTIND-1))
+
+# Get the git directory
+GIT_DIR=$(git rev-parse --git-dir | sed 's#/worktrees/.*##')
+cd "$GIT_DIR"
+
+worktree_name="$1"
+
+git worktree add "$worktree_name" ${branch_name-}
+
+if [[ -z ${branch_name-} ]]; then
+  branch_name="$(git -C "worktrees/${worktree_name}" rev-parse --abbrev-ref HEAD)"
+fi
+
+git -C "worktrees/${worktree_name}" push -u "${remote_name}" "${branch_name}"

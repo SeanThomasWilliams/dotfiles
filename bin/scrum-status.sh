@@ -10,7 +10,7 @@ fi
 yesterdays_completed_tasks_json=$(t '((end > yesterday and entry < today) and (status = completed))' export)
 yesterdays_tasks_json=$(t '(((end > yesterday and entry < today) or (start < today and status:pending)) and (status != deleted and status != completed))' export)
 # Today's completed tasks
-todays_completed_tasks_json=$(t '((start < now and status:pending) or (end > today and status = completed))' export)
+todays_completed_tasks_json=$(t '(end > today and status = completed)' export)
 # Today's tasks are anything that is started and is not completd
 todays_tasks_json=$(t '((start < now and status:pending) or (end > today and status != deleted and status != completed))' export)
 
