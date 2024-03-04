@@ -2,15 +2,37 @@
 
 set -uo pipefail
 
+if [[ ${DEBUG:-0} -eq 1 ]]; then
+  set -x
+fi
+
 if [[ -z ${TMUX_DIR_BASES-} ]]; then
   echo >&2 "TMUX_DIR_BASES is not set"
   exit 1
 fi
 
+TS_CACHE="$HOME/.ts.cache"
+
+# If -c is passed, clear the cache
+if [[ "$#" -ge 1 && "$1" == "-c" ]]; then
+  rm -f "$TS_CACHE"
+  shift
+fi
+
+# Check if the file exists and remove it if it's older than 1 hour
+if [[ -f "$TS_CACHE" ]]; then
+  find "$TS_CACHE" -type f -mmin +60 -exec rm -f {} \;
+fi
+
+# Create the cache file if it doesn't exist
+if [[ ! -f "$TS_CACHE" ]]; then
+  { find $TMUX_DIR_BASES -type d -name '.git'; find $TMUX_DIR_BASES -type f -name '.git' -exec grep -l -v '/modules/' {} +; } | grep -v asdf | sed 's#/.git$##' > "$TS_CACHE"
+fi
+
 if [[ $# -eq 1 ]]; then
-  selected=$1
+  selected=$(fzf -q "$1" < "$TS_CACHE")
 else
-  selected=$(find $TMUX_DIR_BASES -name '.git' -exec dirname {} \; | grep -v asdf | fzf)
+  selected=$(fzf < "$TS_CACHE")
 fi
 
 if [[ -z $selected ]]; then

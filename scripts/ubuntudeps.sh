@@ -85,6 +85,7 @@ PACKAGES=(
   materia-gtk-theme
   maven
   mlocate
+  mosh
   ncal
   net-tools
   nfs-common
@@ -124,6 +125,8 @@ PACKAGES=(
   xsettingsd
   zlib1g-dev
 )
+
+sudo add-apt-repository ppa:keithw/mosh-dev -y
 
 sudo apt-get update -yyq
 
