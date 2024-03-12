@@ -25,7 +25,6 @@ gnu-sed
 gnupg
 gnutls
 hadolint
-hstr
 htop
 jq
 kustomize

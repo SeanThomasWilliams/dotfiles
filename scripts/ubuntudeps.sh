@@ -49,7 +49,6 @@ PACKAGES=(
   gnutls-bin
   grep
   hsetroot
-  hstr
   htop
   i3
   i3lock

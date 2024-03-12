@@ -8,7 +8,6 @@
 	excludesfile = ~/.gitignore
 	quotePath = false
 	commitGraph = true
-	pager = delta
 
 [color]
 	ui = auto

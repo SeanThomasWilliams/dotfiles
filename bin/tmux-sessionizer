@@ -13,6 +13,7 @@ fi
 
 TS_CACHE="$HOME/.ts.cache"
 TS_LIST="$TS_CACHE"
+FILTER_CACHE='asdf|\.terraform/modules'
 
 FZF_QUERY=""
 FZF_PREVIEW_ARGS=()
@@ -39,7 +40,9 @@ fi
 
 # Create the cache file if it doesn't exist
 if [[ ! -f "$TS_CACHE" ]]; then
-  { find $TMUX_DIR_BASES -type d -name '.git'; find $TMUX_DIR_BASES -type f -name '.git' -exec grep -l -v '/modules/' {} +; } | grep -v asdf | sed 's#/.git$##' > "$TS_CACHE"
+  { find $TMUX_DIR_BASES -type d -name '.git'; find $TMUX_DIR_BASES -type f -name '.git' -exec grep -l -v '/modules/' {} +; } 2>/dev/null |\
+    grep -Ev "$FILTER_CACHE" |\
+    sed 's#/.git$##' > "$TS_CACHE"
 fi
 
 selected=$(fzf --select-1 --query="${FZF_QUERY-}" "${FZF_PREVIEW_ARGS[@]}" < "$TS_LIST")
