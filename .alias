@@ -222,6 +222,11 @@ load_alias_settings(){
     alias fgrep="find . -type f | awk '!/CVS|\.class|\.jar|\.war|\.git|\.svn|_Stub|\.#/  {print \$0;}' | sed 's/\ /\\\ /g' | xargs grep --color=always -n "
   fi
 
+  # Fix FZF completion for complex var exports
+  if [[ -f ~/.fzf/shell/completion.bash ]]; then
+    sed -i 's/export unset printenv/unset printenv/' ~/.fzf/shell/completion.bash
+  fi
+
   ## os-specific
   if ls --color &> /dev/null; then
     # We are on linux
