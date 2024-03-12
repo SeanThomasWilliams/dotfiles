@@ -1,11 +1,5 @@
 #!/bin/bash
 
-# i3 Vm
-# sudo apt install -y compton hsetroot rxvt-unicode xsel rofi fonts-noto fonts-mplus xsettingsd lxappearance scrot viewnior
-# sudo apt install -y libgpgme-dev libassuan-dev libbtrfs-dev libdevmapper-dev pkg-config
-# blueman
-
-
 INTERACTIVE_PACKAGES=(
   postfix
 )
@@ -21,12 +15,14 @@ PACKAGES=(
   baobab
   bison
   blueman
+  blueman
   build-essential
   bzip2
   cec-utils
   checkinstall
   cmake
   compton
+  csvkit
   curl
   dconf-editor
   direnv
@@ -35,6 +31,7 @@ PACKAGES=(
   docker.io
   dstat
   dunst
+  ethtool
   exuberant-ctags
   feh
   flatpak
@@ -88,6 +85,8 @@ PACKAGES=(
   mosh
   ncal
   net-tools
+  network-manager-gnome
+  network-manager-openconnect-gnome
   nfs-common
   openjdk-8-jdk
   opensc
@@ -104,6 +103,7 @@ PACKAGES=(
   silversearcher-ag
   sshuttle
   suckless-tools
+  system-config-printer
   tcpdump
   texlive-fonts-extra
   thunderbird
@@ -134,6 +134,10 @@ sudo apt-get install -yyq "${INTERACTIVE_PACKAGES[@]}"
 
 #export DEBIAN_FRONTEND=noninteractive
 sudo apt-get install -yyq "${PACKAGES[@]}"
+
+curl -fSsL -O "https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_64bit/session-manager-plugin.deb"
+sudo apt-get install -yyq ./session-manager-plugin.deb
+rm -f session-manager-plugin.deb
 
 sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
 

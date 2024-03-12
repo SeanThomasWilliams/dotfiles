@@ -12,16 +12,29 @@ if [[ -z ${TMUX_DIR_BASES-} ]]; then
 fi
 
 TS_CACHE="$HOME/.ts.cache"
+TS_LIST="$TS_CACHE"
+
+FZF_QUERY=""
+FZF_PREVIEW_ARGS=()
 
 # If -c is passed, clear the cache
-if [[ "$#" -ge 1 && "$1" == "-c" ]]; then
+if [[ "$#" -ge 1 && "$1" == "-r" ]]; then
   rm -f "$TS_CACHE"
   shift
 fi
 
-# Check if the file exists and remove it if it's older than 1 hour
-if [[ -f "$TS_CACHE" ]]; then
-  find "$TS_CACHE" -type f -mmin +60 -exec rm -f {} \;
+if [[ "$#" -ge 1 && "$1" == "-a" ]]; then
+  TS_LIST="/tmp/.ts.active"
+  tmux list-sessions -F "#{session_name}" > "$TS_LIST"
+  FZF_PREVIEW_ARGS=(
+    --preview 'tmux capture-pane -J -p -e -t {}'
+    --preview-window 'down:80%'
+  )
+  shift
+fi
+
+if [[ $# -eq 1 ]]; then
+  FZF_QUERY="$1"
 fi
 
 # Create the cache file if it doesn't exist
@@ -29,12 +42,7 @@ if [[ ! -f "$TS_CACHE" ]]; then
   { find $TMUX_DIR_BASES -type d -name '.git'; find $TMUX_DIR_BASES -type f -name '.git' -exec grep -l -v '/modules/' {} +; } | grep -v asdf | sed 's#/.git$##' > "$TS_CACHE"
 fi
 
-if [[ $# -eq 1 ]]; then
-  selected=$(fzf -q "$1" < "$TS_CACHE")
-else
-  selected=$(fzf < "$TS_CACHE")
-fi
-
+selected=$(fzf --select-1 --query="${FZF_QUERY-}" "${FZF_PREVIEW_ARGS[@]}" < "$TS_LIST")
 if [[ -z $selected ]]; then
   exit 0
 fi
@@ -43,7 +51,7 @@ selected_name=$(echo "$selected" | awk -F'/' '{gsub($0,".","_"); printf "%s/%s\n
 tmux_running=$(pgrep tmux)
 
 # Brand new tmux / session
-if [[ -z ${TMUX-} ]] && [[ -z ${tmux_running-} ]]; then
+if [[ -z ${TMUX-} && -z ${tmux_running-} ]]; then
   tmux new-session -s $selected_name -c $selected
   exit 0
 fi

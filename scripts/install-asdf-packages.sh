@@ -22,6 +22,7 @@ PLUGIN_LIST=(
   kcctl
   kubectl
   kubectx
+  kubelogin
   kustomize
   minio
   nodejs

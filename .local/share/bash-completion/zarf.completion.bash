@@ -4,5 +4,5 @@
 
 if command -v zarf &>/dev/null
 then
-  eval "$(zarf completion bash)"
+  eval "$(zarf completion bash --no-log-file)"
 fi

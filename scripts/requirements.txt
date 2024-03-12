@@ -1,14 +1,15 @@
 Jinja2
 MarkupSafe
-ansible-lint
 ansible
+ansible-lint
 argcomplete
 autoflake
 awscli
+awscliv2
 awslogs
 black
-boto3
 boto
+boto3
 botocore
 colorama
 cookiecutter
