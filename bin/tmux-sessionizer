@@ -50,7 +50,9 @@ if [[ -z $selected ]]; then
   exit 0
 fi
 
-selected_name=$(echo "$selected" | awk -F'/' '{gsub($0,".","_"); printf "%s/%s\n", $(NF-1), $NF}')
+selected_name=$(echo "$selected" |\
+  sed "s#$HOME/##;s#.*\.com/##" |\
+  awk -F'/' 'BEGIN{OFS="/"} {gsub(/\./, "_", $0)} NF >= 3 {print substr($1, 1, 4),$(NF-1),$NF}; NF < 3 {print $(NF-1),$NF}')
 tmux_running=$(pgrep tmux)
 
 # Brand new tmux / session
