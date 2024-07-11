@@ -34,6 +34,7 @@ PACKAGES=(
   ethtool
   exuberant-ctags
   feh
+  ffmpegthumbnailer
   flatpak
   fonts-mplus
   fonts-noto
@@ -44,6 +45,7 @@ PACKAGES=(
   git
   gnome-screenshot
   gnome-software-plugin-flatpak
+  gnome-sushi
   gnome-tweaks
   gnupg
   gnutls-bin
@@ -80,6 +82,7 @@ PACKAGES=(
   make
   materia-gtk-theme
   maven
+  mkcert
   mlocate
   mosh
   ncal
@@ -101,6 +104,7 @@ PACKAGES=(
   sed
   silversearcher-ag
   sshuttle
+  sshpass
   suckless-tools
   system-config-printer
   tcpdump
@@ -108,6 +112,7 @@ PACKAGES=(
   thunderbird
   tmux
   ttf-mscorefonts-installer
+  ubuntu-restricted-extras
   unzip
   uuid
   uuid-dev

@@ -29,7 +29,6 @@
 	cp = cherry-pick
 	cpc = cherry-pick --continue
 	dc = diff --cached
-	delete-branch = !sh -c \"git branch -D "$1" && git push -d origin "$1"\"
 	dh1 = diff HEAD~1
 	di = diff
 	ds = diff --staged
@@ -69,12 +68,16 @@
 	wu = log --stat origin..@{0}
 	wup = log -p origin..@{0}
 
-[difftool]
-	prompt = false
-
 [diff]
+
 	tool = nvimdiff
 	colorMoved = default
+
+[diff "sopsdiffer"]
+	textconv = "sops -d"
+
+[difftool]
+	prompt = false
 
 [difftool "nvimdiff"]
 	cmd = "nvim -d -u ~/.vimrc \"$LOCAL\" \"$REMOTE\""
@@ -83,12 +86,12 @@
 	tool = nvimdiff
 	conflictStyle = diff3
 
-[mergetool "nvimdiff"]
-	cmd = "nvim -d -u ~/.vimrc \"$MERGED\" \"$LOCAL\""
-
 [mergetool]
 	prompt = false
 	keepBackup = false
+
+[mergetool "nvimdiff"]
+	cmd = "nvim -d -u ~/.vimrc \"$LOCAL\" \"$MERGED\" \"$REMOTE\""
 
 [delta]
 	navigate = true    # use n and N to move between diff sections
@@ -108,9 +111,6 @@
 	smudge = git-lfs smudge -- %f
 	process = git-lfs filter-process
 	required = true
-
-[url "git@github.com:Novetta"]
-	insteadOf = https://github.com/Novetta
 
 [http]
 	sslVerify = false

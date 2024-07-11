@@ -330,17 +330,17 @@ load_extra_source_files(){
   done
 }
 
+parse_git_branch() {
+  git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/(\1) /'
+}
+
 load_ps1_settings(){
   # Check if PS1 is set (interactive shell)
   if [[ -z ${PS1-} ]]; then
     return
   fi
 
-  PS1="$(if [[ ${EUID} == 0 ]]; then
-    echo '\[\033[01;31m\]\h'
-  else
-    echo '\[\033[01;32m\]\u@\h'
-  fi)\[\033[01;34m\] \w \$([[ \$? != 0 ]] && echo \"\[\033[01;31m\]:(\[\033[01;34m\] \")\$\[\033[00m\] "
+  PS1="\[\033[01;32m\]\u@\h \[\033[01;34m\]\w \[\033[33m\]\$(parse_git_branch)\[\033[00m\]$ "
 }
 
 load_shell_settings(){

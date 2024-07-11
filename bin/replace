@@ -36,12 +36,12 @@ if [[ -n ${DEBUG-} ]]; then
 fi
 
 TARGET_DIR=('.')
-IGNORE_PATTERN='^\.[a-z]|/\.[a-z]'
+IGNORE_PATTERN='^\.[a-z]|/\.[a-z]|\.zst|\.gz|\.tgz|\.cache'
 
 while getopts ':ad:f:n:t:h' opt; do
   case "${opt}" in
     a)
-      IGNORE_PATTERN='\.git'
+      IGNORE_PATTERN='\.git|\.zst|\.gz|\.tgz'
       ;;
     d)
       TARGET_DIR=("${OPTARG}")
@@ -111,19 +111,19 @@ FIND_CMD=(
   find "${FIND_GLOBAL_ARGS[@]}"
   -type f \
   -ipath "$FILE_GLOB"
-  -printf '%p\n'
+  -printf '%p\0'
 )
 
 if [[ -z ${REPLACE_STRING-} ]]; then
   echo >&2 "Preview of matching files contents: "
   "${FIND_CMD[@]}" 2>/dev/null |\
-    sed 's#^\./##' |\
-    grep -Ev "${IGNORE_PATTERN}" |\
-    xargs grep --color -- "$FIND_STRING"
+    sed --null-data 's#^\./##' |\
+    grep --null-data -Ev "${IGNORE_PATTERN}" |\
+    xargs -0 grep --color -- "$FIND_STRING"
   exit
 fi
 
 "${FIND_CMD[@]}" 2>/dev/null |\
-  sed 's#^\./##' |\
-  grep -Ev "${IGNORE_PATTERN}" |\
-  xargs sed -i "s#$FIND_STRING#$REPLACE_STRING#g"
+  sed --null-data 's#^\./##' |\
+  grep --null-data -Ev "${IGNORE_PATTERN}" |\
+  xargs -0 sed -i "s#$FIND_STRING#$REPLACE_STRING#g"

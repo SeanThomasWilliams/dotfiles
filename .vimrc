@@ -34,6 +34,7 @@ Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'junegunn/fzf.vim'
 Plug 'leafgarland/typescript-vim'
 Plug 'lilydjwg/colorizer'
+Plug 'lucidph3nx/nvim-sops'
 Plug 'ludovicchabant/vim-gutentags'
 Plug 'majutsushi/tagbar'
 Plug 'mbbill/undotree'
@@ -406,6 +407,7 @@ if has('autocmd')
     autocmd BufNewFile,BufRead *.js setlocal et ts=2 sw=2 sts=2
     autocmd BufNewFile,BufRead *.json setlocal et ts=2 sw=2 sts=2 conceallevel=0
     autocmd BufNewFile,BufRead *.lua setlocal noet ts=4 sw=4 sts=4
+    autocmd BufNewFile,BufRead init.lua setlocal et ts=2 sw=2 sts=2
     autocmd BufNewFile,BufRead *.py setlocal et ts=4 sw=4 sts=4
     autocmd BufNewFile,BufRead *.sh setlocal et ts=2 sw=2 sts=2
     autocmd BufNewFile,BufRead */aws/jenkins/* setlocal ft=groovy

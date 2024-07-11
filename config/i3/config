@@ -302,6 +302,7 @@ for_window [class="gnome-terminal-server"] title_format "Terminal"
 for_window [class="F5 VPN"] move to workspace $ws8
 for_window [class="google-chrome" window_role="pop-up"] move to workspace $ws2
 for_window [title="Messages.*" window_role="pop-up"] move to workspace $ws2
+for_window [title="Mattermost.*" window_role="pop-up"] move to workspace $ws6
 for_window [title="YouTube Music" window_role="pop-up"] move to workspace $ws2
 for_window [title="Google Hangouts" window_role="pop-up"] move to workspace $ws2
 for_window [title="Microsoft Teams.*" window_role="pop-up"] move to workspace $ws6

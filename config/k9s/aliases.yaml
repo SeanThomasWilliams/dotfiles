@@ -1,9 +1,17 @@
 aliases:
-  dp: deployments
-  sec: v1/secrets
-  jo: jobs
+  ap: authorizationpolicies.security.istio.io
   cr: clusterroles
   crb: clusterrolebindings
-  ro: roles
-  rb: rolebindings
+  dp: deployments
+  dr: destinationrules.networking.istio.io
+  ef: envoyfilters.networking.istio.io
+  gw: gateways.networking.istio.io
+  jo: jobs
   np: networkpolicies
+  pa: peerauthentications.security.istio.io
+  pc: proxyconfigs.networking.istio.io
+  ra: requestauthentications.security.istio.io
+  rb: rolebindings
+  ro: roles
+  sc: sidecars.networking.istio.io
+  se: serviceentries.networking.istio.io

@@ -6,11 +6,6 @@ if [[ ${DEBUG:-0} -eq 1 ]]; then
   set -x
 fi
 
-if [[ -z ${TMUX_DIR_BASES-} ]]; then
-  echo >&2 "TMUX_DIR_BASES is not set"
-  exit 1
-fi
-
 TS_CACHE="$HOME/.ts.cache"
 TS_LIST="$TS_CACHE"
 FILTER_CACHE='asdf|\.terraform/modules'
@@ -18,21 +13,56 @@ FILTER_CACHE='asdf|\.terraform/modules'
 FZF_QUERY=""
 FZF_PREVIEW_ARGS=()
 
-# If -c is passed, clear the cache
-if [[ "$#" -ge 1 && "$1" == "-r" ]]; then
-  rm -f "$TS_CACHE"
-  shift
+usage(){
+  cat >&2 <<EOF
+Usage: tmux-sessionizer [-r] [-h] [FZF_QUERY]
+
+Options:
+  -a  Search active tmux sessions
+  -r  Refresh the cache
+  -h  Show this help message
+
+Arguments:
+  FZF_QUERY: Initial query to pass to fzf
+
+Environment Variables:
+  TMUX_DIR_BASES: Directories to search for tmux sessions
+  FILTER_CACHE:   Exclude directories that match this regex from the cache
+  DEBUG:          Set to 1 to enable debug mode
+EOF
+}
+
+if [[ -z ${TMUX_DIR_BASES-} ]]; then
+  echo >&2 "TMUX_DIR_BASES is not set"
+  usage
+  exit 1
 fi
 
-if [[ "$#" -ge 1 && "$1" == "-a" ]]; then
-  TS_LIST="/tmp/.ts.active"
-  tmux list-sessions -F "#{session_name}" > "$TS_LIST"
-  FZF_PREVIEW_ARGS=(
-    --preview 'tmux capture-pane -J -p -e -t {}'
-    --preview-window 'down:80%'
-  )
-  shift
-fi
+# Parse arguments
+while getopts ":ahr" opt; do
+  case $opt in
+    a)
+      TS_LIST="/tmp/.ts.active"
+      tmux list-sessions -F "#{session_name}" > "$TS_LIST"
+      FZF_PREVIEW_ARGS=(
+        --preview 'tmux capture-pane -J -p -e -t {}'
+        --preview-window 'down:80%'
+      )
+      ;;
+    h)
+      usage
+      exit 0
+      ;;
+    r)
+      rm -f "$TS_CACHE"
+      ;;
+    \?)
+      echo "Invalid option: -$OPTARG" >&2
+      ;;
+  esac
+done
+
+shift $((OPTIND-1))
 
 if [[ $# -eq 1 ]]; then
   FZF_QUERY="$1"

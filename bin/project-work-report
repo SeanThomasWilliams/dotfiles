@@ -100,7 +100,7 @@ QUERY_START_DATE="${START_DATE}T00:00:00"
 QUERY_END_DATE="${END_DATE}T23:59:59"
 
 # Setup Output Path
-BASE_DIR="$HOME/${PROJECT}/.worklog"
+BASE_DIR="$HOME/worklog/${PROJECT}"
 mkdir -p "$BASE_DIR"
 WORK_SUMMARY_FILE="$BASE_DIR/project-status.md"
 rm -f "$WORK_SUMMARY_FILE"

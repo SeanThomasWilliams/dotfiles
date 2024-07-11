@@ -112,7 +112,7 @@ taskd.certificate=~/sync/task/xeed.io/sean_williams.cert.pem
 taskd.key=~/sync/task/xeed.io/sean_williams.key.pem
 taskd.ca=~/sync/task/xeed.io/ca.cert.pem
 taskd.credentials=xeed.io/Sean Williams/3458dcbb-0eda-4ac2-a34d-17e8d7369aae
-taskd.server=pihole1.seanthomaswilliams.gmail.com.beta.tailscale.net:53589
+taskd.server=pihole1.ghoul-iguana.ts.net:53589
 taskd.trust=ignore hostname
 
 # Bugwarrior UDAs

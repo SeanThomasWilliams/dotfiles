@@ -1,0 +1,95 @@
+#!/bin/bash
+
+parse_istio_log() {
+  awk '
+  BEGIN {
+    FS = "\"";
+    printf "{\n"
+  }
+
+  function trim(str) {
+    sub(/^[ \t\r\n]+/, "", str)
+    sub(/[ \t\r\n]+$/, "", str)
+    return str
+  }
+
+  {
+    timestamp = substr($1, 2, length($1)-3)
+    method_group = trim($2)
+    status_group = trim($3)
+    tcp_service_time = trim($4)
+    bytes_group = trim($5)
+    forwarded_for = trim($6)
+    user_agent = trim($8)
+    request_id = $trim(10)
+    authority = $trim(12)
+    upstream_service = $trim(14)
+    trace_group = trim($15)
+
+    split(method_group, method_parts, " ")
+    method = method_parts[1]
+    uri_full = method_parts[2]
+    protocol = method_parts[3]
+
+    status_size = split(status_group, status_parts, " ")
+    status_code = status_parts[1]
+    response_flags = status_parts[2]
+    for (i=3; i<=status_size; i++) {
+      response_flags = response_flags " " status_parts[i]
+    }
+
+    bytes_size = split(bytes_group, bytes_parts, " ")
+    bytes_received = bytes_parts[1]
+    bytes_sent = bytes_parts[2]
+    duration = bytes_parts[3]
+
+    split(trace_group, trace_parts, " ")
+    upstream_cluster = trace_parts[1]
+    upstream_local = trace_parts[2]
+    downstream_local = trace_parts[3]
+    downstream_remote = trace_parts[4]
+    requested_server = trace_parts[5]
+    route_name = trace_parts[6] " " trace_parts[7]
+
+
+    split(uri_full, uri_parts, "?")
+    uri_path = uri_parts[1]
+    uri_param = (length(uri_parts) > 1) ? "?" uri_parts[2] : ""
+
+    original_message = $0
+    gsub("\"","\\\"",original_message)
+
+    printf "  \"timestamp\": \"%s\",\n", timestamp
+    printf "  \"authority\": \"%s\",\n", authority
+    printf "  \"bytes_received\": \"%s\",\n", bytes_received
+    printf "  \"bytes_sent\": \"%s\",\n", bytes_sent
+    printf "  \"duration\": \"%s\",\n", duration
+    printf "  \"forwarded_for\": \"%s\",\n", forwarded_for
+    printf "  \"method\": \"%s\",\n", method
+    printf "  \"protocol\": \"%s\",\n", protocol
+    printf "  \"request_id\": \"%s\",\n", request_id
+    printf "  \"response_flags\": \"%s\",\n", response_flags
+    printf "  \"status_code\": \"%s\",\n", status_code
+    printf "  \"tcp_service_time\": \"%s\",\n", tcp_service_time
+    printf "  \"upstream_service\": \"%s\",\n", upstream_service
+    printf "  \"upstream_cluster\": \"%s\",\n", upstream_cluster
+    printf "  \"upstream_local\": \"%s\",\n", upstream_local
+    printf "  \"downstream_local\": \"%s\",\n", downstream_local
+    printf "  \"downstream_remote\": \"%s\",\n", downstream_remote
+    printf "  \"requested_server\": \"%s\",\n", requested_server
+    printf "  \"route_name\": \"%s\",\n", route_name
+    printf "  \"uri_param\": \"%s\",\n", uri_param
+    printf "  \"uri_path\": \"%s\",\n", uri_path
+    printf "  \"user_agent\": \"%s\",\n", user_agent
+    printf "  \"mixer_status\": \"-\",\n"
+    printf "  \"original_message\": \"%s\"\n", original_message
+  }
+
+  END {
+    printf "}\n"
+  }
+  '
+}
+
+# Read input from stdin and parse
+parse_istio_log

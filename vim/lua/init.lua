@@ -9,6 +9,14 @@ local has_words_before = function()
   return col ~= 0 and vim.api.nvim_buf_get_text(0, line-1, 0, line-1, col, {})[1]:match("^%s*$") == nil
 end
 
+--- sops
+require('nvim_sops').setup({
+  enabled = true,
+  debug = false
+})
+vim.keymap.set("n", "<leader>se", vim.cmd.SopsEncrypt)
+vim.keymap.set("n", "<leader>sd", vim.cmd.SopsDecrypt)
+
 -- Copilot
 require('copilot').setup({
   panel = {
@@ -267,8 +275,38 @@ end
 
 nvim_lsp["terraformls"].filetypes = {"terraform", "tf", "hcl"}
 
+-- Function to find the root directory of the project
+local function find_project_root()
+  local cwd = vim.loop.cwd()
+  local root = vim.fn.system("git rev-parse --show-toplevel")
+  if vim.v.shell_error == 0 and root ~= nil then
+    return string.gsub(root, "\n", "")
+  end
+  return cwd
+end
+
 -- Harpoon2
-harpoon:setup()
+harpoon:setup({
+  settings = {
+    save_on_toggle = true,
+    sync_on_ui_close = true,
+    key = function()
+      return find_project_root()
+    end,
+  },
+  default = {
+    get_root_dir = function ()
+        return find_project_root()
+    end,
+  },
+})
+
+-- Set CWD to project root from Fugitive
+local extensions = require("harpoon.extensions");
+harpoon:extend(extensions.builtins.command_on_nav("Gcd"))
+
+-- local config = harpoon.get_config() -- Hypothetical function, adjust based on actual API
+-- print(vim.inspect(harpoon.config.default))
 
 vim.keymap.set("n", "<leader>r", function() harpoon:list():append() end)
 vim.keymap.set("n", "<C-e>", function() harpoon.ui:toggle_quick_menu(harpoon:list()) end)

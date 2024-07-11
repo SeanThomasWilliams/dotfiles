@@ -12,13 +12,9 @@ fi
 
 # Variables
 ARCHIVE_SOURCE=0
-BITRATE=1500
 GPU_INDEX=0
 GPU_MODE=0
 LOG_LEVEL=info
-
-# Complex variables
-MAX_RATE=$((BITRATE * 3))
 
 trap 'rm -f "$TMP_FILE"' ERR
 
@@ -120,6 +116,14 @@ is_transcoded(){
   fi
 }
 
+calculate_bitrate(){
+  local fname
+  fname="$1"
+
+  ffprobe -v quiet -select_streams v -show_entries stream=bit_rate:format=bit_rate -of csv "$fname" |\
+    awk -F, '! /N\/A/ {print int($2/1000)}'
+}
+
 extract_pix_fmt(){
   local fname
   fname="$1"
@@ -161,6 +165,24 @@ else
   fi
 fi
 
+file_bitrate=$(calculate_bitrate "$INPUT_FILE")
+if [[ -z "$file_bitrate" ]]; then
+  echo >&2 "Unable to determine bitrate for file: $INPUT_FILE"
+  exit 1
+fi
+
+if [[ $file_bitrate -lt 1000 ]]; then
+  BITRATE=1000
+elif [[ $file_bitrate -gt 2500 ]]; then
+  BITRATE=2500
+else
+  BITRATE="$file_bitrate"
+fi
+
+echo >&2 "Input file '$INPUT_FILE' has bitrate: '$file_bitrate'. Setting transcode bitrate to: '$BITRATE'"
+# Calculate max bitrate
+MAX_RATE=$((BITRATE * 3))
+
 # Get pixel format
 PIX_FMT="$(extract_pix_fmt "$INPUT_FILE")"
 if [[ -z "$PIX_FMT" ]]; then
@@ -189,7 +211,7 @@ if [[ $GPU_MODE -eq 1 ]]; then
   else
     VIDEO_ARGS=(-pix_fmt p010le -c:v hevc_nvenc)
   fi
-  VIDEO_ARGS+=(-temporal-aq 1 -rc-lookahead 20 -preset p6 -metadata composer="transcode.sh GPU")
+  VIDEO_ARGS+=(-rc-lookahead 20 -preset p6 -metadata composer="transcode.sh GPU")
   # export CUDA_DEVICE_MAX_CONNECTIONS=2
 else
   echo >&2 "CPU Transcoding: '$INPUT_FILE'"
