@@ -17,7 +17,9 @@ if [[ ! -d neovim.git ]]; then
   git clone https://github.com/neovim/neovim.git neovim.git
 fi
 cd ~/software/neovim.git
-git checkout stable
+git fetch --tags
+latest_tag=$(git describe --tags `git rev-list --tags --max-count=1`)
+git checkout $latest_tag
 
 rm -f ~/anaconda3/bin/libtool*
 
