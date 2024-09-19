@@ -5,42 +5,27 @@ source "$HOME/.asdf/asdf.sh"
 export MAKEFLAGS=-j10
 
 PLUGIN_LIST=(
-  cmake
-
   awscli
-  ctop
-  delta
   flux2
-  fzf
   golang
   helm
   istioctl
-  jq
   k3d
   k9s
-  kafkactl
-  kcctl
   kubectl
   kubectx
   kubelogin
   kustomize
-  minio
   nodejs
   packer
-  ripgrep
   ruby
   shellcheck
-  snyk
   sops
-  sqlite
-  syft
   terraform
   terraform-ls
   terragrunt
   tflint
-  tmux
   yarn
-  yq
 )
 
 for plugin in "${PLUGIN_LIST[@]}"; do

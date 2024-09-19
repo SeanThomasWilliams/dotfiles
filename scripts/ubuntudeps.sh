@@ -58,7 +58,7 @@ PACKAGES=(
   i3-wm
   imagemagick
   jq
-  libaio1
+#  libaio1
   libbcpkix-java
   libbcprov-java
   libbctls-java
@@ -83,7 +83,7 @@ PACKAGES=(
   materia-gtk-theme
   maven
   mkcert
-  mlocate
+  plocate
   mosh
   ncal
   net-tools
@@ -130,7 +130,7 @@ PACKAGES=(
   zlib1g-dev
 )
 
-sudo add-apt-repository ppa:keithw/mosh-dev -y
+#sudo add-apt-repository ppa:keithw/mosh-dev -y
 
 sudo apt-get update -yyq
 

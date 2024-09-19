@@ -13,8 +13,8 @@
 *.pyc
 *.retry
 *.rpm
-*.swp
 *.svg
+*.swp
 *.tar.*
 *.tar.gz
 *.temp
@@ -47,6 +47,9 @@ __pycache__
 asdf/
 init.vim
 mermaid-filter.err
+node_modules/
+package-lock.json
+package.json
 rke2.yaml
 tags
 tags.files
