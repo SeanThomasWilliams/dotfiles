@@ -1,64 +1,71 @@
 #!/bin/bash
 
+set -x
+set -euo pipefail
+
+install_docker(){
+  # Add Docker's official GPG key:
+  sudo install -m 0755 -d /etc/apt/keyrings
+  sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+  sudo chmod a+r /etc/apt/keyrings/docker.asc
+
+  # Add the repository to Apt sources:
+  echo \
+      "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+        $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+          sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+  sudo apt-get update -yyq
+  sudo apt-get remove -yyq docker.io docker-doc docker-compose docker-compose-v2 podman-docker containerd runc
+  sudo apt-get install -yyq docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+}
+
+install_aws_session_manager(){
+  curl -fSsL -O "https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_64bit/session-manager-plugin.deb"
+  sudo apt-get install -yyq ./session-manager-plugin.deb
+  rm -f ./session-manager-plugin.deb
+}
+
 INTERACTIVE_PACKAGES=(
   postfix
 )
 
-PACKAGES=(
+CLI_PACKAGES=(
   amazon-ecr-credential-helper
   apt-file
-  arandr
   aria2
   autoconf
   autojump
   automake
-  baobab
   bison
-  blueman
-  blueman
   build-essential
   bzip2
-  cec-utils
+  ca-certificates
   checkinstall
   cmake
-  compton
   csvkit
   curl
-  dconf-editor
   direnv
   dnsmasq
-  docker-buildx
-  docker.io
   dstat
-  dunst
   ethtool
   exuberant-ctags
   feh
-  ffmpegthumbnailer
-  flatpak
   fonts-mplus
   fonts-noto
   fonts-symbola
+  fzf
   gawk
   gcc
   gettext
   git
-  gnome-screenshot
-  gnome-software-plugin-flatpak
-  gnome-sushi
-  gnome-tweaks
   gnupg
   gnutls-bin
   grep
-  hsetroot
   htop
-  i3
-  i3lock
-  i3status
-  i3-wm
   imagemagick
   jq
-#  libaio1
+  libaio1
   libbcpkix-java
   libbcprov-java
   libbctls-java
@@ -74,76 +81,95 @@ PACKAGES=(
   libssl-dev
   libtool-bin
   libxml2-dev
-  libxslt-dev
+  libxslt1-dev
   libyaml-dev
   lm-sensors
-  lxappearance
   lynx
   make
-  materia-gtk-theme
   maven
   mkcert
-  plocate
   mosh
   ncal
   net-tools
-  network-manager-gnome
-  network-manager-openconnect-gnome
   nfs-common
-  openjdk-8-jdk
+  openjdk-21-jdk-headless
   opensc
   openssh-server
   pandoc
   parallel
-  pasystray
-  pavucontrol
-  postfix
-  rofi
-  rxvt-unicode
-  scrot
+  plocate
+  rar
   sed
   silversearcher-ag
-  sshuttle
   sshpass
-  suckless-tools
-  system-config-printer
+  sshuttle
   tcpdump
-  texlive-fonts-extra
-  thunderbird
   tmux
-  ttf-mscorefonts-installer
-  ubuntu-restricted-extras
+  unrar
   unzip
   uuid
   uuid-dev
-  viewnior
   vim
-  virtualbox
-  virtualbox-guest-additions-iso
   wget
   whois
+  zip
+  zlib1g-dev
+)
+
+UI_PACKAGES=(
+  arandr
+  baobab
+  cec-utils
+  compton
+  dconf-editor
+  dunst
+  ffmpegthumbnailer
+  gnome-screenshot
+  gnome-software-plugin-flatpak
+  gnome-sushi
+  gnome-tweaks
+  hsetroot
+  i3
+  i3lock
+  i3status
+  i3-wm
+  lxappearance
+  materia-gtk-theme
+  network-manager-gnome
+  network-manager-openconnect-gnome
+  pasystray
+  pavucontrol
+  rofi
+  rxvt-unicode
+  scrot
+  suckless-tools
+  system-config-printer
+  texlive-fonts-extra
+  thunderbird
+  ttf-mscorefonts-installer
+  ubuntu-restricted-extras
+  viewnior
+  virtualbox
+  virtualbox-guest-additions-iso
   xclip
   xdg-desktop-portal-gtk
   xmlto
   xsel
   xsettingsd
-  zlib1g-dev
 )
 
-#sudo add-apt-repository ppa:keithw/mosh-dev -y
-
 sudo apt-get update -yyq
-
 sudo apt-get install -yyq "${INTERACTIVE_PACKAGES[@]}"
 
-#export DEBIAN_FRONTEND=noninteractive
-sudo apt-get install -yyq "${PACKAGES[@]}"
+export DEBIAN_FRONTEND=noninteractive
+sudo apt-get install -yyq "${CLI_PACKAGES[@]}"
 
-curl -fSsL -O "https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_64bit/session-manager-plugin.deb"
-sudo apt-get install -yyq ./session-manager-plugin.deb
-rm -f session-manager-plugin.deb
+if command -v xrandr &>/dev/null; then
+  sudo apt-get install -yyq "${UI_PACKAGES[@]}"
+fi
 
-sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+install_docker
+install_aws_session_manager
 
 # Install nvidia drivers
 if lspci | grep -q -i nvidia; then

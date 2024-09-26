@@ -255,7 +255,7 @@ local capabilities = require('cmp_nvim_lsp').default_capabilities()
 local servers = {
     "gopls",
     "dockerls",
-    "tsserver",
+    "ts_ls",
     "bashls",
     "jedi_language_server",
     "rust_analyzer",

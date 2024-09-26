@@ -2,6 +2,8 @@
 
 source "$HOME/.asdf/asdf.sh"
 
+touch "$HOME/.tool-versions"
+
 export MAKEFLAGS=-j10
 
 PLUGIN_LIST=(
@@ -42,8 +44,6 @@ for plugin in "${PLUGIN_LIST[@]}"; do
   hash -r
   command -v "$plugin"
 done
-
-asdf install nodejs 16.19.0
 
 asdf plugin add kpt
 asdf install kpt v1.0.0-beta.24
