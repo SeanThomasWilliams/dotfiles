@@ -30,6 +30,7 @@ Plug 'hrsh7th/cmp-path'
 Plug 'hrsh7th/nvim-cmp'
 Plug 'jacoborus/tender.vim'
 Plug 'jose-elias-alvarez/null-ls.nvim'
+Plug 'joshuavial/aider.nvim'
 Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'junegunn/fzf.vim'
 Plug 'leafgarland/typescript-vim'
@@ -202,6 +203,7 @@ set cursorline " Show highlight on the cursor line
 "set showbreak=↪
 set background=dark
 set bg=dark
+let mapleader="\\"
 " Make syntax errors in SCREAM
 " (otherwise a missing comma in JSON is bold red vs regular red - not visible)
 " :highlight Error term=reverse cterm=bold ctermfg=7 ctermbg=1 guifg=White guibg=Red
@@ -234,7 +236,7 @@ set lazyredraw " Don't update screen during macro and script execution
 set winminheight=0
 set winwidth=79
 set textwidth=120
-set timeoutlen=250
+set timeoutlen=500
 set title " Show a window title
 set updatecount=10
 " }}}
@@ -568,6 +570,9 @@ noremap <silent> }} :s/^/  /e<CR>:nohlsearch<CR>
 "noremap <silent> <leader>cu :<C-B>silent <C-E>s/^\V<C-R>=escape(b:comment_leader,'\/')<CR>//e<CR>:nohlsearch<CR>
 "omnicomplete
 " inoremap <C-Space> <C-X><C-I>
+
+nnoremap <silent> <leader>oa :lua AiderOpen()<CR>
+nnoremap <silent> <leader>ob :lua AiderBackground()<CR>
 
 " Resize splits
 nnoremap <silent> + :exe "vertical resize " . (winwidth(0) * 4/3)<CR>
@@ -903,25 +908,6 @@ let g:vimwiki_list = [{
 
 autocmd FileType vimwiki set spell spelllang=en_us complete+=kspell
 
-" Vimux Config
-let g:VimuxHeight = "33"
-" Doesn't seem to work
-let g:VimuxUseNearest = 1
-
-function! VimuxShebangSlime()
-  call VimuxOpenRunner()
-  if getline(1) =~ "^#!.*/bin/"
-    " Get the command after the shebang
-    let runcmd = strpart(getline(1), 2)
-    call VimuxSendText(runcmd . ' ' . @v)
-  else
-    call VimuxSendText(@v)
-    call VimuxSendKeys("Enter")
-  endif
-endfunction
-
-vmap <Leader>vs "vy :call VimuxShebangSlime()<CR>gv
-nmap <Leader>vo :call VimuxOpenRunner()<CR>
 vnoremap <Leader>ci y:tabnew <bar> setlocal buftype=nofile bufhidden=hide noswapfile <bar> r! echo '<C-R>"' <bar> showcertinfo 2>&1<CR><CR>
 
 function! GoogleSearch()
@@ -936,6 +922,8 @@ nmap <Leader>gs :call GoogleSearch()<CR>
 
 " Markdown Preview
 let g:mkdp_theme = 'light'
+let g:mkdp_open_to_the_world = 1
+let g:mkdp_page_title = '${name}'
 
 " options for markdown render
 " mkit: markdown-it options for render

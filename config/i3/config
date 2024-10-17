@@ -17,7 +17,7 @@
 # exec --no-startup-id xss-lock --transfer-sleep-lock -- i3lock --nofork
 
 # Change display settings
-exec_always --no-startup-id init-display
+exec --no-startup-id init-display
 
 # NetworkManager is the most popular way to manage wireless networks on Linux,
 # and nm-applet is a desktop environment-independent system tray GUI for it.
@@ -38,6 +38,8 @@ exec --no-startup-id xset dpms 0 0 1800
 
 # Desktop background
 exec --no-startup-id feh --bg-scale "$HOME/Pictures/mountain-smoke.jpg"
+
+exec_always "$HOME/anaconda3/bin/autotiling"
 
 set $mod Mod4
 
@@ -125,6 +127,7 @@ bindsym $mod+f fullscreen toggle
 # change container layout (stacked, tabbed, toggle split)
 bindsym $mod+s layout stacking
 bindsym $mod+w layout tabbed
+bindsym $mod+t layout tabbed
 bindsym $mod+e layout toggle split
 # Toggle between stacking/tabbed/splith/splitv:
 bindsym $mod+y layout toggle all
@@ -266,9 +269,11 @@ bindsym $mod+r mode "resize"
 # finds out, if available)
 bar {
   status_command i3status
+  tray_output primary
+  tray_padding 0
 
   colors {
-    background #2f343f
+    background #586e75 # A muted teal from the "Solarized Dark" palette, which is gentle on the eyes.
     statusline #2f343f
     separator #4b5262
 
@@ -276,7 +281,7 @@ bar {
     focused_workspace       #2f343f #bf616a #d8dee8
     active_workspace        #2f343f #2f343f #d8dee8
     inactive_workspace      #2f343f #2f343f #d8dee8
-    urgent_workspacei       #2f343f #ebcb8b #2f343f
+    urgent_workspace        #2f343f #ebcb8b #2f343f
   }
 }
 
@@ -308,6 +313,8 @@ for_window [title="Google Hangouts" window_role="pop-up"] move to workspace $ws2
 for_window [title="Microsoft Teams.*" window_role="pop-up"] move to workspace $ws6
 for_window [title="Zoom Cloud Meetings"] move to workspace $ws8
 for_window [title="Zoom Meeting"] move to workspace $ws8
+for_window [title="Cloudflare Zero Trust"] move to workspace $ws8
+
 
 # colour of border, background, text, indicator, and child_border
 client.focused              #bf616a #2f343f #d8dee8 #bf616a #d8dee8

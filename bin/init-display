@@ -10,6 +10,18 @@ fi
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 I3_CONFIG="$SCRIPT_DIR/../.config/i3/config"
+mkdir -p ~/.config
+
+# Redirect stdout and stderr to the log file
+exec >> ~/.config/init-display.log 2>&1
+
+# Your script commands start here
+echo >&2 "$0 started at $(date)"
+
+echo >&2 "Xrandr verbose:"
+xrandr --verbose
+
+echo >&2 "Display: ${DISPLAY-}"
 
 update_i3_config(){
   local left primary right
@@ -30,8 +42,11 @@ update_i3_config(){
 }
 
 # This is your default laptop screen, detect by running `xrandr`
-INTERNAL_OUTPUT="eDP-1"
-LAPTOP_RESOLUTION="1400x900"
+DEFAULT_OUTPUT="${DEFAULT_OUTPUT:-"eDP-1"}"
+DEFAULT_RESOLUTION="${DEFAULT_RESOLUTION:-"1400x900"}"
+DEFAULT_BRIGHTNESS="${DEFAULT_BRIGHTNESS:-"1.0"}"
+
+echo >&2 "Default output: $DEFAULT_OUTPUT @ $DEFAULT_RESOLUTION"
 
 XRANDR=$(xrandr)
 
@@ -111,7 +126,7 @@ elif [[ -n ${DP_4_CONNECTED-} && -n ${HDMI_0_CONNECTED-} ]]; then
 elif [[ -n ${DP_31_CONNECTED-} && -n ${DP_32_CONNECTED-} && -n ${DP_33_CONNECTED-} ]]; then
   echo >&2 "Using connected external output DP-3-1, DP-3-2, DP-3-3"
   xrandr \
-    --output "$INTERNAL_OUTPUT" --off \
+    --output "$DEFAULT_OUTPUT" --off \
     --output DP-3-2 --primary --mode 3440x1440 --rotate normal \
     --output DP-3-1           --mode 1920x1080 --rotate left --left-of DP-3-2 \
     --output DP-3-3           --mode 3440x1440 --rotate normal --right-of DP-3-2
@@ -120,7 +135,7 @@ elif [[ -n ${DP_31_CONNECTED-} && -n ${DP_32_CONNECTED-} && -n ${DP_33_CONNECTED
 elif [[ -n ${DP_11_CONNECTED-} && -n ${DP_13_CONNECTED-} && -n ${HDMI_1_CONNECTED-} ]]; then
   echo >&2 "Using connected external output DP-1-1 and DP-1-3 and HDMI-1"
   xrandr \
-    --output "$INTERNAL_OUTPUT" --off \
+    --output "$DEFAULT_OUTPUT" --off \
     --output HDMI-1 --mode 1920x1080 --pos 4640x444 --rotate normal \
     --output DP-1-3 --primary --mode 3440x1440 --pos 1200x324 --rotate normal \
     --output DP-1-1 --mode 1920x1200 --pos 0x0 --rotate left
@@ -128,7 +143,7 @@ elif [[ -n ${DP_11_CONNECTED-} && -n ${DP_13_CONNECTED-} && -n ${HDMI_1_CONNECTE
 elif [[ -n ${DP_11_CONNECTED-} && -n ${DP_13_CONNECTED-} && -n ${DP_3_CONNECTED-} ]]; then
   echo >&2 "Using connected external output DP-1-1 and DP-1-3 and DP-3"
   xrandr \
-    --output "$INTERNAL_OUTPUT" --off \
+    --output "$DEFAULT_OUTPUT" --off \
     --output DP-1-1 --mode 1920x1080 --pos 4640x444 --rotate normal \
     --output DP-1-3 --primary --mode 3440x1440 --pos 1200x324 --rotate normal \
     --output DP-3 --mode 1920x1200 --pos 0x0 --rotate left
@@ -136,7 +151,7 @@ elif [[ -n ${DP_11_CONNECTED-} && -n ${DP_13_CONNECTED-} && -n ${DP_3_CONNECTED-
 elif [[ -n ${DP_21_CONNECTED-} && -n ${DP_23_CONNECTED-} && -n ${DP_4_CONNECTED-} ]]; then
   echo >&2 "Using connected external output DP-2-1 and DP-2-3 and DP-4"
   xrandr \
-    --output "$INTERNAL_OUTPUT" --off \
+    --output "$DEFAULT_OUTPUT" --off \
     --output DP-2-1 --mode 1920x1080 --pos 4640x444 --rotate normal \
     --output DP-2-3 --primary --mode 3440x1440 --pos 1200x324 --rotate normal \
     --output DP-4 --mode 1920x1200 --pos 0x0 --rotate left
@@ -144,7 +159,7 @@ elif [[ -n ${DP_21_CONNECTED-} && -n ${DP_23_CONNECTED-} && -n ${DP_4_CONNECTED-
 elif [[ -n ${DP_11_CONNECTED-} && -n ${DP_13_CONNECTED-} && -n ${DP_4_CONNECTED-} ]]; then
   echo >&2 "Using connected external output DP-1-1, DP-1-3 and DP-4"
   xrandr \
-    --output "$INTERNAL_OUTPUT" --off \
+    --output "$DEFAULT_OUTPUT" --off \
     --output DP-1-1 --mode 1920x1080 --pos 4640x444 --rotate normal \
     --output DP-1-3 --primary --mode 3440x1440 --pos 1200x324 --rotate normal \
     --output DP-4 --mode 1920x1200 --pos 0x0 --rotate left
@@ -152,34 +167,34 @@ elif [[ -n ${DP_11_CONNECTED-} && -n ${DP_13_CONNECTED-} && -n ${DP_4_CONNECTED-
 elif [[ -n ${DP_1_CONNECTED-} && -n ${DP_4_CONNECTED-} ]]; then
   # Portable / RV Setup
   echo >&2 "Using Internal, DP-4 and DP-1"
-  xrandr --output "$INTERNAL_OUTPUT" --mode "$LAPTOP_RESOLUTION" --primary --pos 0x687 \
+  xrandr --output "$DEFAULT_OUTPUT" --mode "$DEFAULT_RESOLUTION" --primary --pos 0x687 \
     --output DP-1 --mode 1920x1080 --rotate normal --pos 2489x994 \
     --output DP-4 --mode 1360x768 --rotate normal --pos 2489x0
-  update_i3_config "$INTERNAL_OUTPUT" "DP-1" "DP-4"
+  update_i3_config "$DEFAULT_OUTPUT" "DP-1" "DP-4"
 elif [[ -n ${DP_2_CONNECTED-} && -n ${DP_4_CONNECTED-} ]]; then
   # Portable / RV Setup
   echo >&2 "Using Internal, DP-4 and DP-2"
-  xrandr --output "$INTERNAL_OUTPUT" --primary --pos 0x687 \
+  xrandr --output "$DEFAULT_OUTPUT" --primary --pos 0x687 \
     --output DP-2 --mode 1920x1080 --rotate normal --pos 2489x994 \
     --output DP-4 --mode 1360x768 --rotate normal --pos 2489x0
-  update_i3_config "DP-2" "$INTERNAL_OUTPUT" "DP-4"
+  update_i3_config "DP-2" "$DEFAULT_OUTPUT" "DP-4"
 elif [[ -n ${DP_1_CONNECTED-} && -n ${DP_3_CONNECTED-} ]]; then
   echo >&2 "Using connected external output DP-3 and DP-1"
-  xrandr --output "$INTERNAL_OUTPUT" --off \
+  xrandr --output "$DEFAULT_OUTPUT" --off \
     --output DP-1 --mode 1920x1200 --pos 3440x0 --rotate left \
     --output DP-3 --primary --mode 3440x1440 --pos 0x366 --rotate normal
   update_i3_config "DP-1" "DP-3" "DP-3"
 elif [[ -n ${DP_4_CONNECTED-} ]]; then
   if xrandr | grep -q 3440x1440; then
     echo >&2 "Using large display - connected external output DP-4"
-    xrandr --output "$INTERNAL_OUTPUT" --off \
+    xrandr --output "$DEFAULT_OUTPUT" --off \
       --output DP-4 --primary --mode 3440x1440
     update_i3_config "DP-4" "DP-4" "DP-4"
   else
     echo >&2 "Using DP-4 and internal"
-    xrandr --output "$INTERNAL_OUTPUT" --brightness 0.5 --mode "$LAPTOP_RESOLUTION" --primary \
-      --output DP-4 --left-of "$INTERNAL_OUTPUT" --rotate normal --auto
-    update_i3_config "$INTERNAL_OUTPUT" "DP-4" "$INTERNAL_OUTPUT"
+    xrandr --output "$DEFAULT_OUTPUT" --brightness 0.5 --mode "$DEFAULT_RESOLUTION" --primary \
+      --output DP-4 --left-of "$DEFAULT_OUTPUT" --rotate normal --auto
+    update_i3_config "$DEFAULT_OUTPUT" "DP-4" "$DEFAULT_OUTPUT"
   fi
 elif [[ -n ${HDMI_1_0_CONNECTED-} ]]; then
   echo >&2 "Using connected external output HDMI-1-0 (primary)"
@@ -195,13 +210,21 @@ elif [[ -n ${HDMI_0_CONNECTED-} ]]; then
   update_i3_config "HDMI-0" "HDMI-0" "HDMI-0"
 elif [[ -n ${DP_1_CONNECTED-} ]]; then
   echo >&2 "Using DP-1 and internal"
-  xrandr --output "$INTERNAL_OUTPUT" --mode "$LAPTOP_RESOLUTION" --primary \
-    --output DP-1 --rotate normal --left-of "$INTERNAL_OUTPUT"
-  update_i3_config "$INTERNAL_OUTPUT" "DP-1" "$INTERNAL_OUTPUT"
+  xrandr --output "$DEFAULT_OUTPUT" --mode "$DEFAULT_RESOLUTION" --primary \
+    --output DP-1 --rotate normal --left-of "$DEFAULT_OUTPUT"
+  update_i3_config "$DEFAULT_OUTPUT" "DP-1" "$DEFAULT_OUTPUT"
 else
-  echo >&2 "Using internal output $INTERNAL_OUTPUT at $LAPTOP_RESOLUTION"
-  xrandr --output "$INTERNAL_OUTPUT" --mode "$LAPTOP_RESOLUTION" --primary \
-    --brightness 0.4 \
+  echo >&2 "No monitor detected, forcing on"
+  echo >&2 "xset settings:"
+  xset q
+  echo >&2 "Forcing on"
+  xset dpms force on
+  sleep 1
+  echo >&2 "xset settings after:"
+  xset q
+  echo >&2 "Using default output $DEFAULT_OUTPUT at $DEFAULT_RESOLUTION"
+  xrandr --output "$DEFAULT_OUTPUT" --mode "$DEFAULT_RESOLUTION" --primary \
+    --brightness "$DEFAULT_BRIGHTNESS" \
     --set "scaling mode" "Full"
-  update_i3_config "$INTERNAL_OUTPUT" "$INTERNAL_OUTPUT" "$INTERNAL_OUTPUT"
+  update_i3_config "$DEFAULT_OUTPUT" "$DEFAULT_OUTPUT" "$DEFAULT_OUTPUT"
 fi

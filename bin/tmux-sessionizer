@@ -7,7 +7,8 @@ if [[ ${DEBUG:-0} -eq 1 ]]; then
 fi
 
 TS_CACHE="$HOME/.ts.cache"
-TS_LIST="$TS_CACHE"
+TS_SMART_CACHE="$HOME/.ts.smart.cache"
+TS_LIST="$TS_SMART_CACHE"
 FILTER_CACHE='asdf|\.terraform/modules'
 
 FZF_QUERY=""
@@ -54,7 +55,7 @@ while getopts ":ahr" opt; do
       exit 0
       ;;
     r)
-      rm -f "$TS_CACHE"
+      rm -f "$TS_CACHE" "$TS_SMART_CACHE"
       ;;
     \?)
       echo "Invalid option: -$OPTARG" >&2
@@ -69,12 +70,18 @@ if [[ $# -eq 1 ]]; then
 fi
 
 # Create the cache file if it doesn't exist
-if [[ ! -f "$TS_CACHE" ]]; then
+if [[ ! -f "$TS_CACHE" || ! -f "$TS_SMART_CACHE" ]]; then
   { find $TMUX_DIR_BASES -type d -name '.git'; find $TMUX_DIR_BASES -type f -name '.git' -exec grep -l -v '/modules/' {} +; } 2>/dev/null |\
     grep -Ev "$FILTER_CACHE" |\
     sed 's#/.git$##' > "$TS_CACHE"
+
+  # Generate the sorted lists
+  sorted_autojump_stat=$(autojump --stat | awk '/^[0-9]+.[0-9]:\s+\// {print $2}' | grep -x -f "$TS_CACHE")
+  unmatched_entries=$(grep -vxFf <(echo "$sorted_autojump_stat") "$TS_CACHE" | sort)
+  echo -e "$unmatched_entries\n$sorted_autojump_stat" | tac > "$TS_SMART_CACHE"
 fi
 
+# Use the sorted list with fzf
 selected=$(fzf --select-1 --query="${FZF_QUERY-}" "${FZF_PREVIEW_ARGS[@]}" < "$TS_LIST")
 if [[ -z $selected ]]; then
   exit 0
@@ -87,16 +94,16 @@ tmux_running=$(pgrep tmux)
 
 # Brand new tmux / session
 if [[ -z ${TMUX-} && -z ${tmux_running-} ]]; then
-  tmux new-session -s $selected_name -c $selected
+  tmux -2 new-session -s $selected_name -c $selected
   exit 0
 fi
 
 if ! tmux has-session -t=$selected_name 2> /dev/null; then
-  tmux new-session -ds $selected_name -c $selected
+  tmux -2 new-session -ds $selected_name -c $selected
 fi
 
 if [[ -z ${TMUX-} ]]; then
-  tmux attach -t $selected_name
+  tmux -2 attach -t $selected_name
 else
-  tmux switch-client -t $selected_name
+  tmux -2 switch-client -t $selected_name
 fi

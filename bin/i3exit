@@ -1,6 +1,10 @@
-#!/bin/sh
+#!/bin/bash
 
-lock() {
+# Ensure the directory exists
+mkdir -p ~/.config
+exec >> ~/.config/i3exit.log 2>&1
+
+lock(){
   PICTURE=/tmp/i3lock.png
   BLUR="5x4"
 
@@ -9,6 +13,31 @@ lock() {
   i3lock -i "$PICTURE"
   rm -f "$PICTURE"
 }
+
+# Path to the lock file
+LOCKFILE="/tmp/monitor.lock"
+DISPLAY="${DISPLAY:-":0"}"
+
+toggle_screen(){
+  xrandr | grep ' connected'
+  xset -display "$DISPLAY" dpms q
+
+  # Wait for the input to settle
+  sleep 0.1
+
+  if [[ ! -f "$LOCKFILE" ]]; then
+    echo >&2 "No lockfile. Turning monitor off"
+    xset -display "$DISPLAY" dpms force standby
+    touch "$LOCKFILE"
+  else
+    echo >&2 "Lockfile detected. Turning monitor on"
+    xset -display "$DISPLAY" dpms force on
+    rm -f "$LOCKFILE"
+  fi
+}
+
+echo >&2 "----"
+echo >&2 "$0 started at $(date)"
 
 case "$1" in
   lock)
@@ -30,17 +59,13 @@ case "$1" in
     systemctl poweroff
     ;;
   togglescreen)
-    sleep 0.1
-    if xset -display "$DISPLAY" dpms q | grep -q 'Monitor is On'; then
-      xset -display "$DISPLAY" dpms force off
-    else
-      xset -display "$DISPLAY" dpms force on
-    fi
+    toggle_screen
     ;;
   *)
-    echo "Usage: $0 {lock|logout|suspend|hibernate|reboot|shutdown|screenoff}"
+    echo "Usage: $0 {lock|logout|suspend|hibernate|reboot|shutdown|togglescreen}"
     exit 2
     ;;
 esac
 
-exit 0
+echo >&2 "$0 finished at $(date)"
+echo >&2 "----"

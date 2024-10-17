@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+if [[ -z "$1" ]]; then
+    echo "Usage: $0 <profile-number> <url>"
+    exit 1
+fi
+
+PROFILE_NUMBER=$1
+shift
+
+google-chrome --profile-directory="Profile ${PROFILE_NUMBER}" "${@}"
