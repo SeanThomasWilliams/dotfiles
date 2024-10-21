@@ -87,7 +87,18 @@ load_node_settings(){
   add_to_path_if_exists "$node_bin"
 }
 
+load_ruby_settings(){
+  local path_part
+  if command -v gem &> /dev/null; then
+    GEM_PATH=$(gem environment gempath)
+    for path_part in ${GEM_PATH//:/ }; do
+      add_to_path_if_exists "$path_part"
+    done
+  fi
+}
+
 load_golang_settings(){
+  local path_part
   unset GOROOT
   # Go Settings
   GOROOT="$(go env GOROOT 2>/dev/null)"
@@ -170,8 +181,11 @@ add_to_path_if_exists(){
 }
 
 load_path_settings(){
+  local path_part
+
   # Always add these to PATH
   PATH_PREPEND=(
+    "/opt/homebrew/bin"
     "/usr/local/bin"
     "/usr/local/opt/libpq/bin"
     "/usr/local/opt/llvm/bin"
@@ -197,6 +211,7 @@ load_path_settings(){
   load_golang_settings
   load_node_settings
   load_java_settings
+  load_ruby_settings
 }
 
 load_alias_settings(){

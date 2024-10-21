@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -euo pipefail
+
 source "$HOME/.asdf/asdf.sh"
 
 touch "$HOME/.tool-versions"
@@ -18,32 +20,40 @@ PLUGIN_LIST=(
   kubectx
   kubelogin
   kustomize
-  nodejs
   packer
-  ruby
   shellcheck
   sops
   terraform
   terraform-ls
   terragrunt
   tflint
-  yarn
+
+  #nodejs
+  #ruby
+  #yarn
 )
 
-for plugin in "${PLUGIN_LIST[@]}"; do
-  if [[ -f "$HOME/.asdf/shims/$plugin" ]]; then
-    echo >&2 "Plugin $plugin already installed"
-    asdf global "$plugin" latest
-    continue
-  fi
+install_plugin() {
+  local plugin
+  plugin="$1"
+
+  cd "$HOME"
 
   echo >&2 "Adding $plugin"
-  asdf plugin add "$plugin"
+  if [[ -f "$HOME/.asdf/shims/$plugin" ]]; then
+    echo >&2 "Plugin $plugin already installed"
+  else
+    asdf plugin add "$plugin"
+  fi
+
   asdf global "$plugin" latest
   asdf install "$plugin" latest
   hash -r
   command -v "$plugin"
-done
+}
+export -f install_plugin
+
+echo "${PLUGIN_LIST[@]}" | xargs -n 1 -P 4 -I {} bash -c 'install_plugin "$@"' _ {}
 
 asdf plugin add kpt
 asdf install kpt v1.0.0-beta.24

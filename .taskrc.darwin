@@ -13,13 +13,30 @@
 # Files
 data.location=~/.task
 
-# Color theme
-include /usr/local/Cellar/task/2.5.3_1/share/doc/task/rc/dark-256.theme
+## All themes
+#include dark-16.theme
+#include dark-256.theme
+#include dark-blue-256.theme
+#include dark-gray-256.theme
+#include dark-gray-blue-256.theme
+#include dark-green-256.theme
+#include dark-red-256.theme
+#include dark-violets-256.theme
+include solarized-dark-256.theme
 
 color=on
 
-# default.due=tom
+# Preferences
+alias.burndown=burndown.daily
+active.indicator=<
+weekstart=Monday
 default.priority=M
+default.command=ready
+
+# ready [default]
+report.ready.columns=id,priority,due.relative,project,tags.list,description,urgency,start.active,recur.indicator
+report.ready.labels=ID,P,Due,Project,Tags,Description,Urg,A,R
+report.ready.sort=urgency-
 
 due=1
 monthsperline=3
@@ -33,6 +50,13 @@ report.worklog.description=Completed tasks
 report.worklog.filter=(status:completed)
 report.worklog.labels=UUID,Completed,Description
 
+# TODO report
+report.todo.sort=urgency-
+report.todo.columns=id,project,urgency,description
+report.todo.description=TODO tasks
+report.todo.filter=(status:pending)
+report.todo.labels=ID,Project,Urgency,Description
+
 # Completed report
 report.completed.sort=end
 report.completed.columns=uuid.short,entry,end,entry.age,tags,description
@@ -40,68 +64,33 @@ report.completed.description=Completed tasks
 report.completed.filter=(status:completed and end.after:'-30 days')
 report.completed.labels=UUID,Created,Completed,Age,Tags,Description
 
-# Default list report
-report.list.description=Lists all tasks matching the specified criteria
-report.list.columns=id,project,priority,due.relative,due,depends,recur,urgency,tags,description
-report.list.labels=ID,Project,Pri,Rel,Due,Depends,Recur,Score,Tags,Description & Annotation
-report.list.sort=urgency-
+#report.list.description=Lists all tasks matching the specified criteria
+#report.list.columns=id,project,priority,due.relative,due,depends,recur,urgency,tags,description
+#report.list.labels=ID,Project,Pri,Rel,Due,Depends,Recur,Score,Tags,Description & Annotation
 # report.list.sort=due+,priority-,project+
-report.list.filter=status:pending
-report.list.dateformat= a M-D
+#report.list.filter=status:pending
+#report.list.dateformat= a M-D
 alias.ls=list
 
-default.command=(due.before:5d or due: ) and status:pending list
+report.custom.columns=id,entry.age,depends,priority,project,tags,recur,scheduled.countdown,due.relative,until.remaining,description,urgency
+report.custom.description=Most urgent tasks
+report.custom.filter=status:pending limit:page
+report.custom.labels=ID,Age,Deps,P,Project,Tag,Recur,S,Due,Until,Description,Urg
+report.custom.sort=urgency-,tags-
 
-urgency.next.coefficient=25.0                   # +next tag
-urgency.due.coefficient=5.0                    # overdue or near due date
-urgency.blocking.coefficient=8.0                # blocking other tasks
-urgency.active.coefficient=4.0                  # already started tasks
-urgency.scheduled.coefficient=4.0               # scheduled tasks
-urgency.age.coefficient=0.0                     # Urgency coefficient for age
-urgency.annotations.coefficient=1.0             # has annotations
-urgency.tags.coefficient=1.0                    # has tags
-urgency.project.coefficient=1.0                 # assigned to any project
-urgency.blocked.coefficient=-50.0               # blocked by other tasks
-urgency.waiting.coefficient=-100.0              # waiting task
+report.long.sort=tags-,urgency-
+
+report.next.filter=(status:pending) # and due < now+29d)
+
+# Custom attributes
+
+urgency.annotations.coefficient=0.2 # Default 1
+urgency.tags.coefficient=0.0 # Default 1
+urgency.age.coefficient=0.3 # Default 2
+urgency.blocked.coefficient=-15 # Default: -5
+urgency.due.coefficient=6 # Default: 12.0
 
 editor=nvim
-
-uda.intheamtrelloboardid.type=string
-uda.intheamtrelloboardid.label=Inthe.AM Trello Board ID
-
-uda.intheamtrellourl.type=string
-uda.intheamtrellourl.label=Inthe.AM Trello URL
-
-uda.intheamtrelloid.type=string
-uda.intheamtrelloid.label=Inthe.AM Trello Object ID
-
-uda.intheamtrellolistid.type=string
-uda.intheamtrellolistid.label=Inthe.AM Trello List ID
-
-uda.intheamtrellodescription.type=string
-uda.intheamtrellodescription.label=Inthe.AM Trello Description
-
-uda.intheamoriginalemailsubject.type=string
-uda.intheamoriginalemailsubject.label=Inthe.AM E-mail Subject
-
-uda.intheammergedfrom.type=string
-uda.intheammergedfrom.label=Inthe.AM Duplicate Tasks Merged
-
-uda.intheamoriginalemailid.type=numeric
-uda.intheamoriginalemailid.label=Inthe.AM E-mail ID
-
-uda.intheamattachments.type=string
-uda.intheamattachments.label=Inthe.AM Attachments
-
-uda.intheamduplicateof.type=string
-uda.intheamduplicateof.label=Inthe.AM Duplicate of Task
-
-uda.intheamtrellolistname.type=string
-uda.intheamtrellolistname.label=Inthe.AM Trello List Name
-uda.intheamtrellolistname.values=To Do,Doing,Done
-
-# Incoming e-mail, SMS, etc
-urgency.user.tag.review.coefficient=99
 
 # Set case sensitive search
 search.case.sensitive=no
@@ -111,33 +100,85 @@ regex=on
 
 # Priority as UDA
 uda.priority.values=H,M,,L
-urgency.priority.coefficient=6.0
+urgency.uda.priority.L.coefficient=0
+urgency.uda.priority..coefficient=1.8
 
 # InThe.AM
-taskd.certificate=~/sync/task/private.certificate.pem
-taskd.key=~/sync/task/private.key.pem
-taskd.ca=~/sync/task/ca.cert.pem
-taskd.credentials=inthe_am/seanthomaswilliams/150193cd-ee7e-4362-922d-aa5bef2cdd2a
-taskd.server=taskwarrior.inthe.am:53589
+taskd.certificate=~/sync/task/xeed.io/sean_williams.cert.pem
+taskd.key=~/sync/task/xeed.io/sean_williams.key.pem
+taskd.ca=~/sync/task/xeed.io/ca.cert.pem
+taskd.credentials=xeed.io/Sean Williams/3458dcbb-0eda-4ac2-a34d-17e8d7369aae
+taskd.server=pihole1.ghoul-iguana.ts.net:53589
 taskd.trust=ignore hostname
 
-# Jira UDA
-uda.jira.type=string
-uda.jira.label=JIRA Issue
+# Bugwarrior UDAs
+uda.jiraissuetype.type=string
+uda.jiraissuetype.label=Issue Type
+uda.jirasummary.type=string
+uda.jirasummary.label=Jira Summary
+uda.jiraurl.type=string
+uda.jiraurl.label=Jira URL
+uda.jiradescription.type=string
+uda.jiradescription.label=Jira Description
+uda.jiraid.type=string
+uda.jiraid.label=Jira Issue ID
+uda.jiraestimate.type=numeric
+uda.jiraestimate.label=Estimate
+uda.jirafixversion.type=string
+uda.jirafixversion.label=Fix Version
+uda.jiracreatedts.type=date
+uda.jiracreatedts.label=Created At
+uda.jirastatus.type=string
+uda.jirastatus.label=Jira Status
+uda.jirasubtasks.type=string
+uda.jirasubtasks.label=Jira Subtasks
+uda.jiraparent.type=string
+uda.jiraparent.label=Jira Parent
+# END Bugwarrior UDAs
 
 # Bugwarrior UDAs
-uda.trellocard.type=string
-uda.trellocard.label=Trello card name
-uda.trellocardid.type=string
-uda.trellocardid.label=Trello card ID
-uda.trelloboard.type=string
-uda.trelloboard.label=Trello board name
-uda.trellolist.type=string
-uda.trellolist.label=Trello list name
-uda.trelloshortlink.type=string
-uda.trelloshortlink.label=Trello shortlink
-uda.trelloshorturl.type=string
-uda.trelloshorturl.label=Trello short URL
-uda.trellourl.type=string
-uda.trellourl.label=Trello URL
+uda.gitlabtitle.type=string
+uda.gitlabtitle.label=Gitlab Title
+uda.gitlabdescription.type=string
+uda.gitlabdescription.label=Gitlab Description
+uda.gitlabcreatedon.type=date
+uda.gitlabcreatedon.label=Gitlab Created
+uda.gitlabupdatedat.type=date
+uda.gitlabupdatedat.label=Gitlab Updated
+uda.gitlabduedate.type=date
+uda.gitlabduedate.label=Gitlab Due Date
+uda.gitlabmilestone.type=string
+uda.gitlabmilestone.label=Gitlab Milestone
+uda.gitlaburl.type=string
+uda.gitlaburl.label=Gitlab URL
+uda.gitlabrepo.type=string
+uda.gitlabrepo.label=Gitlab Repo Slug
+uda.gitlabtype.type=string
+uda.gitlabtype.label=Gitlab Type
+uda.gitlabnumber.type=string
+uda.gitlabnumber.label=Gitlab Issue/MR #
+uda.gitlabstate.type=string
+uda.gitlabstate.label=Gitlab Issue/MR State
+uda.gitlabupvotes.type=numeric
+uda.gitlabupvotes.label=Gitlab Upvotes
+uda.gitlabdownvotes.type=numeric
+uda.gitlabdownvotes.label=Gitlab Downvotes
+uda.gitlabwip.type=numeric
+uda.gitlabwip.label=Gitlab MR Work-In-Progress Flag
+uda.gitlabauthor.type=string
+uda.gitlabauthor.label=Gitlab Author
+uda.gitlabassignee.type=string
+uda.gitlabassignee.label=Gitlab Assignee
+uda.gitlabnamespace.type=string
+uda.gitlabnamespace.label=Gitlab Namespace
+uda.gitlabweight.type=numeric
+uda.gitlabweight.label=Gitlab Weight
 # END Bugwarrior UDAs
+
+news.version=2.6.0
+uda.reviewed.type=date
+uda.reviewed.label=Reviewed
+report._reviewed.description=Tasksh review report.  Adjust the filter to your needs.
+report._reviewed.columns=uuid
+report._reviewed.sort=reviewed+,modified+
+report._reviewed.filter=( reviewed.none: or reviewed.before:now-6days ) and ( +PENDING or +WAITING )

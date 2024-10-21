@@ -25,9 +25,6 @@ data.location=~/.task
 #include solarized-dark-256.theme
 include /usr/share/doc/task/rc/solarized-dark-256.theme
 
-# Include US holidays
-# include holidays.en-US.rc
-
 color=on
 
 # Preferences
