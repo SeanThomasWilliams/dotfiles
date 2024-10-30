@@ -322,7 +322,6 @@ load_lang_settings(){
 load_extra_source_files(){
   ### source workstation-specific
   SOURCEFILES=(
-    "$HOME/.local.alias"
     "$HOME/.fzf.bash"
     "$HOME/.local/share/bash-completion/*.bash"
     "$HOME/anaconda3/etc/profile.d/*.sh"
@@ -343,6 +342,13 @@ load_extra_source_files(){
       done
     fi
   done
+}
+
+load_local_alias(){
+  local_alias="$HOME/.local.alias"
+  if [[ -f "$local_alias" ]]; then
+    source "$local_alias"
+  fi
 }
 
 parse_git_branch() {
@@ -380,3 +386,4 @@ load_extra_source_files
 load_ps1_settings
 load_alias_settings
 fix_path_ordering
+load_local_alias

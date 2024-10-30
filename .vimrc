@@ -30,7 +30,6 @@ Plug 'hrsh7th/cmp-path'
 Plug 'hrsh7th/nvim-cmp'
 Plug 'jacoborus/tender.vim'
 Plug 'jose-elias-alvarez/null-ls.nvim'
-Plug 'joshuavial/aider.nvim'
 Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'junegunn/fzf.vim'
 Plug 'leafgarland/typescript-vim'
@@ -570,9 +569,6 @@ noremap <silent> }} :s/^/  /e<CR>:nohlsearch<CR>
 "noremap <silent> <leader>cu :<C-B>silent <C-E>s/^\V<C-R>=escape(b:comment_leader,'\/')<CR>//e<CR>:nohlsearch<CR>
 "omnicomplete
 " inoremap <C-Space> <C-X><C-I>
-
-nnoremap <silent> <leader>oa :lua AiderOpen()<CR>
-nnoremap <silent> <leader>ob :lua AiderBackground()<CR>
 
 " Resize splits
 nnoremap <silent> + :exe "vertical resize " . (winwidth(0) * 4/3)<CR>

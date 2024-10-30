@@ -11,10 +11,6 @@ local has_words_before = function()
   return col ~= 0 and vim.api.nvim_buf_get_text(0, line-1, 0, line-1, col, {})[1]:match("^%s*$") == nil
 end
 
-require('aider').setup({
-  default_bindings = false
-})
-
 --- sops
 require('nvim_sops').setup({
   enabled = true,

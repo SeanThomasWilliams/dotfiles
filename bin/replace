@@ -31,6 +31,12 @@ Options:
 EOF
 }
 
+sed="sed"
+
+if command -v gsed &> /dev/null; then
+  export sed="gsed"
+fi
+
 if [[ -n ${DEBUG-} ]]; then
   set -x
 fi
@@ -75,7 +81,7 @@ fi
 
 if [[ $# -ge 1 ]]; then
   # Escape special characters
-  FIND_STRING=$(printf "%s" "$1" | sed -e 's/[]\/$*.^[]/\\&/g')
+  FIND_STRING=$(printf "%s" "$1" | $sed -e 's/[]\/$*.^[]/\\&/g')
   shift
 fi
 
@@ -111,19 +117,19 @@ FIND_CMD=(
   find "${FIND_GLOBAL_ARGS[@]}"
   -type f \
   -ipath "$FILE_GLOB"
-  -printf '%p\0'
+  -print0
 )
 
 if [[ -z ${REPLACE_STRING-} ]]; then
   echo >&2 "Preview of matching files contents: "
   "${FIND_CMD[@]}" 2>/dev/null |\
-    sed --null-data 's#^\./##' |\
+    $sed --null-data 's#^\./##' |\
     grep --null-data -Ev "${IGNORE_PATTERN}" |\
     xargs -0 grep --color -- "$FIND_STRING"
   exit
 fi
 
 "${FIND_CMD[@]}" 2>/dev/null |\
-  sed --null-data 's#^\./##' |\
+  $sed --null-data 's#^\./##' |\
   grep --null-data -Ev "${IGNORE_PATTERN}" |\
-  xargs -0 sed -i "s#$FIND_STRING#$REPLACE_STRING#g"
+  xargs -0 $sed -i "s#$FIND_STRING#$REPLACE_STRING#g"
