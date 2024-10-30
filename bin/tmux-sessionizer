@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -uo pipefail
+set -euo pipefail
 
 if [[ ${DEBUG:-0} -eq 1 ]]; then
   set -x
@@ -31,6 +31,13 @@ Environment Variables:
   FILTER_CACHE:   Exclude directories that match this regex from the cache
   DEBUG:          Set to 1 to enable debug mode
 EOF
+}
+
+refresh_cache(){
+  # Refresh cache if it's older than 60 minutes
+  if [[ -f "$TS_CACHE" && -f "$TS_SMART_CACHE" ]]; then
+    find "$TS_CACHE" "$TS_SMART_CACHE" -type f -mmin +300 -exec rm -f {} \;
+  fi
 }
 
 if [[ -z ${TMUX_DIR_BASES-} ]]; then
@@ -87,23 +94,30 @@ if [[ -z $selected ]]; then
   exit 0
 fi
 
+refresh_cache &
+
 selected_name=$(echo "$selected" |\
   sed "s#$HOME/##;s#.*\.com/##" |\
   awk -F'/' 'BEGIN{OFS="/"} {gsub(/\./, "_", $0)} NF >= 3 {print substr($1, 1, 4),$(NF-1),$NF}; NF < 3 {print $(NF-1),$NF}')
 tmux_running=$(pgrep tmux)
 
-# Brand new tmux / session
+# We are not inside tmux and tmux is not running
 if [[ -z ${TMUX-} && -z ${tmux_running-} ]]; then
+  # Start a new session and enter it
   tmux -2 new-session -s $selected_name -c $selected
   exit 0
 fi
 
+# Tmux is running. Check if session exists
 if ! tmux has-session -t=$selected_name 2> /dev/null; then
-  tmux -2 new-session -ds $selected_name -c $selected
+  # Create the session and detach
+  tmux -2 new-session -ds "$selected_name" -c "$selected"
 fi
 
 if [[ -z ${TMUX-} ]]; then
-  tmux -2 attach -t $selected_name
+  # Attach to the session if outside tmux
+  tmux -2 attach -t "$selected_name"
 else
-  tmux -2 switch-client -t $selected_name
+  # Switch the client to the session if inside tmux
+  tmux -2 switch-client -t "$selected_name"
 fi
