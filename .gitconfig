@@ -91,7 +91,7 @@
 	keepBackup = false
 
 [mergetool "nvimdiff"]
-	cmd = "nvim -d -u ~/.vimrc \"$LOCAL\" \"$MERGED\" \"$REMOTE\""
+	cmd = "nvim -d -u ~/.vimrc \"$LOCAL\" \"$MERGED\""
 
 [delta]
 	navigate = true    # use n and N to move between diff sections

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -euo pipefail
+set -uo pipefail
 
 if [[ ${DEBUG:-0} -eq 1 ]]; then
   set -x
@@ -12,7 +12,9 @@ TS_LIST="$TS_SMART_CACHE"
 FILTER_CACHE='asdf|\.terraform/modules'
 
 FZF_QUERY=""
-FZF_PREVIEW_ARGS=()
+FZF_PREVIEW_ARGS=(
+  --select-1
+)
 
 usage(){
   cat >&2 <<EOF
@@ -34,10 +36,25 @@ EOF
 }
 
 refresh_cache(){
+  # Create the cache file if it doesn't exist
+  if [[ ! -f "$TS_CACHE" || ! -f "$TS_SMART_CACHE" ]]; then
+    { find $TMUX_DIR_BASES -type d -name '.git'; find $TMUX_DIR_BASES -type f -name '.git' -exec grep -l -v '/modules/' {} +; } 2>/dev/null |\
+      grep -Ev "$FILTER_CACHE" |\
+      sed 's#/.git$##' > "$TS_CACHE"
+
+    # Generate the sorted lists
+    sorted_autojump_stat=$(autojump --stat | awk '/^[0-9]+.[0-9]:\s+\// {print $2}' | grep -x -f "$TS_CACHE")
+    unmatched_entries=$(grep -vxFf <(echo "$sorted_autojump_stat") "$TS_CACHE" | sort)
+    echo -e "$unmatched_entries\n$sorted_autojump_stat" | tac > "$TS_SMART_CACHE"
+  fi
+}
+
+expire_cache(){
   # Refresh cache if it's older than 60 minutes
   if [[ -f "$TS_CACHE" && -f "$TS_SMART_CACHE" ]]; then
-    find "$TS_CACHE" "$TS_SMART_CACHE" -type f -mmin +300 -exec rm -f {} \;
+    find "$TS_CACHE" "$TS_SMART_CACHE" -type f -mmin +600 -exec rm -f {} \;
   fi
+  refresh_cache
 }
 
 if [[ -z ${TMUX_DIR_BASES-} ]]; then
@@ -76,25 +93,13 @@ if [[ $# -eq 1 ]]; then
   FZF_QUERY="$1"
 fi
 
-# Create the cache file if it doesn't exist
-if [[ ! -f "$TS_CACHE" || ! -f "$TS_SMART_CACHE" ]]; then
-  { find $TMUX_DIR_BASES -type d -name '.git'; find $TMUX_DIR_BASES -type f -name '.git' -exec grep -l -v '/modules/' {} +; } 2>/dev/null |\
-    grep -Ev "$FILTER_CACHE" |\
-    sed 's#/.git$##' > "$TS_CACHE"
-
-  # Generate the sorted lists
-  sorted_autojump_stat=$(autojump --stat | awk '/^[0-9]+.[0-9]:\s+\// {print $2}' | grep -x -f "$TS_CACHE")
-  unmatched_entries=$(grep -vxFf <(echo "$sorted_autojump_stat") "$TS_CACHE" | sort)
-  echo -e "$unmatched_entries\n$sorted_autojump_stat" | tac > "$TS_SMART_CACHE"
-fi
+refresh_cache
 
 # Use the sorted list with fzf
-selected=$(fzf --select-1 --query="${FZF_QUERY-}" "${FZF_PREVIEW_ARGS[@]}" < "$TS_LIST")
+selected=$(fzf --query="${FZF_QUERY-}" "${FZF_PREVIEW_ARGS[@]}" < "$TS_LIST")
 if [[ -z $selected ]]; then
   exit 0
 fi
-
-refresh_cache &
 
 selected_name=$(echo "$selected" |\
   sed "s#$HOME/##;s#.*\.com/##" |\
@@ -107,6 +112,8 @@ if [[ -z ${TMUX-} && -z ${tmux_running-} ]]; then
   tmux -2 new-session -s $selected_name -c $selected
   exit 0
 fi
+
+expire_cache &
 
 # Tmux is running. Check if session exists
 if ! tmux has-session -t=$selected_name 2> /dev/null; then
