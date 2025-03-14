@@ -53,7 +53,7 @@ install_plugin() {
 }
 export -f install_plugin
 
-echo "${PLUGIN_LIST[@]}" | xargs -n 1 -P 4 -I {} bash -c 'install_plugin "$@"' _ {}
+echo "${PLUGIN_LIST[@]}" | xargs -n 1 -P 4 bash -c 'install_plugin "$@"' _
 
 asdf plugin add kpt
 asdf install kpt v1.0.0-beta.24

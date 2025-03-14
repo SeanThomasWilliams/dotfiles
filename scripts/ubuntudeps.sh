@@ -65,7 +65,6 @@ CLI_PACKAGES=(
   htop
   imagemagick
   jq
-  libaio1
   libbcpkix-java
   libbcprov-java
   libbctls-java
