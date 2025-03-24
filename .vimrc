@@ -10,14 +10,13 @@
 set nocompatible " Required
 
 call plug#begin('~/.vim/plugged')
+Plug 'MunifTanjim/nui.nvim'
+Plug 'SirVer/ultisnips'
+Plug 'ThePrimeagen/harpoon', { 'branch': 'harpoon2' }
 Plug 'airblade/vim-gitgutter'
 Plug 'benekastah/neomake'
 Plug 'bling/vim-airline'
 Plug 'ekalinin/Dockerfile.vim'
-Plug 'Ivo-Donchev/vim-react-goto-definition'
-Plug 'MunifTanjim/nui.nvim'
-Plug 'SirVer/ultisnips'
-Plug 'ThePrimeagen/harpoon', { 'branch': 'harpoon2' }
 Plug 'ellisonleao/gruvbox.nvim'
 Plug 'fatih/vim-go', { 'tag': '*' }
 Plug 'folke/tokyonight.nvim', { 'branch': 'main' }
@@ -42,6 +41,7 @@ Plug 'mustache/vim-mustache-handlebars'
 Plug 'neovim/nvim-lspconfig', { 'do': 'npm i -g pyright' }
 Plug 'nvim-lua/lsp-status.nvim'
 Plug 'nvim-lua/plenary.nvim'
+Plug 'nvim-tree/nvim-web-devicons'
 Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}  " We recommend updating the parsers on update
 Plug 'pangloss/vim-javascript'
 Plug 'pearofducks/ansible-vim'
@@ -54,6 +54,7 @@ Plug 'sbdchd/neoformat'
 Plug 'seanthomaswilliams/dwm.vim'
 Plug 'seanthomaswilliams/markdown-preview.nvim', { 'do': 'cd app && yarn install' }
 Plug 'shmup/vim-sql-syntax'
+Plug 'stevearc/dressing.nvim'
 Plug 'towolf/vim-helm'
 Plug 'tpope/vim-dispatch'
 Plug 'tpope/vim-fugitive'
@@ -61,8 +62,10 @@ Plug 'tpope/vim-surround'
 Plug 'vim-perl/vim-perl'
 Plug 'vimwiki/vimwiki'
 Plug 'will133/vim-dirdiff'
+Plug 'yetone/avante.nvim', { 'branch': 'main', 'do': 'make' }
 Plug 'zbirenbaum/copilot-cmp'
 Plug 'zbirenbaum/copilot.lua'
+
 " Required, plugins available after.
 call plug#end()
 
@@ -219,7 +222,7 @@ set splitright                  " Split vertical windows right to the current wi
 set switchbuf=useopen
 set synmaxcol=500 " Don't try to highlight lines longer than X characters.
 set cmdheight=1
-set laststatus=2 " Always have a status line regardless
+set laststatus=3 " Always have a status line regardless (per neovim)
 set modeline
 set modelines=5
 set numberwidth=5

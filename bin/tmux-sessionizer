@@ -22,6 +22,7 @@ Usage: tmux-sessionizer [-r] [-h] [FZF_QUERY]
 
 Options:
   -a  Search active tmux sessions
+  -l  List active tmux sessions
   -r  Refresh the cache
   -h  Show this help message
 
@@ -64,15 +65,29 @@ if [[ -z ${TMUX_DIR_BASES-} ]]; then
 fi
 
 # Parse arguments
-while getopts ":ahr" opt; do
+while getopts ":ahklr" opt; do
   case $opt in
     a)
       TS_LIST="/tmp/.ts.active"
       tmux list-sessions -F "#{session_name}" > "$TS_LIST"
       FZF_PREVIEW_ARGS=(
+        --select-1
         --preview 'tmux capture-pane -J -p -e -t {}'
         --preview-window 'down:80%'
       )
+      ;;
+    k)
+      KILL_SESSION=1
+      tmux list-sessions -F "#{session_name}" > "$TS_LIST"
+      FZF_PREVIEW_ARGS=(
+        --preview 'tmux capture-pane -J -p -e -t {}'
+        --preview-window 'down:80%'
+      )
+      ;;
+    l)
+      echo >&2 "Active TMUX sessions:"
+      tmux list-sessions -F "#{session_name}"
+      exit 0
       ;;
     h)
       usage
@@ -98,6 +113,12 @@ refresh_cache
 # Use the sorted list with fzf
 selected=$(fzf --query="${FZF_QUERY-}" "${FZF_PREVIEW_ARGS[@]}" < "$TS_LIST")
 if [[ -z $selected ]]; then
+  exit 0
+fi
+
+if [[ -n ${KILL_SESSION-} ]]; then
+  echo >&2 "Killing session: $selected"
+  tmux kill-session -t "$selected"
   exit 0
 fi
 

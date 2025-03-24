@@ -178,6 +178,13 @@ local on_attach = function(client, bufnr)
     buf_set_keymap("n", "<space>f", "<cmd>lua vim.lsp.buf.formatting()<CR>", opts)
 end
 
+local cmp = require('cmp')
+cmp.setup({
+    sources = cmp.config.sources({
+        { name = 'render-markdown' },
+    }),
+})
+
 cmp.setup({
   snippet = {
     expand = function(args)
@@ -226,9 +233,9 @@ cmp.setup({
     { name = "nvim_lsp", group_index = 2 },
     { name = "path", group_index = 2 },
     { name = "buffer", group_index = 2 },
+    { name = 'render-markdown', group_index = 2 },
   },
 })
-
 
 -- Use buffer source for `/` and `?` (if you enabled `native_menu`, this won't work anymore).
 cmp.setup.cmdline({ '/', '?' }, {
@@ -317,3 +324,46 @@ vim.keymap.set("n", "<leader>4", function() harpoon:list():select(4) end)
 -- Toggle previous & next buffers stored within Harpoon list
 vim.keymap.set("n", "<C-N>", function() harpoon:list():next() end)
 vim.keymap.set("n", "<C-M>", function() harpoon:list():prev() end)
+
+require('avante_lib').load()
+require('avante').setup ({
+  provider = "claude",
+  openai = {
+    endpoint = "https://api.openai.com/v1",
+    model = "gpt-4o-mini",
+    timeout = 30000, -- timeout in milliseconds
+    temperature = 0, -- adjust if needed
+    max_tokens = 8192,
+  },
+  claude = {
+    endpoint = "https://api.anthropic.com",
+    model = "claude-3-5-sonnet-20241022",
+    temperature = 0,
+    max_tokens = 4096,
+  },
+  gemini = {
+    endpoint = "https://generativelanguage.googleapis.com/v1beta/models",
+    --model = "gemini-1.5-flash-latest",
+    model = "gemini-2.0-flash",
+    timeout = 30000, -- Timeout in milliseconds
+    temperature = 0,
+    max_tokens = 4096,
+  },
+})
+
+require('nvim-web-devicons').setup {
+ -- globally enable different highlight colors per icon (default to true)
+ -- if set to false all icons will have the default icon's color
+ color_icons = true;
+ -- globally enable default icons (default to false)
+ -- will get overriden by `get_icons` option
+ default = true;
+ -- globally enable "strict" selection of icons - icon will be looked up in
+ -- different tables, first by filename, and if not found by extension; this
+ -- prevents cases when file doesn't have any extension but still gets some icon
+ -- because its name happened to match some extension (default to false)
+ strict = true;
+ -- set the light or dark variant manually, instead of relying on `background`
+ -- (default to nil)
+ variant = "dark";
+}

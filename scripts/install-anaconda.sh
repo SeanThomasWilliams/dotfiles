@@ -2,7 +2,7 @@
 
 set -eux
 
-VERSION=2023.09-0
+VERSION=latest
 ANACONDA_INSTALLER_NAME="Anaconda3-$VERSION-Linux-x86_64.sh"
 ANACONDA_INSTALLER_PATH="$HOME/software/Anaconda3-$VERSION-Linux-x86_64.sh"
 

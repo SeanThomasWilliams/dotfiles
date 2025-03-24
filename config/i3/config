@@ -65,11 +65,11 @@ set $refresh_i3status killall -SIGUSR1 i3status
 bindsym XF86AudioRaiseVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ +10%
 bindsym XF86AudioLowerVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ -10%
 bindsym XF86AudioMute exec --no-startup-id pactl set-source-mute @DEFAULT_SOURCE@ toggle
-# bindsym XF86AudioMicMute exec --no-startup-id pactl set-source-mute @DEFAULT_SOURCE@ toggle && $refresh_i3status
+bindsym XF86AudioMicMute exec --no-startup-id pactl set-source-mute @DEFAULT_SOURCE@ toggle
 
 # Volume changes without toggling 'keypad'
 # bindsym Print exec --no-startup-id pactl set-source-mute @DEFAULT_SOURCE@ toggle
-bindsym Print exec --no-startup-id toggle-sound
+bindsym Print exec --no-startup-id pactl set-source-mute @DEFAULT_SOURCE@ toggle
 bindsym Scroll_Lock exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ -10%
 bindsym Pause exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ +10%
 
