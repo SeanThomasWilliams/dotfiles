@@ -1,10 +1,9 @@
 #!/bin/bash
 # shellcheck disable=SC2034,SC2016
 
-set -u
 set -o pipefail
 
-if [[ ${DEBUG-} -eq 1 ]]; then
+if [[ ${DEBUG:-0} -eq 1 ]]; then
   set -x
 fi
 
@@ -49,9 +48,9 @@ DEFAULT_BRIGHTNESS="${DEFAULT_BRIGHTNESS:-"1.0"}"
 echo >&2 "Default output: $DEFAULT_OUTPUT @ $DEFAULT_RESOLUTION"
 
 XRANDR=$(xrandr)
-
 DP_0_CONNECTED=$(echo  -e "$XRANDR" | awk '$2 == "connected" && $1 !~ "eDP-1" {print $1}' | grep 'DP-0$')
 DP_1_CONNECTED=$(echo  -e "$XRANDR" | awk '$2 == "connected" && $1 !~ "eDP-1" {print $1}' | grep 'DP-1$')
+DISPLAY_PORT_1_CONNECTED=$(echo  -e "$XRANDR" | awk '$2 == "connected" && $1 !~ "eDP-1" {print $1}' | grep 'DisplayPort-1$')
 DP_2_CONNECTED=$(echo  -e "$XRANDR" | awk '$2 == "connected" && $1 !~ "eDP-1" {print $1}' | grep 'DP-2$')
 DP_3_CONNECTED=$(echo  -e "$XRANDR" | awk '$2 == "connected" && $1 !~ "eDP-1" {print $1}' | grep 'DP-3$')
 DP_4_CONNECTED=$(echo  -e "$XRANDR" | awk '$2 == "connected" && $1 !~ "eDP-1" {print $1}' | grep 'DP-4$')
@@ -213,6 +212,11 @@ elif [[ -n ${DP_1_CONNECTED-} ]]; then
   xrandr --output "$DEFAULT_OUTPUT" --mode "$DEFAULT_RESOLUTION" --primary \
     --output DP-1 --rotate normal --left-of "$DEFAULT_OUTPUT"
   update_i3_config "$DEFAULT_OUTPUT" "DP-1" "$DEFAULT_OUTPUT"
+elif [[ -n ${DISPLAY_PORT_1_CONNECTED-} ]]; then
+  echo >&2 "Using DisplayPort-1 and internal"
+  xrandr --output "$DEFAULT_OUTPUT" --mode "$DEFAULT_RESOLUTION" --primary \
+    --output DisplayPort-1 --rotate normal --right-of "$DEFAULT_OUTPUT"
+  update_i3_config "$DEFAULT_OUTPUT" "$DEFAULT_OUTPUT" "DisplayPort-1"
 else
   echo >&2 "No monitor detected, forcing on"
   echo >&2 "xset settings:"
