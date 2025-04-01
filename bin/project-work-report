@@ -262,6 +262,8 @@ render_report(){
     -t html \
     -o "${WORK_SUMMARY_FILE%.*}.html" "$WORK_SUMMARY_FILE"
 
+  echo >&2 "Report generated at ${WORK_SUMMARY_FILE}"
+
   if [[ -z ${NO_BROWSER-} ]]; then
     open "${WORK_SUMMARY_FILE%.*}.html"
   fi
