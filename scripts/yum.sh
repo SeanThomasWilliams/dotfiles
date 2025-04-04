@@ -11,6 +11,7 @@ sudo yum install --allowerasing -y \
   automake \
   cmake \
   curl \
+  fuse3 \
   gcc \
   gcc-c++ \
   gettext \
