@@ -2,6 +2,7 @@
 
 set -eu
 set -o pipefail
+set -x
 
 CERT_BUNDLE="unclass-certificates_pkcs7_DoD" \
 CERT_URL_PREFIX="https://dl.dod.cyber.mil/wp-content/uploads/pki-pke/zip" \

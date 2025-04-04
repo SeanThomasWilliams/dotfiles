@@ -5,8 +5,8 @@ if command -v amazon-linux-extras >/dev/null; then
 	sudo yum -y install htop dstat
 fi
 
-sudo yum groups install -y Development\ tools
-sudo yum install -y \
+sudo yum groups install -y --allowerasing Development\ tools
+sudo yum install --allowerasing -y \
   autoconf \
   automake \
   cmake \
@@ -14,6 +14,8 @@ sudo yum install -y \
   gcc \
   gcc-c++ \
   gettext \
+  gnupg2 \
+  golang \
   icu \
   libtool \
   libuuid-devel \
@@ -25,6 +27,7 @@ sudo yum install -y \
   ncurses \
   ncurses-devel \
   ncurses-libs \
+  nodejs20-npm \
   openscap-scanner \
   openscap-utils \
   openssl-devel \
@@ -33,6 +36,8 @@ sudo yum install -y \
   pkgconfig \
   python3 \
   readline-devel \
+  ruby \
+  ruby-devel \
   tmux \
   unzip \
   uuid \

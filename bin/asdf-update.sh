@@ -55,6 +55,6 @@ cd "$HOME"
 asdf install "$PLUGIN_NAME" "$LATEST_VERSION"
 
 # Set global version of plugin to latest version
-asdf global "$PLUGIN_NAME" "$LATEST_VERSION"
+asdf set --home "$PLUGIN_NAME" "$LATEST_VERSION"
 
 echo >&2 "Successfully updated $PLUGIN_NAME to $LATEST_VERSION"

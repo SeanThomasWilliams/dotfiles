@@ -23,6 +23,7 @@ PLUGIN_LIST=(
   istioctl
   k3d
   k9s
+  fzf
   kubectl
   kubectx
   kubelogin
