@@ -8,7 +8,6 @@ fi
 sudo yum groups install -y Development\ tools
 sudo yum install -y \
   autoconf \
-  autojump \
   automake \
   cmake \
   curl \

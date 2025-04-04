@@ -1,23 +1,23 @@
 #!/bin/bash
 
-set -eux
+set -eux -o pipefail
 
 VERSION=latest
-ANACONDA_INSTALLER_NAME="Anaconda3-$VERSION-Linux-x86_64.sh"
-ANACONDA_INSTALLER_PATH="$HOME/software/Anaconda3-$VERSION-Linux-x86_64.sh"
+MINICONDA_INSTALLER_NAME="Miniconda3-$VERSION-Linux-x86_64.sh"
+MINICONDA_INSTALLER_PATH="$HOME/software/Anaconda3-$VERSION-Linux-x86_64.sh"
+MINICONDA_PREFIX="$HOME/anaconda3"
 
-rm -rf "$HOME/anaconda3"
+rm -rf "$MINICONDA_PREFIX"
 
 mkdir -p "$HOME/software"
 
-if [[ ! -f "$ANACONDA_INSTALLER_PATH" ]]; then
-  curl -fSsL "https://repo.continuum.io/archive/$ANACONDA_INSTALLER_NAME" -o "$ANACONDA_INSTALLER_PATH"
+if [[ ! -f "$MINICONDA_INSTALLER_PATH" ]]; then
+  curl -fSsL "https://repo.anaconda.com/miniconda/$MINICONDA_INSTALLER_NAME" -o "$MINICONDA_INSTALLER_PATH"
 fi
 
-bash "$ANACONDA_INSTALLER_PATH" -b
+bash "$MINICONDA_INSTALLER_PATH" -m -b -p "$MINICONDA_PREFIX"
 
-export PATH="$HOME/anaconda3/bin:$PATH"
+export PATH="$MINICONDA_PREFIX/bin:$PATH"
 hash -r
 
 ./pip.sh
-./generatejupyterconfig.sh

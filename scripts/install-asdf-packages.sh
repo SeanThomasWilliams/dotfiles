@@ -1,12 +1,19 @@
 #!/bin/bash
 
-set -euo pipefail
+set -uo pipefail
 
-source "$HOME/.asdf/asdf.sh"
+if ! command -v asdf &> /dev/null; then
+  echo >&2 "Install asdf first!"
+  exit 1
+fi
 
 touch "$HOME/.tool-versions"
 
 export MAKEFLAGS=-j10
+
+asdf plugin add kpt
+asdf install kpt v1.0.0-beta.24
+asdf set --home kpt v1.0.0-beta.24
 
 PLUGIN_LIST=(
   awscli
@@ -25,7 +32,6 @@ PLUGIN_LIST=(
   sops
   terraform
   terraform-ls
-  terragrunt
   tflint
 
   #nodejs
@@ -46,15 +52,11 @@ install_plugin() {
     asdf plugin add "$plugin"
   fi
 
-  asdf global "$plugin" latest
+  asdf set --home "$plugin" latest
   asdf install "$plugin" latest
   hash -r
   command -v "$plugin"
 }
 export -f install_plugin
 
-echo "${PLUGIN_LIST[@]}" | xargs -n 1 -P 4 bash -c 'install_plugin "$@"' _
-
-asdf plugin add kpt
-asdf install kpt v1.0.0-beta.24
-asdf global kpt v1.0.0-beta.24
+echo "${PLUGIN_LIST[@]}" | xargs -n 1 -P 1 bash -c 'install_plugin "$@"' _

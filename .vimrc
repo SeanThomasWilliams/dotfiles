@@ -214,7 +214,6 @@ let mapleader="\\"
 " {{{ Misc UI settings
 set encoding=utf-8
 scriptencoding utf-8
-set pastetoggle=<F4>
 set shell=bash " This makes RVM work inside Vim. I have no idea why.
 set showcmd " display incomplete commands
 set splitbelow                  " Split horizontal windows below to the current windows
