@@ -188,6 +188,9 @@
     # Maximum amount of notifications kept in history
     history_length = 20
 
+    # Number of active notifications
+    notification_limit = 5
+
     ### Misc/Advanced ###
 
     # dmenu path.

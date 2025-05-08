@@ -13,6 +13,7 @@ FILTER_CACHE='asdf|\.terraform/modules'
 
 FZF_QUERY=""
 FZF_PREVIEW_ARGS=(
+  --scheme=path
   --select-1
 )
 
@@ -78,6 +79,7 @@ while getopts ":ahklr" opt; do
       ;;
     k)
       KILL_SESSION=1
+      TS_LIST="/tmp/.ts.active"
       tmux list-sessions -F "#{session_name}" > "$TS_LIST"
       FZF_PREVIEW_ARGS=(
         --preview 'tmux capture-pane -J -p -e -t {}'
@@ -130,7 +132,7 @@ tmux_running=$(pgrep tmux)
 # We are not inside tmux and tmux is not running
 if [[ -z ${TMUX-} && -z ${tmux_running-} ]]; then
   # Start a new session and enter it
-  tmux -2 new-session -s $selected_name -c $selected
+  tmux -2 new-session -s "$selected_name" -c "$selected"
   exit 0
 fi
 

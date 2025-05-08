@@ -24,6 +24,8 @@ Options:
     Directory to search within (overridden by <TARGET_DIR>)
   -n
     Max directory depth to search
+  -s <search_pattern>
+    Search file contents using ripgrep with the given pattern
   -t
     Filetype (sh, py, etc)
   -h
@@ -32,11 +34,12 @@ EOF
 }
 
 if [[ -n ${DEBUG-} ]]; then
-  set -x
+  set -xv
 fi
 
 DEFAULT_TARGET_DIR=(*)
 TARGET_DIR=()
+SEARCH_PATTERN="" # Variable to store the search pattern for content search
 IGNORE_PATTERN='.*/\..*cache|.*/\.DS_Store|.*/\.git|.*/\.direnv|.*/\.pnpm|.*/\.terraform|.*/mod|.*node_modules|.*/vendor'
 IGNORE_PATTERN+='|^\..*cache|^\.DS_Store|^\.git|^\.direnv|^/\.pnpm|^/\.terraform|^mod|^node_modules|^vendor'
 EDITOR="${EDITOR:-vim}"
@@ -48,7 +51,7 @@ EDITOR="${EDITOR:-vim}"
 # -l is for long options with double dash like --version
 # the comma separates different long options
 # -a is for long options with single dash like -version
-options=$(getopt -o "ad:en:t:hv" -l "all,dir:,edit,name:,type:,help,verbose" -n "$0" -- "$@")
+options=$(getopt -o "ad:en:s:t:hv" -l "all,dir:,edit,name:,search-contents:,type:,help,verbose" -n "$0" -- "$@")
 
 # set --:
 # If no arguments follow this option, then the positional parameters are unset. Otherwise, the positional parameters
@@ -70,6 +73,11 @@ while true; do
     -n|--name)
       shift
       MAX_DEPTH="$1"
+      ;;
+    -s|--search-contents)
+      shift # Shift past the option
+      SEARCH_CONTENTS=1
+      SEARCH_PATTERN="$1" # Capture the argument
       ;;
     -t|--type)
       shift
@@ -113,6 +121,13 @@ if [[ -z ${TARGET_DIR-} ]]; then
   TARGET_DIR=("${DEFAULT_TARGET_DIR[@]}")
 fi
 
+# If searching contents, SEARCH_PATTERN is required
+if [[ -n ${SEARCH_CONTENTS-} ]] && [[ -z ${SEARCH_PATTERN-} ]]; then
+  echo "Error: A search pattern is required when using the -s option." >&2
+  usage
+  exit 1
+fi
+
 # Set maxdepth if directed
 FIND_GLOBAL_ARGS=(
   "${TARGET_DIR[@]}"
@@ -134,15 +149,26 @@ FIND_CMD=(
   -printf '%p\n'
 )
 
-if [[ -n ${FILE_NAME-} ]]; then
-  # Find relevant files and strip the leading './'
-  "${FIND_CMD[@]}" 2>/dev/null |\
-    grep --color -i -E "$FILE_NAME"
+# Execute find command and capture output
+FOUND_FILES=$("${FIND_CMD[@]}" 2>/dev/null)
+
+if [[ -n ${SEARCH_CONTENTS-} ]]; then
+  # Search contents of found files using ripgrep
+  # Pass the list of files via stdin
+  echo "$FOUND_FILES" | xargs -r rg --no-messages --color=always -S "$SEARCH_PATTERN"
+elif [[ -n ${FILE_NAME-} ]]; then
+  # Highlight FILE_NAME in filenames if not searching contents
+  echo "$FOUND_FILES" | grep --color=auto -i -E "$FILE_NAME"
 else
-  # Don't highlight FILE_NAME
-  "${FIND_CMD[@]}" 2>/dev/null
+  # Just list files if no FILE_NAME and not searching contents
+  echo "$FOUND_FILES"
 fi
 
 if [[ -n ${EDIT_FILES-} ]]; then
-  "$EDITOR" $("${FIND_CMD[@]}")
+  if [[ -n ${SEARCH_CONTENTS-} ]]; then
+    echo "$FOUND_FILES" | xargs -r rg --files-with-matches --no-messages -S "$SEARCH_PATTERN" | xargs -r "$EDITOR"
+  else
+    # Just list files if no FILE_NAME and not searching contents
+    echo "$FOUND_FILES" | xargs -r "$EDITOR"
+  fi
 fi

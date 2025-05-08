@@ -327,7 +327,7 @@ vim.keymap.set("n", "<C-M>", function() harpoon:list():prev() end)
 
 require('avante_lib').load()
 require('avante').setup ({
-  provider = "claude",
+  provider = "gemini",
   openai = {
     endpoint = "https://api.openai.com/v1",
     model = "gpt-4o-mini",
@@ -340,14 +340,26 @@ require('avante').setup ({
     model = "claude-3-5-sonnet-20241022",
     temperature = 0,
     max_tokens = 4096,
+    disable_tools = true,
   },
-  gemini = {
+  gemini20 = {
     endpoint = "https://generativelanguage.googleapis.com/v1beta/models",
-    --model = "gemini-1.5-flash-latest",
     model = "gemini-2.0-flash",
     timeout = 30000, -- Timeout in milliseconds
     temperature = 0,
-    max_tokens = 4096,
+    max_tokens = 8192,
+  },
+  gemini = {
+    endpoint = "https://generativelanguage.googleapis.com/v1beta/models",
+    model = "gemini-2.5-flash-preview-04-17",
+    timeout = 30000, -- Timeout in milliseconds
+    temperature = 0,
+    max_tokens = 65536,
+    generationConfig = {
+      thinkingConfig = {
+        thinkingBudget = 1024,
+      },
+    },
   },
 })
 
