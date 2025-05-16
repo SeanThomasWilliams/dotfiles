@@ -51,6 +51,8 @@ XRANDR=$(xrandr)
 DP_0_CONNECTED=$(echo  -e "$XRANDR" | awk '$2 == "connected" && $1 !~ "eDP-1" {print $1}' | grep 'DP-0$')
 DP_1_CONNECTED=$(echo  -e "$XRANDR" | awk '$2 == "connected" && $1 !~ "eDP-1" {print $1}' | grep 'DP-1$')
 DISPLAY_PORT_1_CONNECTED=$(echo  -e "$XRANDR" | awk '$2 == "connected" && $1 !~ "eDP-1" {print $1}' | grep 'DisplayPort-1$')
+DISPLAY_PORT_2_CONNECTED=$(echo  -e "$XRANDR" | awk '$2 == "connected" && $1 !~ "eDP-1" {print $1}' | grep 'DisplayPort-2$')
+DISPLAY_PORT_3_CONNECTED=$(echo  -e "$XRANDR" | awk '$2 == "connected" && $1 !~ "eDP-1" {print $1}' | grep 'DisplayPort-3$')
 DP_2_CONNECTED=$(echo  -e "$XRANDR" | awk '$2 == "connected" && $1 !~ "eDP-1" {print $1}' | grep 'DP-2$')
 DP_3_CONNECTED=$(echo  -e "$XRANDR" | awk '$2 == "connected" && $1 !~ "eDP-1" {print $1}' | grep 'DP-3$')
 DP_4_CONNECTED=$(echo  -e "$XRANDR" | awk '$2 == "connected" && $1 !~ "eDP-1" {print $1}' | grep 'DP-4$')
@@ -217,6 +219,11 @@ elif [[ -n ${DISPLAY_PORT_1_CONNECTED-} ]]; then
   xrandr --output "$DEFAULT_OUTPUT" --mode "$DEFAULT_RESOLUTION" --primary \
     --output DisplayPort-1 --rotate normal --right-of "$DEFAULT_OUTPUT"
   update_i3_config "$DEFAULT_OUTPUT" "$DEFAULT_OUTPUT" "DisplayPort-1"
+elif [[ -n ${DISPLAY_PORT_3_CONNECTED-} ]]; then
+  echo >&2 "Using DisplayPort-3 only"
+  xrandr --output "$DEFAULT_OUTPUT" --off \
+    --output DisplayPort-3 --rotate normal --primary
+  update_i3_config "DisplayPort-3" "DisplayPort-3" "DisplayPort-3"
 else
   echo >&2 "No monitor detected, forcing on"
   echo >&2 "xset settings:"
