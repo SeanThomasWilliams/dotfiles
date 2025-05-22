@@ -37,7 +37,7 @@ exec --no-startup-id xset s 1800 1800
 exec --no-startup-id xset dpms 0 0 1800
 
 # Desktop background
-exec --no-startup-id feh --bg-scale "$HOME/Pictures/mountain-smoke.jpg"
+exec --no-startup-id feh --bg-fill "$HOME/Pictures/mountain-smoke.jpg"
 
 exec_always "$HOME/anaconda3/bin/autotiling"
 
@@ -80,7 +80,7 @@ floating_modifier $mod
 bindsym $mod+Return exec i3-sensible-terminal
 
 # start a browser
-bindsym $mod+Shift+Return exec firefox -P
+bindsym $mod+Shift+Return exec firefox --ProfileManager
 
 # kill focused window
 bindsym $mod+Shift+q kill
@@ -153,7 +153,7 @@ set $ws4 "4:tmux"
 set $ws5 "5:misc"
 set $ws6 "6:chat"
 set $ws7 "7:misc"
-set $ws8 "8:zoom"
+set $ws8 "8:vpn"
 set $ws9 "9:browsers"
 set $ws10 "10:mail"
 
@@ -311,8 +311,8 @@ for_window [title="Mattermost.*" window_role="pop-up"] move to workspace $ws6
 for_window [title="YouTube Music" window_role="pop-up"] move to workspace $ws2
 for_window [title="Google Hangouts" window_role="pop-up"] move to workspace $ws2
 for_window [title="Microsoft Teams.*" window_role="pop-up"] move to workspace $ws6
-for_window [title="Zoom Cloud Meetings"] move to workspace $ws8
-for_window [title="Zoom Meeting"] move to workspace $ws8
+for_window [title="Zoom Cloud Meetings"] move to workspace $ws6
+for_window [title="Zoom Meeting"] move to workspace $ws6
 for_window [title="Cloudflare Zero Trust"] move to workspace $ws8
 
 
@@ -330,7 +330,7 @@ assign [class="[Mm]icrosoft [Tt]eams.*"] $ws6
 assign [class="[Ss]ignal"] $ws2
 assign [class="[Ss]lack"] $ws6
 assign [class="[Tt]hunderbird"] $ws10
-assign [class="[Zz]oom.*"] $ws8
+assign [class="[Rr]emote-viewer"] $ws8
 
 # Startup Apps
 # exec --no-startup-id i3-msg 'workspace $ws1; exec google-chrome --profile-directory="Default"'
@@ -340,7 +340,6 @@ exec --no-startup-id i3-msg 'workspace $ws2; exec signal-desktop'
 exec --no-startup-id i3-msg 'workspace $ws4; exec i3-sensible-terminal'
 #exec --no-startup-id i3-msg 'workspace $ws5; exec chrome-app.sh Microsoft Teams'
 exec --no-startup-id i3-msg 'workspace $ws6; exec slack'
-exec --no-startup-id i3-msg 'workspace $ws8; exec zoom-client'
 exec --no-startup-id i3-msg 'workspace $ws10; exec /usr/lib/thunderbird/thunderbird'
 
 # Let chrome appear on the correct window

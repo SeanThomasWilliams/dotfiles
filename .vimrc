@@ -276,7 +276,7 @@ set smartcase   " ... unless they contain at least one capital letter
 " }}}
 
 " {{{ Whitespace settings
-set diffopt+=internal,algorithm:patience,indent-heuristic
+set diffopt=internal,filler,closeoff,hiddenoff,context:8,algorithm:patience,indent-heuristic,linematch:60
 set nowrap                          " don't wrap lines
 set tabstop=2                       " a tab is two spaces
 set shiftround                      " Round intentations to the nearest shiftwidth
