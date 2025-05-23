@@ -6,23 +6,40 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd "$SCRIPT_DIR"
 
 # Darwin/Linux
-UNAME_S=$(uname -s)
+UNAME_S="$(uname -s)"
+HOSTNAME_S="$(hostname -s)"
+XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
+mkdir -p "$XDG_CONFIG_HOME"
 
 git submodule update --init --recursive
 
 for fname in "$SCRIPT_DIR"/.*; do
-  [[ ! -f $fname ]] && continue # Skip missing files
+  [[ ! -f $fname ]] && continue # Skip non-files
 
-  fname_base=$(basename "$fname")
   fname_src="$fname"
+  fname_base=$(basename "$fname")
   fname_target="$HOME/$fname_base"
+
+  if ! [[ "$fname_base" = *.json || "$fname_base" = *.conf || "$fname_base" = *.local ]]; then
+    if [[ "$fname_base" =~ \..*\..* ]]; then
+      echo >&2 "Skipping dotfile variant $fname"
+      continue
+    fi
+  fi
 
   # Handle os-specific config files
   if [[ -f "$fname.$UNAME_S" ]]; then
     fname_src="$fname.$UNAME_S"
+    echo >&2 "Using $fname_src for $fname"
   fi
 
-  ln -sfn "$fname_src" "$fname_target"
+  # Handle host-specific config files
+  if [[ -f "$fname.$HOSTNAME_S" ]]; then
+    fname_src="$fname.$HOSTNAME_S"
+    echo >&2 "Using $fname_src for $fname"
+  fi
+
+  ln -vsfn "$fname_src" "$fname_target"
 done
 
 # Bash-completion
@@ -31,19 +48,32 @@ rm -f "$HOME/.local/share/bash-completion"
 ln -sfn "$SCRIPT_DIR/.local/share/bash-completion" "$HOME/.local/share/"
 
 # For neovim
-mkdir -p "$HOME"/.config
-ln -sfn "$SCRIPT_DIR"/vim "$HOME"/.config/nvim
-ln -sfn "$SCRIPT_DIR"/.vimrc "$HOME"/.config/nvim/init.vim
+ln -sfn "$SCRIPT_DIR"/vim "$XDG_CONFIG_HOME/nvim"
+ln -sfn "$SCRIPT_DIR"/.vimrc "$XDG_CONFIG_HOME/nvim/init.vim"
 
 # Config dir
-mkdir -p "$HOME/.config"
-for d in "$SCRIPT_DIR"/config/*; do
-  base_dir=$(basename "$d")
-  if [[ -d "$HOME/.config/$base_dir" ]]; then
-    echo "Skipping $base_dir, already exists"
+for dname in "$SCRIPT_DIR"/config/*; do
+  dname_src="$dname"
+  dname_base=$(basename "$dname")
+  dname_target="$XDG_CONFIG_HOME/$dname_base"
+
+  if [[ "$dname_base" =~ .*\..* ]]; then
+    echo >&2 "Skipping config dir variant $dname"
     continue
   fi
-  ln -vsfn "$d" "$HOME/.config/"
+
+  # Handle os-specific config files
+  if [[ -d "$dname.$UNAME_S" ]]; then
+    dname_src="$dname.$UNAME_S"
+    echo >&2 "Using $dname_src for $dname"
+  fi
+
+  # Handle host-specific config files
+  if [[ -d "$dname.$HOSTNAME_S" ]]; then
+    dname_src="$dname.$HOSTNAME_S"
+  fi
+
+  ln -vsfn "$dname_src" "$XDG_CONFIG_HOME/$dname_base"
 done
 
 config_dirs=(
