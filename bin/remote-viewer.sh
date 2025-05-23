@@ -1,4 +1,8 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
+if [[ -f "$HOME/.local.alias" ]]; then
+  source "$HOME/.local.alias"
+fi
 
 # Pattern: <class>,<vendor>,<product>,<version>,<allow>
 # Use -1 for class/vendor/product/version to accept any value.
