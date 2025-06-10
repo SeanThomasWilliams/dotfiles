@@ -152,10 +152,12 @@ FIND_CMD=(
 # Execute find command and capture output
 FOUND_FILES=$("${FIND_CMD[@]}" 2>/dev/null)
 
+set +e
+
 if [[ -n ${SEARCH_CONTENTS-} ]]; then
   # Search contents of found files using ripgrep
   # Pass the list of files via stdin
-  echo "$FOUND_FILES" | xargs -r rg --no-messages --color=always -S "$SEARCH_PATTERN"
+  echo "$FOUND_FILES" | xargs -r rg --no-messages -S "$SEARCH_PATTERN"
 elif [[ -n ${FILE_NAME-} ]]; then
   # Highlight FILE_NAME in filenames if not searching contents
   echo "$FOUND_FILES" | grep --color=auto -i -E "$FILE_NAME"
