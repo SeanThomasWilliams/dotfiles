@@ -19,6 +19,10 @@ Options:
     Transcode all files in the directory
   -d
     Enable debug mode
+  -n
+    Dry run mode, do not move files
+  -t
+    Touch non-transcoded files and exit
   -x
     Use xargs over GNU parallel
   -h
@@ -26,16 +30,20 @@ Options:
 EOF
 }
 
-while getopts ":adhtx" opt; do
+while getopts ":adnhtx" opt; do
   case $opt in
     a)
       FIND_ARGS=()
       ;;
     d)
+      export DEBUG=1
       set -x
       ;;
+    n)
+      TRANSCODE_ARGS+=("-n")
+      ;;
     t)
-      TRANSCODE_ARGS=("-t")
+      TRANSCODE_ARGS+=("-t")
       ;;
     x)
       USE_XARGS=1
@@ -54,12 +62,13 @@ done
 shift $((OPTIND-1))
 
 if [[ $# -lt 1 ]]; then
-  echo >&2 "Usage: $0 <directory>"
+  usage
   exit 1
 fi
 
 if [[ ! -d "$1" ]]; then
   echo >&2 "Error: $1 is not a directory"
+  usage
   exit 1
 fi
 

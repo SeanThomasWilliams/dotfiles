@@ -12,7 +12,6 @@ protected_branches=(
   c1-zone-b
   dev
   develop
-  hotfix
   main
   master
   prod

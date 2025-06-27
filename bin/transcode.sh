@@ -11,12 +11,16 @@ if [[ ${DEBUG:-0} -eq 1 ]]; then
 fi
 
 # Variables
-ARCHIVE_SOURCE=0
-GPU_INDEX=0
-GPU_MODE=0
-LOG_LEVEL=info
+archive_source=0
+gpu_index=0
+gpu_node=0
+log_level=info
+video_codec_args=()
+source_args=()
+subtitle_args=(-c:s copy)
+muxer_args=()
 
-trap 'rm -f "$TMP_FILE"' ERR
+trap 'rm -f "$tmp_file"' ERR
 
 dlog(){
   if [[ ${DEBUG:-0} -eq 1 ]]; then
@@ -26,12 +30,12 @@ dlog(){
 
 usage(){
   cat >&2 <<EOF
-Usage: $0 [-t] [-g] [-i <GPU_INDEX>] <INPUT_FILE>
+Usage: $0 [-t] [-g] [-i <gpu_index>] <input_file>
 
 Options:
   -g
     Enable GPU mode
-  -i <GPU_INDEX>
+  -i <gpu_index>
     Set GPU index
   -n
     Dry run
@@ -51,16 +55,16 @@ fi
 while getopts ":ghi:nt" opt; do
   case "$opt" in
     g)
-      GPU_MODE=1
+      gpu_node=1
       ;;
     i)
-      GPU_INDEX="$OPTARG"
+      gpu_index="$OPTARG"
       ;;
     n)
-      DRY_RUN=1
+      dry_run=1
       ;;
     t)
-      TOUCH_ONLY=1
+      touch_only=1
       ;;
     h)
       usage
@@ -85,23 +89,23 @@ if [[ $# -ne 1 ]]; then
 fi
 
 # Process filenames
-INPUT_FILE="$1"
-EXT="${INPUT_FILE##*.}"
+input_file="$1"
+ext="${input_file##*.}"
 
-if [[ ${EXT} == "avi" ]]; then
-  EXT="mp4"
+if [[ $ext = "avi" ]]; then
+  ext="mp4"
 fi
 
-OUTPUT_FILE="${INPUT_FILE%.*}.${EXT}"
-ARCHIVE_FILE="${INPUT_FILE}.archive"
-TMP_FILE="${INPUT_FILE%.*}.$$.tmp.${EXT}"
-LOG_FILE="${INPUT_FILE%.*}.$$.log"
+output_file="${input_file%.*}.${ext}"
+archive_file="${input_file}.archive"
+tmp_file="${input_file%.*}.$$.tmp.${ext}"
+log_file="${input_file%.*}.$$.log"
 
-dlog "Input file: $INPUT_FILE"
-dlog "Output file: $OUTPUT_FILE"
-dlog "Archive file: $ARCHIVE_FILE"
-dlog "Temp file: $TMP_FILE"
-dlog "Log file: $LOG_FILE"
+dlog "Input file: $input_file"
+dlog "Output file: $output_file"
+dlog "Archive file: $archive_file"
+dlog "Temp file: $tmp_file"
+dlog "Log file: $log_file"
 
 is_transcoded(){
   local fname
@@ -120,7 +124,7 @@ calculate_bitrate(){
   local fname
   fname="$1"
 
-  ffprobe -v quiet -select_streams v -show_entries stream=bit_rate:format=bit_rate -of csv "$fname" |\
+  ffprobe -v quiet -select_streams v:0 -show_entries format=bit_rate -of csv "$fname" |\
     awk -F, '! /N\/A/ {print int($2/1000)}'
 }
 
@@ -148,134 +152,144 @@ extract_pix_fmt(){
   awk -F, '{gsub(/ /,""); print $2}'
 }
 
-if [[ "$INPUT_FILE" =~ .*\.tmp\.*$ ]]; then
-  echo >&2 "File: $INPUT_FILE is a tmp file. Removing and Skipping..."
-  rm -f "$INPUT_FILE"
+if [[ "$input_file" =~ .*\.tmp\.*$ ]]; then
+  echo >&2 "File: $input_file is a tmp file. Removing and Skipping..."
+  rm -f "$input_file"
   exit 0
 fi
 
-if is_transcoded "$INPUT_FILE"; then
-  dlog "File: $INPUT_FILE is already transcoded. Skipping..."
+if is_transcoded "$input_file"; then
+  dlog "File: $input_file is already transcoded. Skipping..."
   exit 0
 else
-  if [[ ${TOUCH_ONLY:-0} -eq 1 ]]; then
-    echo >&2 "Touching file: $INPUT_FILE"
-    touch "$INPUT_FILE"
+  if [[ ${touch_only:-0} -eq 1 ]]; then
+    echo >&2 "Touching file: $input_file"
+    touch "$input_file"
     exit 0
   fi
 fi
 
-file_bitrate=$(calculate_bitrate "$INPUT_FILE")
-if [[ -z "$file_bitrate" ]]; then
-  echo >&2 "Unable to determine bitrate for file: $INPUT_FILE"
+file_bitrate=$(calculate_bitrate "$input_file")
+if [[ -z "${file_bitrate-}" ]]; then
+  echo >&2 "Unable to determine bitrate for file: $input_file"
   exit 1
 fi
 
 if [[ $file_bitrate -lt 1000 ]]; then
-  BITRATE=1000
+  bitrate=1000
 elif [[ $file_bitrate -gt 2500 ]]; then
-  BITRATE=2500
+  bitrate=2500
 else
-  BITRATE="$file_bitrate"
+  bitrate="$file_bitrate"
 fi
 
-echo >&2 "Input file '$INPUT_FILE' has bitrate: '$file_bitrate'. Setting transcode bitrate to: '$BITRATE'"
+echo >&2 "Input file '$input_file' has bitrate: '$file_bitrate'. Setting transcode bitrate to: '$bitrate'"
 # Calculate max bitrate
-MAX_RATE=$((BITRATE * 3))
+max_rate=$((bitrate * 3))
 
 # Get pixel format
-PIX_FMT="$(extract_pix_fmt "$INPUT_FILE")"
-if [[ -z "$PIX_FMT" ]]; then
-  echo >&2 "Unable to determine pixel format for file: $INPUT_FILE"
+pix_fmt="$(extract_pix_fmt "$input_file")"
+if [[ -z "$pix_fmt" ]]; then
+  echo >&2 "Unable to determine pixel format for file: $input_file"
   exit 1
 fi
 
-case "${PIX_FMT}" in
+case "${pix_fmt}" in
   yuv420p|yuvj420p|yuvj444p)
-    VIDEO_ENCODING=x264
+    video_encoding=x264
     ;;
   yuv420p10le)
-    VIDEO_ENCODING=x265
+    video_encoding=x265
     ;;
   *)
-    echo >&2 "Invalid pixel format '$PIX_FMT' for file: $INPUT_FILE"
+    echo >&2 "Invalid pixel format '$pix_fmt' for file: $input_file"
     exit 1
     ;;
 esac
 
-if [[ $GPU_MODE -eq 1 ]]; then
-  echo >&2 "GPU-${GPU_INDEX} Transcoding: '$INPUT_FILE'"
-  SOURCE_ARGS="-hwaccel_device ${GPU_INDEX} -hwaccel cuda -hwaccel_output_format auto"
-  if [[ $VIDEO_ENCODING == "x264" ]]; then
-    VIDEO_ARGS=(-pix_fmt yuv420p -c:v h264_nvenc -profile:v high)
+if [[ $gpu_node -eq 1 ]]; then
+  echo >&2 "GPU-${gpu_index} Transcoding: '$input_file'"
+  source_args=(-hwaccel_device "${gpu_index}" -hwaccel cuda -hwaccel_output_format auto)
+  if [[ $video_encoding == "x264" ]]; then
+    video_codec_args=(-pix_fmt yuv420p -c:v h264_nvenc -profile:v high)
   else
-    VIDEO_ARGS=(-pix_fmt p010le -c:v hevc_nvenc)
+    video_codec_args=(-pix_fmt p010le -c:v hevc_nvenc)
   fi
-  VIDEO_ARGS+=(-rc-lookahead 20 -preset p6 -metadata composer="transcode.sh GPU")
+  video_codec_args+=(-rc-lookahead 20 -preset p6 -metadata composer="transcode.sh GPU")
   # export CUDA_DEVICE_MAX_CONNECTIONS=2
 else
-  echo >&2 "CPU Transcoding: '$INPUT_FILE'"
-  SOURCE_ARGS="-hwaccel none"
-  if [[ $VIDEO_ENCODING == "x264" ]]; then
-    VIDEO_ARGS=(-pix_fmt yuv420p -c:v libx264 -profile:v high -preset slow)
+  echo >&2 "CPU Transcoding: '$input_file'"
+  source_args=(-hwaccel none)
+  if [[ $video_encoding == "x264" ]]; then
+    video_codec_args=(-pix_fmt yuv420p -c:v libx264 -profile:v high -preset slow)
   else
-    VIDEO_ARGS=(-pix_fmt yuv420p10le -c:v libx265 -preset slow)
+    video_codec_args=(-pix_fmt yuv420p10le -c:v libx265 -preset slow)
   fi
-  VIDEO_ARGS+=(-metadata composer="transcode.sh CPU")
+  video_codec_args+=(-metadata composer="transcode.sh CPU")
+fi
+
+if [[ $ext = "mp4" ]]; then
+  subtitle_args=(-c:s mov_text)
+  muxer_args=(-movflags +faststart)
 fi
 
 # If this is a dry run, only transcode the first 10 seconds
-if [[ ${DRY_RUN:-0} -eq 1 ]]; then
-  SOURCE_ARGS="$SOURCE_ARGS -t 10"
+if [[ ${dry_run:-0} -eq 1 ]]; then
+  source_args+=(-t 10)
 fi
 
-nice -n 10 ffmpeg \
-  -y \
-  -v "$LOG_LEVEL" \
-  -hide_banner \
-  -stats_period 10s \
-  -probesize 100M \
-  -analyzeduration 250M \
-  -vsync 0 \
-  ${SOURCE_ARGS} \
-  -threads 0 \
-  -i "$INPUT_FILE" \
-  "${VIDEO_ARGS[@]}" \
-  -b:v "${BITRATE}k" \
-  -bufsize "${MAX_RATE}k" \
-  -maxrate "${MAX_RATE}k" \
-  -movflags faststart \
-  -ac 2 \
-  -b:a 128k \
-  -c:a aac \
-  -map 0:v:0 \
-  -map 0:a \
-  -max_muxing_queue_size 9999 \
-  -metadata copyright="$(basename "$INPUT_FILE")" \
-  "$TMP_FILE" 2>&1 | tee -a "$LOG_FILE"
+nice -n 10 \
+  ffmpeg \
+    -y \
+    -v "$log_level" \
+    -hide_banner \
+    -stats_period 10s \
+    -probesize 100M \
+    -analyzeduration 250M \
+    -vsync 0 \
+    "${source_args[@]}" \
+    -threads 0 \
+    -i "$input_file" \
+    "${video_codec_args[@]}" \
+    -b:v "${bitrate}k" \
+    -bufsize "${max_rate}k" \
+    -maxrate "${max_rate}k" \
+    -ac 2 \
+    -b:a 128k \
+    -c:a aac \
+    -map 0:v:0 \
+    -map 0:a \
+    -map 0:s? \
+    -map_metadata 0 \
+    -map_chapters 0 \
+    "${subtitle_args[@]}" \
+    "${muxer_args[@]}" \
+    -max_muxing_queue_size 9999 \
+    -metadata copyright="$(basename "$input_file")" \
+    "$tmp_file" 2>&1 | tee -a "$log_file"
 
-if [[ -f "$TMP_FILE" ]]; then
-  if [[ $(stat -c %s "$TMP_FILE") -eq 0 ]]; then
-    echo >&2 "File: $TMP_FILE is empty. Removing..."
-    rm -fv "$TMP_FILE"
+if [[ -f "$tmp_file" ]]; then
+  if [[ $(stat -c %s "$tmp_file") -eq 0 ]]; then
+    echo >&2 "File: $tmp_file is empty. Removing..."
+    rm -fv "$tmp_file"
     exit 1
   else
     # Success Case
-    if [[ ${DRY_RUN:-0} -eq 1 ]]; then
+    if [[ ${dry_run:-0} -eq 1 ]]; then
       echo >&2 "Dry run. Not moving files."
       exit 0
     fi
 
-    if [[ ${ARCHIVE_SOURCE:-0} -eq 1 ]]; then
-      mv -v "$INPUT_FILE" "$ARCHIVE_FILE"
+    if [[ ${archive_source:-0} -eq 1 ]]; then
+      mv -v "$input_file" "$archive_file"
     else
-      rm -f "$INPUT_FILE"
+      rm -f "$input_file"
     fi
 
-    mv -v "$TMP_FILE" "$OUTPUT_FILE"
-    rm -f "$LOG_FILE"
+    mv -v "$tmp_file" "$output_file"
+    rm -f "$log_file"
   fi
 else
-  echo >&2 "File: $TMP_FILE does not exist. Exiting..."
+  echo >&2 "File: $tmp_file does not exist. Exiting..."
   exit 1
 fi
