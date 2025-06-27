@@ -227,6 +227,8 @@ load_alias_settings(){
   alias trv='command task pro:rv'
   alias tw='command t waiting'
   alias k9s='setterm --linewrap off; k9s'
+  alias claude='claude --dangerously-skip-permissions'
+  alias gemini='gemini --yolo'
   alias terragrunt-clear-cache='find ./ -type d -name ".terragrunt-cache" -prune -exec rm -rf {} \;'
   alias terragrunt-clear-debug='find ./ -type f -name "terragrunt-debug.tfvars.json" -prune -exec rm -rf {} \;'
 

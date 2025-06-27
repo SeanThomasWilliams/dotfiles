@@ -25,4 +25,5 @@ sudo snap disconnect firefox:pcscd
 remote-viewer \
   --spice-usbredir-auto-redirect-filter="$USB_FILTER" \
   --spice-usbredir-redirect-on-connect="$USB_FILTER" \
+  --spice-disable-effects=animation \
   "spice://${SPICE_VM_HOST}:5900"
