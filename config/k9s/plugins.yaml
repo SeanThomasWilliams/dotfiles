@@ -25,6 +25,44 @@ plugins:
     args:
       - -c
       - "flux --context $CONTEXT $([ $(kubectl --context $CONTEXT get kustomizations -n $NAMESPACE $NAME -o=custom-columns=TYPE:.spec.suspend | tail -1) = \"true\" ] && echo \"resume\" || echo \"suspend\") kustomization -n $NAMESPACE $NAME &> /dev/null"
+  toggleCronjob:
+    shortCut: Shift-T
+    confirm: false
+    scopes:
+      - cj
+    description: Toggle to suspend or resume a running cronjob
+    command: kubectl
+    background: true
+    args:
+      - patch
+      - cronjobs
+      - $NAME
+      - -n
+      - $NAMESPACE
+      - --context
+      - $CONTEXT
+      - -p
+      - '{"spec" : {"suspend" : $!COL-SUSPEND }}'
+  remove_finalizers:
+    shortCut: Ctrl-F
+    confirm: true
+    scopes:
+      - all
+    description: Removes all finalizers
+    command: kubectl
+    background: true
+    args:
+      - patch
+      - --context
+      - $CONTEXT
+      - --namespace
+      - $NAMESPACE
+      - $RESOURCE_NAME.$RESOURCE_GROUP
+      - $NAME
+      - -p
+      - '{"metadata":{"finalizers":null}}'
+      - --type
+      - merge
   reconcile-git:
     shortCut: Shift-R
     confirm: false

@@ -11,6 +11,8 @@ touch "$HOME/.tool-versions"
 
 export MAKEFLAGS=-j10
 
+asdf plugin add zoxide https://github.com/nyrst/asdf-zoxide.git
+
 asdf plugin add kpt
 asdf install kpt v1.0.0-beta.24
 asdf set --home kpt v1.0.0-beta.24
@@ -34,6 +36,7 @@ PLUGIN_LIST=(
   terraform
   terraform-ls
   tflint
+  zoxide
 
   #nodejs
   #ruby

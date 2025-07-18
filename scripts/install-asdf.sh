@@ -1,5 +1,5 @@
 #!/bin/bash
 
-rm -rf ~/.asdf
+ASDF_VERSION="v0.18.0"
 
-go install github.com/asdf-vm/asdf/cmd/asdf@v0.16.0
+go install "github.com/asdf-vm/asdf/cmd/asdf@$ASDF_VERSION"
