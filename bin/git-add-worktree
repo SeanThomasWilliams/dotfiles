@@ -2,41 +2,66 @@
 
 set -euo pipefail
 
-if [[ $# -lt 1 ]]; then
-  echo >&2 "Usage: $0 [-b branch-name] [-r remote-name] <worktree-name>";
+# Initialize variables
+branch_name=""
+remote_name="origin"
+worktree_name=""
+
+# Parse arguments
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -b|--branch)
+      if [[ -n "$2" ]]; then
+        branch_name="$2"
+        shift # Consume the option argument
+      else
+        echo >&2 "Error: Option '$1' requires an argument."
+        exit 1
+      fi
+      ;;
+    -r|--remote)
+      if [[ -n "$2" ]]; then
+        remote_name="$2"
+        shift # Consume the option argument
+      else
+        echo >&2 "Error: Option '$1' requires an argument."
+        exit 1
+      fi
+      ;;
+    -*)
+      echo >&2 "Error: Invalid option: '$1'"
+      echo >&2 "Usage: $0 [-b branch-name] [-r remote-name] <worktree-name>"
+      exit 1
+      ;;
+    *)
+      # This is a positional argument, assume it's the worktree_name
+      if [[ -z "$worktree_name" ]]; then
+        worktree_name="$1"
+      else
+        echo >&2 "Error: Too many positional arguments: '$1'"
+        echo >&2 "Usage: $0 [-b branch-name] [-r remote-name] <worktree-name>"
+        exit 1
+      fi
+      ;;
+  esac
+  shift # Consume the current argument
+done
+
+# Check if worktree_name is provided
+if [[ -z "$worktree_name" ]]; then
+  echo >&2 "Error: Missing required argument <worktree-name>."
+  echo >&2 "Usage: $0 [-b branch-name] [-r remote-name] <worktree-name>"
   exit 1
 fi
 
-remote_name="origin"
-
-# Parse options
-while getopts ":b:r:" opt; do
-  case $opt in
-    b)
-      branch_name=$OPTARG
-      ;;
-    r)
-      remote_name=$OPTARG
-      ;;
-    *)
-      echo >&2 "Invalid option: -$OPTARG"
-      exit 1
-      ;;
-  esac
-done
-
-shift $((OPTIND-1))
+set -x
 
 # Get the git directory
 GIT_DIR=$(git rev-parse --git-dir | sed 's#/worktrees/.*##')
 cd "$GIT_DIR"
 
-worktree_name="$1"
+git worktree prune
 
-git worktree add "$worktree_name" ${branch_name-}
-
-if [[ -z ${branch_name-} ]]; then
-  branch_name="$(git -C "worktrees/${worktree_name}" rev-parse --abbrev-ref HEAD)"
-fi
-
-git -C "worktrees/${worktree_name}" push -u "${remote_name}" "${branch_name}"
+# Add the worktree
+# If branch_name is empty, git worktree add will create a new branch based on HEAD
+git worktree add --force "$worktree_name" ${branch_name:+"$branch_name"}
