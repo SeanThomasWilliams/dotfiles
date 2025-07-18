@@ -24,6 +24,9 @@
 .Makefile.*
 .aider*
 .asdf/
+.claude*
+.claude/
+.claude/*
 .direnv/
 .env*
 .ipython
@@ -43,6 +46,12 @@
 /vim/plugged/
 /vim/tmp/
 Anaconda*.sh
+CLAUDE*.md
+DELTA*.md
+STATUS.md
+TODO*.md
+TODO.md
+TODO.txt
 __pycache__
 asdf/
 init.vim
@@ -56,4 +65,6 @@ tags.files
 tags.lock
 tags.temp
 temp
+uploads/
+usage_tracking*.json
 yarn.lock

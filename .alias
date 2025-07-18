@@ -183,6 +183,8 @@ add_to_path_if_exists(){
 load_path_settings(){
   local path_part
 
+  export ASDF_DATA_DIR="$HOME/.asdf"
+
   # Always add these to PATH
   PATH_PREPEND=(
     "/opt/homebrew/bin"
@@ -196,7 +198,7 @@ load_path_settings(){
     "$HOME/.cargo/bin"
     "$HOME/.yarn/bin"
     "$HOME/.local/bin"
-    "$HOME/.asdf/shims"
+    "$ASDF_DATA_DIR/shims"
   )
 
   for path_part in "${PATH_PREPEND[@]}"; do
@@ -325,7 +327,6 @@ load_extra_source_files(){
     "$HOME/.fzf.bash"
     "$HOME/.local/share/bash-completion/*.bash"
     "$HOME/anaconda3/etc/profile.d/*.sh"
-    "$HOME/.asdf/asdf.sh"
     "$HOME/.asdf/completions/asdf.bash"
     "/usr/local/etc/profile.d/autojump.sh"
     "/usr/share/autojump/*.bash"
@@ -374,6 +375,8 @@ load_shell_settings(){
 
   export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
   export DOCKER_CONFIG="$HOME/.docker"
+  bind 'set show-all-if-ambiguous on'
+  bind 'TAB:menu-complete'
 }
 
 load_shell_settings
