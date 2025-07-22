@@ -324,6 +324,7 @@ load_lang_settings(){
 load_extra_source_files(){
   ### source workstation-specific
   SOURCEFILES=(
+    "/usr/share/bash-completion/bash_completion"
     "$HOME/.fzf.bash"
     "$HOME/.local/share/bash-completion/*.bash"
     "$HOME/anaconda3/etc/profile.d/*.sh"
