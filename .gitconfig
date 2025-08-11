@@ -1,7 +1,7 @@
 [user]
 	name = Sean Williams
 	email = sean@xeed.io
-	signingkey = D911E4AB259CE385
+	signingkey = 28E9D570C5261D1B
 
 [core]
 	editor = nvim
@@ -154,3 +154,7 @@
 
 [worktree]
 	guessRemote = true
+[commit]
+	gpgsign = true
+[tag]
+	gpgSign = true

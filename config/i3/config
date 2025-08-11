@@ -37,7 +37,8 @@ exec --no-startup-id xset s 1800 1800
 exec --no-startup-id xset dpms 0 0 1800
 
 # Desktop background
-exec --no-startup-id feh --bg-fill "$HOME/Pictures/mountain-smoke.jpg"
+#exec --no-startup-id feh --bg-fill "$HOME/Pictures/mountain-smoke.jpg"
+exec --no-startup-id feh --bg-fill "$HOME/Pictures/lake-monroe.jpg"
 
 exec_always "$HOME/anaconda3/bin/autotiling"
 

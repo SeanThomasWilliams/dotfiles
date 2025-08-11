@@ -1,5 +1,6 @@
 !*.manifest
 !.ipython/profile_default/ipython_config.py
+*.backup
 *.bak
 *.deb
 *.gz
@@ -20,6 +21,10 @@
 *.tgz
 *.tmp
 *.zip
+*PLAN.md
+*REQUIREMENT*.md
+*STATUS*.md
+*status*.md
 .DS_Store
 .Makefile.*
 .aider*
@@ -52,9 +57,15 @@ STATUS.md
 TODO*.md
 TODO.md
 TODO.txt
+[0-9][0-9]*-[A-Za-z-]*.md
+[A-Z]*-[A-Z-]*.md
+[A-Z]*_[A-Z-]*.md
 __pycache__
+ai_docs/
+ai_scripts/
 asdf/
 init.vim
+issues/*.md
 mermaid-filter.err
 node_modules/
 package-lock.json

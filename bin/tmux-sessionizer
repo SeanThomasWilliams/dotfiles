@@ -125,7 +125,7 @@ if [[ -n ${KILL_SESSION-} ]]; then
 fi
 
 selected_name=$(echo "$selected" |\
-  sed "s#$HOME/##;s#.*\.com/##" |\
+  sed "s#$HOME/##;s#.*\.com/##;s#.*\.mil/##" |\
   awk -F'/' 'BEGIN{OFS="/"} {gsub(/\./, "_", $0)} NF >= 3 {print substr($1, 1, 4),$(NF-1),$NF}; NF < 3 {print $(NF-1),$NF}')
 tmux_running=$(pgrep tmux)
 

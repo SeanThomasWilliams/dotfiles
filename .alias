@@ -377,7 +377,6 @@ load_shell_settings(){
   export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
   export DOCKER_CONFIG="$HOME/.docker"
   bind 'set show-all-if-ambiguous on'
-  bind 'TAB:menu-complete'
 }
 
 load_shell_settings

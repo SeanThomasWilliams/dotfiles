@@ -8,6 +8,7 @@ if [[ $# -ne 1 ]]; then
 fi
 
 FNAME="$(basename "$1")"
+cd ..
 cur_dir="$PWD"
 
 while [[ $cur_dir != / ]]; do

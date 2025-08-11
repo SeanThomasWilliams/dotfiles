@@ -1,7 +1,5 @@
 #!/bin/bash
 
-if ! command -v jira &> /dev/null; then
-  return
+if command -v jira &> /dev/null; then
+  eval "$(jira completion bash)"
 fi
-
-eval "$(jira --completion-script-bash)"

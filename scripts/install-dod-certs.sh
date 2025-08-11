@@ -13,6 +13,7 @@ CERTDB_DIRS=(
   "$HOME/snap/firefox/common/.mozilla"
   "$HOME/.mozilla"
 )
+FIX_FIREFOX_CERTS=0
 
 trap 'rm -f $CERT_ZIP' EXIT
 
@@ -35,27 +36,38 @@ elif [[ $ID == "ubuntu" ]]; then
     sudo awk '/BEGIN CERT/,/END CERT/{ if(/BEGIN CERT/){c++}; out="dod.ca." c ".crt"; print >out}'
   sudo update-ca-certificates
 
-  for certdb_dir in "${CERTDB_DIRS[@]}"; do
-    if [[ -d "$certdb_dir" ]]; then
-      for cert_db in $(find  "$certdb_dir" -type f -name "cert9.db"); do
-        cert_dir=$(dirname "$cert_db")
-        echo >&2 "Updating Cert DB: $cert_db in $cert_dir"
-        for certificate_file in $(find /usr/local/share/ca-certificates -type f -name 'dod.ca.*'); do
-          echo >&2 "Cert file: $certificate_file"
-          certificate_name=$(openssl x509 -in "$certificate_file" -text -noout |\
-            grep -o 'Subject:.*' |\
-            sed 's#.*CN = \(.*\)#\1#' |\
-            tr ' ' '-' |\
-            tr '[:upper:]' '[:lower:]')
+  PYTHON_CERTS=$(python -c 'import requests; print(requests.certs.where())')
+  ETC_CA_BUNDLE="/etc/ssl/certs/ca-certificates.crt"
 
-          echo >&2 "Mozilla Firefox certificate install '${certificate_name}' in ${cert_dir}"
-          certutil -A \
-            -n "${certificate_name}" \
-            -t "TCu,Cuw,Tuw" \
-            -i "${certificate_file}" \
-            -d sql:"${cert_dir}"
+  if [[ -f "${PYTHON_CERTS-}" ]]; then
+    echo >&2 "Updating Python certs: $PYTHON_CERTS"
+    cp "$PYTHON_CERTS" "${PYTHON_CERTS}.bak"
+    cp "$ETC_CA_BUNDLE" "$PYTHON_CERTS"
+  fi
+
+  if [[ "$FIX_FIREFOX_CERTS" -eq 1 ]]; then
+    for certdb_dir in "${CERTDB_DIRS[@]}"; do
+      if [[ -d "$certdb_dir" ]]; then
+        for cert_db in $(find  "$certdb_dir" -type f -name "cert9.db"); do
+          cert_dir=$(dirname "$cert_db")
+          echo >&2 "Updating Cert DB: $cert_db in $cert_dir"
+          for certificate_file in $(find /usr/local/share/ca-certificates -type f -name 'dod.ca.*'); do
+            echo >&2 "Cert file: $certificate_file"
+            certificate_name=$(openssl x509 -in "$certificate_file" -text -noout |\
+              grep -o 'Subject:.*' |\
+              sed 's#.*CN = \(.*\)#\1#' |\
+              tr ' ' '-' |\
+              tr '[:upper:]' '[:lower:]')
+
+            echo >&2 "Mozilla Firefox certificate install '${certificate_name}' in ${cert_dir}"
+            certutil -A \
+              -n "${certificate_name}" \
+              -t "TCu,Cuw,Tuw" \
+              -i "${certificate_file}" \
+              -d sql:"${cert_dir}"
+          done
         done
-      done
-    fi
-  done
+      fi
+    done
+  fi
 fi
