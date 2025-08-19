@@ -8,13 +8,11 @@ if [[ $# -ne 1 ]]; then
 fi
 
 FNAME="$(basename "$1")"
-cd ..
 cur_dir="$PWD"
 
 while [[ $cur_dir != / ]]; do
   if [[ -f "$cur_dir/$FNAME" ]]; then
     echo "$cur_dir/$FNAME"
-    break
   fi
 
   cur_dir=$(dirname "$cur_dir")

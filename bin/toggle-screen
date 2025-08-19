@@ -1,0 +1,15 @@
+#!/bin/bash
+
+if [[ -z "$DISPLAY" ]]; then
+  export DISPLAY=:0
+fi
+
+if [[ -f /tmp/screen_off ]]; then
+  xset dpms force on
+  rm /tmp/screen_off
+  echo "Screen ON"
+else
+  xset dpms force off
+  touch /tmp/screen_off
+  echo "Screen OFF"
+fi

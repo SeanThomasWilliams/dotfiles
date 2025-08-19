@@ -45,7 +45,7 @@ plugins:
       - '{"spec" : {"suspend" : $!COL-SUSPEND }}'
   remove_finalizers:
     shortCut: Ctrl-F
-    confirm: true
+    confirm: false
     scopes:
       - all
     description: Removes all finalizers

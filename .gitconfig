@@ -94,8 +94,27 @@
 	cmd = "nvim -d -u ~/.vimrc \"$LOCAL\" \"$MERGED\""
 
 [delta]
-	navigate = true    # use n and N to move between diff sections
-	hyperlinks = true
+	features =
+	minus-style =
+	minus-non-emph-style =
+	minus-emph-style =
+	minus-empty-line-marker-style =
+	plus-style =
+	plus-non-emph-style =
+	plus-emph-style =
+	plus-empty-line-marker-style =
+	hunk-header-style =
+	hunk-header-decoration-style =
+	hunk-header-file-style =
+	hunk-header-line-number-style =
+	file-style =
+	file-decoration-style =
+	commit-style =
+	line-number-style =
+	line-numbers-left-style =
+	line-numbers-minus-style =
+	line-numbers-plus-style =
+	line-numbers-right-style =
 
 [pretty]
 	lg = %C(red)%h%C(reset) - %C(green)%ci%C(reset) %s %C(bold blue)-- %an%C(reset)%C(yellow)%d%C(reset)

@@ -206,7 +206,7 @@ load_path_settings(){
   done
 
   # Shorten prompt
-  export PROMPT_DIRTRIM=3
+  export PROMPT_DIRTRIM=4
 
   # Load language settings
   load_python_settings
@@ -329,8 +329,6 @@ load_extra_source_files(){
     "$HOME/.local/share/bash-completion/*.bash"
     "$HOME/anaconda3/etc/profile.d/*.sh"
     "$HOME/.asdf/completions/asdf.bash"
-    "/usr/local/etc/profile.d/autojump.sh"
-    "/usr/share/autojump/*.bash"
     "/Applications/iTerm.app/Contents/Resources/iterm2_shell_integration.bash"
   )
 
@@ -390,3 +388,11 @@ load_ps1_settings
 load_alias_settings
 fix_path_ordering
 load_local_alias
+
+j(){
+    __zoxide_z "$@"
+}
+
+if command -v zoxide &> /dev/null; then
+  export -f j
+fi

@@ -1,0 +1,95 @@
+#!/bin/bash
+
+# This script clones a git URL to $HOME/gocode/src/<owner>/<repo>
+# It should handle https:// urls and add the .git suffix to the clone if missing
+#
+# Example: git-clone-url https://github.com/newren/git-filter-repo
+# Results in:
+# - Makes directory: ~/gocode/src/github.com/newren
+# - Clone URL: https://github.com/newren/git-filter-repo.git
+# - Clones to: ~/gocode/src/github.com/newren/git-filter-repo
+
+# Check if a URL is provided
+if [ -z "$1" ]; then
+    echo "Usage: $0 <git-url>"
+    echo "Example: $0 https://github.com/newren/git-filter-repo"
+    exit 1
+fi
+
+GOPATH="${HOME}/gocode"
+INPUT_URL="$1"
+CLONE_URL=""
+RELATIVE_PATH_IN_REPO=""
+
+# Check if the URL is a "sloppy" web interface URL (e.g., pointing to a file or directory view)
+if [[ "$INPUT_URL" =~ /(blob|tree)/ ]]; then
+    # Extract the base repository URL (e.g., https://github.com/newren/git-filter-repo)
+    CLONE_URL=$(echo "$INPUT_URL" | sed -E 's/(https?:\/\/[^\/]+\/[^\/]+\/[^\/]+)\/(blob|tree)\/(.*)/\1/')
+
+    # Extract the path within the repository (e.g., main/Makefile)
+    RELATIVE_PATH_IN_REPO=$(echo "$INPUT_URL" | sed -E 's/https?:\/\/[^\/]+\/[^\/]+\/[^\/]+\/(blob|tree)\/(.*)/\2/')
+    # Remove the branch name from the path (e.g., main/Makefile -> Makefile)
+    RELATIVE_PATH_IN_REPO=$(echo "$RELATIVE_PATH_IN_REPO" | cut -d'/' -f2-)
+
+    if [ -z "$CLONE_URL" ]; then
+        echo "Error: Could not extract base repository URL from '$INPUT_URL'." >&2
+        exit 1
+    fi
+else
+    CLONE_URL="$INPUT_URL"
+fi
+
+# Ensure the clone URL ends with .git
+if [[ ! "$CLONE_URL" =~ \.git$ ]]; then
+    CLONE_URL="${CLONE_URL}.git"
+fi
+
+# Remove protocol and .git suffix for path parsing
+# Example: https://github.com/newren/git-filter-repo.git -> github.com/newren/git-filter-repo
+URL_PATH=$(echo "$CLONE_URL" | sed -E 's/https?:\/\///; s/\.git$//')
+
+# Extract domain, owner and repo from the URL_PATH
+# Example: github.com/newren/git-filter-repo
+# domain will be 'github.com'
+# owner will be 'newren'
+# repo will be 'git-filter-repo'
+DOMAIN=$(echo "$URL_PATH" | cut -d'/' -f1)
+OWNER=$(echo "$URL_PATH" | cut -d'/' -f2)
+REPO=$(echo "$URL_PATH" | cut -d'/' -f3)
+
+# Construct the full target directory path
+TARGET_DIR="${GOPATH}/src/${DOMAIN}/${OWNER}/${REPO}"
+PARENT_DIR="${GOPATH}/src/${DOMAIN}/${OWNER}"
+
+
+# Create the parent directory if it doesn't exist
+mkdir -p "$PARENT_DIR"
+
+# Convert TARGET_DIR to relative path from $HOME
+RELATIVE_TARGET="${TARGET_DIR#$HOME/}"
+
+# Check if the repository already exists
+if [ -d "$TARGET_DIR" ] && [ -d "$TARGET_DIR/.git" ]; then
+    # Perform git pull silently
+    (cd "$TARGET_DIR" && git pull >/dev/null 2>&1)
+    if [ $? -ne 0 ]; then
+        echo "Error updating repository" >&2
+        exit 1
+    fi
+else
+    # Clone the repository silently
+    git clone -q "$CLONE_URL" "$TARGET_DIR" 2>/dev/null
+    if [ $? -eq 0 ]; then
+        echo "Cloned $CLONE_URL to ~/$RELATIVE_TARGET" >&2
+    else
+        echo "Error cloning $INPUT_URL" >&2
+        exit 1
+    fi
+fi
+
+# Output only the final path to stdout
+if [ -n "$RELATIVE_PATH_IN_REPO" ]; then
+    echo "${TARGET_DIR}/${RELATIVE_PATH_IN_REPO}"
+else
+    echo "$TARGET_DIR"
+fi
