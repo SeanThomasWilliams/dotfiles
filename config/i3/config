@@ -87,7 +87,7 @@ bindsym $mod+Shift+Return exec firefox --ProfileManager
 bindsym $mod+Shift+q kill
 
 # start dmenu (a program launcher)
-bindsym $mod+d exec "rofi -lines 12 -padding 18 -width 60 -location 0 -modi window,drun,run,combi -theme solarized_alternate -combi-modi window,drun -show combi -columns 3 -sidebar-mode"
+bindsym $mod+d exec "rofi -show combi -combi-modi drun -theme solarized_alternate -columns 3 -sidebar-mode"
 
 # Change display
 # bindsym $mod+p exec --no-startup-id init-display
