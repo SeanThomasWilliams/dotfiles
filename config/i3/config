@@ -37,8 +37,7 @@ exec --no-startup-id xset s 1800 1800
 exec --no-startup-id xset dpms 0 0 1800
 
 # Desktop background
-#exec --no-startup-id feh --bg-fill "$HOME/Pictures/mountain-smoke.jpg"
-exec --no-startup-id feh --bg-fill "$HOME/Pictures/lake-monroe.jpg"
+exec --no-startup-id feh --bg-scale "$HOME/Pictures/lake-monroe.jpg"
 
 exec_always "$HOME/anaconda3/bin/autotiling"
 
@@ -120,7 +119,7 @@ bindsym $mod+Shift+Right move right
 bindsym $mod+Shift+$horiz split h
 
 # split in vertical (v) orientation
-bindsym $mod+Shift+$vert split v
+#bindsym $mod+Shift+$vert split v
 
 # enter fullscreen mode for the focused container
 bindsym $mod+f fullscreen toggle
@@ -346,3 +345,12 @@ exec --no-startup-id i3-msg 'workspace $ws10; exec /usr/lib/thunderbird/thunderb
 # Let chrome appear on the correct window
 # exec --no-startup-id i3-msg-wait 10 'workspace $ws9; exec google-chrome --profile-directory="Profile 4"'
 # exec --no-startup-id i3-msg-wait 11 'workspace $ws9; exec google-chrome --profile-directory="Profile 3"'
+
+
+# STT-Suite key bindings (added by make install-i3)
+# $mod+v: Realtime typing (types as you speak)
+bindsym $mod+v exec --no-startup-id ~/.local/bin/stt-toggle-i3 --mode type --realtime true --log-level DEBUG
+# $mod+Shift+v: Bulk typing (records then types all at once)
+bindsym $mod+Shift+v exec --no-startup-id ~/.local/bin/stt-toggle-i3 --mode type --realtime false --log-level DEBUG
+# $mod+Control+Shift+v: Bulk clipboard (records then copies to clipboard)
+bindsym $mod+Control+Shift+v exec --no-startup-id ~/.local/bin/stt-toggle-i3 --mode clipboard --realtime false --log-level DEBUG
