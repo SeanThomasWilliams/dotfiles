@@ -48,8 +48,8 @@ CLI_PACKAGES=(
   direnv
   dnsmasq
   dstat
+  entr
   ethtool
-  exuberant-ctags
   feh
   fonts-mplus
   fonts-noto
@@ -104,6 +104,7 @@ CLI_PACKAGES=(
   sshuttle
   tcpdump
   tmux
+  universal-ctags
   unrar
   unzip
   uuid

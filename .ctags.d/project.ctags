@@ -1,0 +1,92 @@
+# Keep paths relative to repo for nicer :tag jumps
+--tag-relative=yes
+
+# Universal Ctags project config — minimal, clean, no warnings.
+# (Ordering matters: define languages BEFORE mapping/regex.)
+
+# ---------------------------
+# Dockerfile
+# ---------------------------
+--langdef=dockerfile
+--langmap=dockerfile:+(Dockerfile)
+--regex-dockerfile=/^(FROM|MAINTAINER|RUN|CMD|LABEL|EXPOSE|ENV|ADD|COPY|ENTRYPOINT|VOLUME|USER|WORKDIR|ARG|ONBUILD|STOPSIGNAL|HEALTHCHECK|SHELL)/\1/d,dockerfile,dockerfiles/
+## Add stages and common vars to the built-in dockerfile
+--regex-dockerfile=/^FROM[ \t]+[^ \t]+[ \t]+AS[ \t]+([A-Za-z0-9._-]+)/\1/s,Stage/
+--regex-dockerfile=/^ARG[ \t]+([A-Za-z_][A-Za-z0-9_]*)/\1/a,ARG/
+--regex-dockerfile=/^ENV[ \t]+([A-Za-z_][A-Za-z0-9_]*)/\1/e,ENV/
+
+# ---------------------------
+# TOML
+# ---------------------------
+--langdef=toml
+--map-toml=+.toml
+--kinddef-toml=t,table,table
+--kinddef-toml=T,subtable,subtable
+--kinddef-toml=k,key,key
+--regex-toml=/^\[([A-Za-z0-9_.-]+)\][ \t]*$/\1/t,table/i
+--regex-toml=/^\[([A-Za-z0-9_.-]+\.[A-Za-z0-9_.-]+)\][ \t]*$/\1/T,subtable/i
+--regex-toml=/^[ \t]*([A-Za-z0-9_.-]+)[ \t]*=/{_anonymous=key_}\1/k,key/i
+
+# ---------------------------
+# Terraform (HCL2)
+# ---------------------------
+--langdef=Terraform
+--map-Terraform=+.tf
+--map-Terraform=+.tf.json
+# Kinds: v=variable, r=resource, d=data, m=module, o=output, P=provider, l=locals
+--kinddef-Terraform=v,variable,variable
+--kinddef-Terraform=r,resource,resource
+--kinddef-Terraform=d,data,data
+--kinddef-Terraform=m,module,module
+--kinddef-Terraform=o,output,output
+--kinddef-Terraform=P,provider,provider
+--kinddef-Terraform=l,locals,locals
+--regex-Terraform=/^[ \t]*variable[ \t]+"([^"]+)"[ \t]*\{/\1/v,variable/i
+--regex-Terraform=/^[ \t]*resource[ \t]+"([^"]+)"[ \t]+"([^"]+)"[ \t]*\{/\1.\2/r,resource/i
+--regex-Terraform=/^[ \t]*data[ \t]+"([^"]+)"[ \t]+"([^"]+)"[ \t]*\{/\1.\2/d,data/i
+--regex-Terraform=/^[ \t]*module[ \t]+"([^"]+)"[ \t]*\{/\1/m,module/i
+--regex-Terraform=/^[ \t]*output[ \t]+"([^"]+)"[ \t]*\{/\1/o,output/i
+--regex-Terraform=/^[ \t]*provider[ \t]+"([^"]+)"[ \t]*\{/\1/P,provider/i
+--regex-Terraform=/^[ \t]*locals[ \t]*\{/{_anonymous=locals_}locals/l,locals/i
+
+# Terraform tfvars (separate language so we don't over-tag .tf)
+--langdef=TerraformVars
+--map-TerraformVars=+.tfvars
+--map-TerraformVars=+.tfvars.json
+--kinddef-TerraformVars=v,var,variable
+--regex-TerraformVars=/^[ \t]*([A-Za-z0-9_]+)[ \t]*=/{_anonymous=var_}\1/v,var/t
+
+# ---------------------------
+# Packer (HCL2)
+# ---------------------------
+--langdef=packer
+# Be generous: packer uses *.pkr.hcl and *.pkrvars.hcl; many legacy repos use plain *.hcl
+--map-packer=+.pkr.hcl
+--map-packer=+.pkrvars.hcl
+--map-packer=+.hcl
+# Kinds: v=variable, S=source, b=build, p=provisioner, P=postprocessor
+--kinddef-packer=v,variable,variable
+--kinddef-packer=S,source,source
+--kinddef-packer=b,build,build
+--kinddef-packer=p,provisioner,provisioner
+--kinddef-packer=P,postprocessor,postprocessor
+--regex-packer=/^[ \t]*variable[ \t]+"([^"]+)"[ \t]*\{/\1/v,variable/i
+--regex-packer=/^[ \t]*source[ \t]+"[^"]+"[ \t]+"([^"]+)"[ \t]*\{/\1/S,source/i
+--regex-packer=/^[ \t]*build[ \t]*\{/{_anonymous=build_}build/b,build/i
+--regex-packer=/^[ \t]*provisioner[ \t]+"([^"]+)"[ \t]*\{/\1/p,provisioner/i
+--regex-packer=/^[ \t]*post-processor[ \t]+"([^"]+)"[ \t]*\{/\1/P,postprocessor/i
+
+# ---------------------------
+# Packer (HCL2)
+# ---------------------------
+--langdef=ansible
+--map-ansible=+.yml
+--regex-ansible=/^[ \t]*-[ \t]*name:[ \t]*(.+)/\1/t,tasks/
+--regex-ansible=/^[ \t]*-[ \t]*hosts:[ \t]*(.+)/\1/h,hosts/
+
+# ---------------------------
+# JS/TS & misc small map adds
+# ---------------------------
+--map-JavaScript=+.cjs
+--map-TypeScript=+.mts
+--map-Iniconf=+.cfg

@@ -729,10 +729,11 @@ let g:gutentags_file_list_command = {
 \}
 let g:gutentags_add_default_project_roots = 0
 let g:gutentags_project_root = ['.git', '.pythontags', '.forcetags', '.envrc']
-let g:gutentags_generate_on_new = 1
-let g:gutentags_generate_on_missing = 1
-let g:gutentags_generate_on_write = 1
-let g:gutentags_generate_on_empty_buffer = 0
+"let g:gutentags_generate_on_new = 1
+"let g:gutentags_generate_on_missing = 1
+"let g:gutentags_generate_on_write = 1
+"let g:gutentags_generate_on_empty_buffer = 0
+let g:gutentags_enabled = 0
 
 " gutentags-ctags
 let g:gutentags_ctags_exclude_wildignore = 1

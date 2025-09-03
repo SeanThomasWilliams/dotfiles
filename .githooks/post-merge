@@ -1,0 +1,2 @@
+#!/usr/bin/env bash
+( "$HOME/scripts/gen-tags.sh" >/dev/null 2>&1 ) &

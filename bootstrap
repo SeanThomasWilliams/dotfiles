@@ -20,6 +20,11 @@ for fname in "$SCRIPT_DIR"/.*; do
   fname_base=$(basename "$fname")
   fname_target="$HOME/$fname_base"
 
+  if [[ "$fname_base" =~ ^\.(tags.*|DS_Stor|)$ ]]; then
+    echo >&2 "Skipping $fname"
+    continue
+  fi
+
   if ! [[ "$fname_base" = *.json || "$fname_base" = *.conf || "$fname_base" = *.local ]]; then
     if [[ "$fname_base" =~ \..*\..* ]]; then
       echo >&2 "Skipping dotfile variant $fname"
@@ -79,18 +84,26 @@ done
 config_dirs=(
   .ctags.d
   .ipython
+  .githooks
 )
 
 for config_dir in "${config_dirs[@]}"; do
-  ln -sfn "$SCRIPT_DIR/$config_dir" "$HOME/$config_dir"
+  ln -vsfn "$SCRIPT_DIR/$config_dir" "$HOME/$config_dir"
 done
 
 # Binaries
 mkdir -p "$HOME"/bin
-ln -sfn "$SCRIPT_DIR"/bin/* "$HOME"/bin/
+ln -vsfn "$SCRIPT_DIR"/bin/* "$HOME"/bin/
 for binfile in "${SCRIPT_DIR}/${UNAME_S}"/bin/*; do
   [[ ! -f "$binfile" ]] && continue
-  ln -sfn "$binfile" "$HOME"/bin/"$(basename "$binfile")"
+  ln -vsfn "$binfile" "$HOME"/bin/"$(basename "$binfile")"
+done
+
+mkdir -p "$HOME"/scripts
+ln -vsfn "$SCRIPT_DIR"/scripts/* "$HOME"/scripts/
+for scriptsfile in "${SCRIPT_DIR}/${UNAME_S}"/scripts/*; do
+  [[ ! -f "$scriptsfile" ]] && continue
+  ln -vsfn "$scriptsfile" "$HOME"/scripts/"$(basename "$scriptsfile")"
 done
 
 # Vim dir

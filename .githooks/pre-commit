@@ -1,0 +1,76 @@
+#!/bin/bash
+
+# Global pre-commit hook to prevent committing sensitive files
+# This hook will be called for all repositories via core.hooksPath
+
+# First, check if there's a local repository hook and run it
+# Check for local core.hooksPath setting
+local_hooks_path=$(git config --local core.hooksPath 2>/dev/null || echo "")
+
+if [ -n "$local_hooks_path" ] && [ -f "$local_hooks_path/pre-commit" ]; then
+    # Run local hook from configured path
+    "$local_hooks_path/pre-commit"
+    local_exit=$?
+    if [ $local_exit -ne 0 ]; then
+        exit $local_exit
+    fi
+elif [ -f .githooks/pre-commit ]; then
+    # Check standard .githooks directory
+    .githooks/pre-commit
+    local_exit=$?
+    if [ $local_exit -ne 0 ]; then
+        exit $local_exit
+    fi
+elif [ -f .git/hooks/pre-commit ]; then
+    # Fall back to .git/hooks
+    .git/hooks/pre-commit
+    local_exit=$?
+    if [ $local_exit -ne 0 ]; then
+        exit $local_exit
+    fi
+fi
+
+# Now run global checks
+# Files to block: ai_*/*, CLAUDE.md, AGENTS.md, .claude/*, .code/*, .codex/*
+
+# Get list of staged files
+staged_files=$(git diff --cached --name-only)
+
+# Define patterns to block
+blocked_patterns=(
+    "^AGENTS\.md$"
+    "^CLAUDE\.md$"
+    "^\.claude/"
+    "^\.code/"
+    "^\.codex/"
+    "^\.ctags"
+    "^\.tags"
+    "^ai_.*/"
+    "^tests/results/"
+)
+
+# Check each staged file against blocked patterns
+for file in $staged_files; do
+    for pattern in "${blocked_patterns[@]}"; do
+        if echo "$file" | grep -qE "$pattern"; then
+            echo "ERROR: Attempting to commit blocked file: $file"
+            echo "Files matching these patterns are not allowed in commits:"
+            echo "  - ai_*/* (AI-related directories)"
+            echo "  - .tags*"
+            echo "  - .ctags*"
+            echo "  - .claude/*"
+            echo "  - .code/*"
+            echo "  - .codex/*"
+            echo "  - .tests/results/*"
+            echo "  - AGENTS.md"
+            echo "  - CLAUDE.md"
+            echo ""
+            echo "To remove this file from staging:"
+            echo "  git reset HEAD \"$file\""
+            exit 1
+        fi
+    done
+done
+
+# All checks passed
+exit 0

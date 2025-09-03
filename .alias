@@ -194,6 +194,7 @@ load_path_settings(){
     "$HOME/anaconda3/condabin"
     "$HOME/anaconda3/bin"
     "$HOME/bin"
+    "$HOME/scripts"
     "$HOME/.npm-packages/bin"
     "$HOME/.cargo/bin"
     "$HOME/.yarn/bin"

@@ -5,7 +5,7 @@
 
 [core]
 	editor = nvim
-	excludesfile = ~/.gitignore
+	excludesfile = ~/.gitexclude
 	quotePath = false
 	commitGraph = true
 	hooksPath = /home/williamss/.githooks

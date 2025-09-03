@@ -1,7 +1,6 @@
 !*.manifest
 !.ipython/profile_default/ipython_config.py
 #/[A-Z]*[_-][A-Z-]*.md
-#ai_*/
 *.backup
 *.bak
 *.bak.*
@@ -33,6 +32,8 @@
 .claude/*
 .code/
 .codex/
+.ctags.files
+.ctags
 .direnv/
 .env*
 .ipython
@@ -41,8 +42,7 @@
 .stignore
 .stversions/
 .tags
-.tags.files
-.tags.lock
+.tags.*
 .tern-port
 .tmuxp.yaml
 .tool-versions
@@ -50,6 +50,7 @@
 /*PLAN.md
 /*REQUIREMENT*.md
 /*STATUS*.md
+/.leann
 /.mcp.json
 /vim/bundle/
 /vim/init.vim
@@ -59,6 +60,10 @@ AGENT*.md
 Anaconda*.sh
 CLAUDE*.md
 __pycache__
+ai_docs/
+ai_logs/
+ai_scripts/
+ai_temp/
 asdf/
 init.vim
 issues/*.md
@@ -71,9 +76,7 @@ package-lock.json
 package.json
 rke2.yaml
 tags
-tags.files
-tags.lock
-tags.temp
+tags.*
 temp
 uploads/
 usage_tracking*.json

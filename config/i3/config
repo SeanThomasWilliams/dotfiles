@@ -346,10 +346,9 @@ exec --no-startup-id i3-msg 'workspace $ws10; exec /usr/lib/thunderbird/thunderb
 # exec --no-startup-id i3-msg-wait 10 'workspace $ws9; exec google-chrome --profile-directory="Profile 4"'
 # exec --no-startup-id i3-msg-wait 11 'workspace $ws9; exec google-chrome --profile-directory="Profile 3"'
 
+
 # STT-Suite key bindings (added by make install-i3)
 # $mod+v: Realtime typing (types as you speak)
 bindsym $mod+v exec --no-startup-id ~/.local/bin/stt-toggle-i3 --realtime true
 # $mod+Shift+v: Bulk clipboard (records then copies to clipboard)
-bindsym $mod+Shift+v exec --no-startup-id ~/.local/bin/stt-toggle-i3 --realtime false
-# $mod+Control+Shift+v: Both typing and clipboard (realtime)
-bindsym $mod+Control+Shift+v exec --no-startup-id ~/.local/bin/stt-toggle-i3 --mode both --realtime true
+bindsym $mod+Shift+v exec --no-startup-id ~/.local/bin/stt-toggle-i3 --mode both --realtime false
