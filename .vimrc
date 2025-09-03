@@ -31,6 +31,7 @@ Plug 'jacoborus/tender.vim'
 Plug 'jose-elias-alvarez/null-ls.nvim'
 Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'junegunn/fzf.vim'
+Plug 'jvirtanen/vim-hcl'
 Plug 'leafgarland/typescript-vim'
 Plug 'lilydjwg/colorizer'
 Plug 'lucidph3nx/nvim-sops'
@@ -421,6 +422,8 @@ if has('autocmd')
     autocmd BufNewFile,Bufread *.spect setlocal ft=spec
     autocmd BufNewFile,Bufread *.wsgi setlocal ft=python
     autocmd BufNewFile,BufRead *.go setlocal noet ts=4 sw=4 sts=4
+    autocmd BufNewFile,BufRead *.pkr.hcl set filetype=hcl
+
     autocmd FileType crontab setlocal wrap textwidth=0
     autocmd FileType make setlocal noet ts=4 sw=4 sts=4 foldmethod=marker foldlevel=1
     autocmd FileType make nnoremap <silent> <leader>d :sp<CR> <c-]>

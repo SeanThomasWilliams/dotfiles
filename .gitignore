@@ -1,7 +1,10 @@
 !*.manifest
 !.ipython/profile_default/ipython_config.py
+#/[A-Z]*[_-][A-Z-]*.md
+#ai_*/
 *.backup
 *.bak
+*.bak.*
 *.deb
 *.gz
 *.iso
@@ -28,6 +31,8 @@
 .claude*
 .claude/
 .claude/*
+.code/
+.codex/
 .direnv/
 .env*
 .ipython
@@ -46,15 +51,14 @@
 /*REQUIREMENT*.md
 /*STATUS*.md
 /.mcp.json
-/[A-Z]*[_-][A-Z-]*.md
 /vim/bundle/
 /vim/init.vim
 /vim/plugged/
 /vim/tmp/
+AGENT*.md
 Anaconda*.sh
 CLAUDE*.md
 __pycache__
-ai_*/
 asdf/
 init.vim
 issues/*.md

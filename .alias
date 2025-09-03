@@ -67,13 +67,13 @@ load_python_settings(){
 
 load_ansible_settings(){
   if command -v ansible &> /dev/null; then
-    export ANSIBLE_CALLBACK_WHITELIST="timer,profile_roles,profile_tasks,aws_resource_actions,counter_enabled"
-    export ANSIBLE_COMMAND_WARNINGS=0
-    export ANSIBLE_DEPRECATION_WARNINGS=0
+    export ANSIBLE_CALLBACK_WHITELIST=timer,profile_roles,profile_tasks,aws_resource_actions,counter_enabled
+    export ANSIBLE_COMMAND_WARNINGS=1
+    export ANSIBLE_DEPRECATION_WARNINGS=1
     export ANSIBLE_LOAD_CALLBACK_PLUGINS=1
-    export ANSIBLE_PIPELINING=1
-    export ANSIBLE_SSH_ARGS="-C -o ControlMaster=auto -o ControlPersist=60s"
-    export ANSIBLE_SYSTEM_WARNINGS=0
+    export ANSIBLE_PIPELINING=0
+    export ANSIBLE_SSH_ARGS="-o ControlMaster=no -o ControlPersist=no -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+    export ANSIBLE_SYSTEM_WARNINGS=1
   fi
 }
 

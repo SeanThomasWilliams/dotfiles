@@ -8,6 +8,7 @@
 	excludesfile = ~/.gitignore
 	quotePath = false
 	commitGraph = true
+	hooksPath = /home/williamss/.githooks
 
 [color]
 	ui = auto
@@ -158,6 +159,7 @@
 
 [init]
 	defaultBranch = main
+	templatedir = /home/williamss/.config/git/template
 
 [advice]
 	skippedCherryPicks = false

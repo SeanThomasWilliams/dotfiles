@@ -28,6 +28,7 @@ fi
 
 cd "$HOME"
 PLUGIN_NAME=$1
+PLUGIN_VERSION=${2:-latest}
 
 # Check if asdf has a plugin named PLUGIN_NAME
 if ! asdf plugin list all | grep -q "^${PLUGIN_NAME} "; then
@@ -48,13 +49,20 @@ fi
 # Update plugin to latest version
 asdf plugin update "$PLUGIN_NAME"
 
-# Get latest version of plugin
-LATEST_VERSION="$(asdf latest "$PLUGIN_NAME")"
+TARGET_VERSION=""
+if [[ "$PLUGIN_VERSION" == "latest" ]]; then
+  # Get latest version of plugin
+  TARGET_VERSION="$(asdf latest "$PLUGIN_NAME")"
+  echo >&2 "Installing and setting latest version for $PLUGIN_NAME: $TARGET_VERSION"
+else
+  TARGET_VERSION="$PLUGIN_VERSION"
+  echo >&2 "Installing and setting specified version for $PLUGIN_NAME: $TARGET_VERSION"
+fi
 
 cd "$HOME"
-asdf install "$PLUGIN_NAME" "$LATEST_VERSION"
+asdf install "$PLUGIN_NAME" "$TARGET_VERSION"
 
-# Set global version of plugin to latest version
-asdf set --home "$PLUGIN_NAME" "$LATEST_VERSION"
+# Set global version of plugin to the target version
+asdf set --home "$PLUGIN_NAME" "$TARGET_VERSION"
 
-echo >&2 "Successfully updated $PLUGIN_NAME to $LATEST_VERSION"
+echo >&2 "Successfully updated $PLUGIN_NAME to $TARGET_VERSION"
