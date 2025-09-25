@@ -32,8 +32,8 @@
 .claude/*
 .code/
 .codex/
-.ctags.files
 .ctags
+.ctags.files
 .direnv/
 .env*
 .ipython
@@ -64,7 +64,9 @@ ai_docs/
 ai_logs/
 ai_scripts/
 ai_temp/
+ai_tests/
 asdf/
+docs/tech-specs/
 init.vim
 issues/*.md
 kubeconfig.yaml

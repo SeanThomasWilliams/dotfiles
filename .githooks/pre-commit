@@ -30,9 +30,6 @@ elif [ -f .git/hooks/pre-commit ]; then
     fi
 fi
 
-# Now run global checks
-# Files to block: ai_*/*, CLAUDE.md, AGENTS.md, .claude/*, .code/*, .codex/*
-
 # Get list of staged files
 staged_files=$(git diff --cached --name-only)
 

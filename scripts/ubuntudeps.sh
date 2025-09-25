@@ -26,6 +26,20 @@ install_aws_session_manager(){
   rm -f ./session-manager-plugin.deb
 }
 
+install_firefox(){
+  sudo add-apt-repository ppa:mozillateam/ppa -y
+cat <<EOF | sudo tee /etc/apt/preferences.d/mozillateamppa
+Package: firefox*
+Pin: release o=LP-PPA-mozillateam
+Pin-Priority: 1001
+
+Package: firefox*
+Pin: release o=Ubuntu
+Pin-Priority: -1
+EOF
+  sudo apt install -yyq firefox
+}
+
 INTERACTIVE_PACKAGES=(
   postfix
 )
@@ -157,6 +171,8 @@ UI_PACKAGES=(
   xsel
   xsettingsd
 )
+
+install_firefox
 
 sudo apt-get update -yyq
 sudo apt-get install -yyq "${INTERACTIVE_PACKAGES[@]}"

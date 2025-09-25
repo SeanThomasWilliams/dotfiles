@@ -850,7 +850,7 @@ let g:autopep8_on_save = 1
 " vim-dirdiff
 let g:DirDiffAddArgs = "-w" " ignore white space in diff
 let g:DirDiffEnableMappings = 1
-let g:DirDiffExcludes = "*.*ar,*.bak,*.crt,*.csr,*.enc*,*.lock*,*.gz,*.key,*.manifest,*.pem,*.pid,*.pub,*.rpm,.Makefile.*,.ssh,.asdf,.git*,.tags*,.terraform,artifact*,bin,images,kubeconfig,mirror,packer-*,retag-*,rpm-*,s3-*,tmp"
+let g:DirDiffExcludes = "*.*ar,*.bak,*.crt,*.csr,*.enc*,*.lock*,*.gz,*.key,*.manifest,*.pem,*.pid,*.pub,*.rpm,.Makefile.*,.ssh,.asdf,.git*,.tags*,.terraform,artifact*,bin,images,kubeconfig,mirror,packer-*,retag-*,rpm-*,s3-*,tmp,ai_*,.ctags*,.leann/*,*.log"
 let g:DirDiffIgnore = ""
 let g:DirDiffSort = 1
 
@@ -926,6 +926,7 @@ nmap <Leader>gs :call GoogleSearch()<CR>
 let g:mkdp_theme = 'light'
 let g:mkdp_open_to_the_world = 1
 let g:mkdp_page_title = '${name}'
+" let g:mkdp_echo_preview_url = 1
 
 " options for markdown render
 " mkit: markdown-it options for render

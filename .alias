@@ -230,6 +230,7 @@ load_alias_settings(){
   alias k9s='setterm --linewrap off; k9s'
   alias claude='claude --dangerously-skip-permissions'
   alias gemini='gemini --yolo'
+  alias codex='codex --dangerously-bypass-approvals-and-sandbox'
   alias terragrunt-clear-cache='find ./ -type d -name ".terragrunt-cache" -prune -exec rm -rf {} \;'
   alias terragrunt-clear-debug='find ./ -type f -name "terragrunt-debug.tfvars.json" -prune -exec rm -rf {} \;'
 
@@ -373,9 +374,12 @@ load_shell_settings(){
     export UNAME_S
   fi
 
+  export MOZ_DISABLE_RDD_SANDBOX=1
+  export LIBVA_DRIVER_NAME=nvidia
   export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
   export DOCKER_CONFIG="$HOME/.docker"
   bind 'set show-all-if-ambiguous on'
+
 }
 
 load_shell_settings
