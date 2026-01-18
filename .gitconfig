@@ -85,7 +85,6 @@
 
 [merge]
 	tool = nvimdiff
-	conflictStyle = diff3
 
 [mergetool]
 	prompt = false
@@ -179,3 +178,5 @@
 	gpgsign = true
 [tag]
 	gpgSign = true
+[lfs]
+	locksverify = false

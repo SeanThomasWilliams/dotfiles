@@ -219,7 +219,8 @@ function init()
 
   # Return the variable as a bool value unless it is empty then return its
   # default bool value.
-  show_header = get_bool(show_header, 1);
+  # Default show_header=0 for code review workflow (path:line:content format)
+  show_header = get_bool(show_header, 0);
   show_hunk = get_bool(show_hunk, (show_header ? 1 : 0));
   show_path = get_bool(show_path, (show_header ? 0 : 1));
   show_binary = get_bool(show_binary, (show_path ? 1 : 0));

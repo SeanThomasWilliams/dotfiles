@@ -37,7 +37,7 @@ if [[ -n ${DEBUG-} ]]; then
   set -xv
 fi
 
-DEFAULT_TARGET_DIR=(*)
+DEFAULT_TARGET_DIR=( ./* )
 TARGET_DIR=()
 SEARCH_PATTERN="" # Variable to store the search pattern for content search
 IGNORE_PATTERN='.*/\..*cache|.*/\.DS_Store|.*/\.git|.*/\.direnv|.*/\.pnpm|.*/\.terraform|.*/mod|.*node_modules|.*/vendor'
@@ -150,7 +150,7 @@ FIND_CMD=(
 )
 
 # Execute find command and capture output
-FOUND_FILES=$("${FIND_CMD[@]}" 2>/dev/null)
+FOUND_FILES=$("${FIND_CMD[@]}" 2>/dev/null | sed 's|^\./||')
 
 set +e
 

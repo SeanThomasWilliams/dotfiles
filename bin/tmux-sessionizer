@@ -8,24 +8,36 @@ fi
 
 TS_CACHE="$HOME/.ts.cache"
 TS_SMART_CACHE="$HOME/.ts.smart.cache"
+TS_FIND_LOG="$HOME/.ts.find.log"
+TS_SESSION_MAP="$HOME/.ts.session-map.cache"
 TS_LIST="$TS_SMART_CACHE"
-FILTER_CACHE='asdf|\.terraform/modules'
+FILTER_CACHE='asdf|/\.[a-z]|ai_'
 
 FZF_QUERY=""
 FZF_PREVIEW_ARGS=(
-  --scheme=path
+  --no-multi
+  --scheme=history
   --select-1
 )
 
 usage(){
   cat >&2 <<EOF
-Usage: tmux-sessionizer [-r] [-h] [FZF_QUERY]
+Usage: tmux-sessionizer [OPTIONS] [FZF_QUERY]
 
 Options:
-  -a  Search active tmux sessions
-  -l  List active tmux sessions
-  -r  Refresh the cache
-  -h  Show this help message
+  -a, --active              Search active tmux sessions
+  -k, --kill                Kill a tmux session
+  -l, --list                List active tmux sessions
+  -r, --refresh             Refresh the cache
+  -h, --help                Show this help message
+  --list-names              List all cached session names
+  --list-dirs               List all cached directory paths
+  --generate-map            Generate directory→session name map and cache it
+  --print-map               Print the cached session map (dir<TAB>session)
+  --dir-to-name <dir>       Convert directory path to session name
+  --name-to-dir <name>      Convert session name to directory path
+  --get-remote <target>     Get git remote origin for directory or session name
+  --remote-to-name <url>    Convert git remote URL to session name
 
 Arguments:
   FZF_QUERY: Initial query to pass to fzf
@@ -34,30 +46,252 @@ Environment Variables:
   TMUX_DIR_BASES: Directories to search for tmux sessions
   FILTER_CACHE:   Exclude directories that match this regex from the cache
   DEBUG:          Set to 1 to enable debug mode
+
+Session Naming:
+  Converts paths to tmux-safe names preserving org context.
+  Format: org/project/branch (for worktrees) or org/project (for repos)
+  Domain simplification: x.y.mil → x, github.com/gitlab.com removed
 EOF
+}
+
+# autojump --stat (lowest -> highest)
+# 392.3:  /home/williamss/gocode/src/github.com/raft-tech
+# zoxide query --score --list (highest -> lowest)
+# 136.0 /home/williamss/gocode/src/github.com/raft-tech
+get_directory_priority(){
+  if command -v zoxide >/dev/null 2>&1; then
+    zoxide query --score --list | awk '{print $2}'
+  elif command -v autojump >/dev/null 2>&1; then
+    autojump --stat | awk '/^[0-9]+.[0-9]:\s+\// {print $2}' | tac
+  else
+    echo >&2 "Neither zoxide nor autojump is installed."
+    exit 1
+  fi
+}
+
+increment_directory(){
+  if [[ -z "${1-}" || ! -d "$1" ]]; then
+    return
+  fi
+
+  DIR_NAME="$(realpath "$1")"
+
+  if [[ ! -d "$DIR_NAME" ]]; then
+    echo >&2 "Invalid directory: $DIR_NAME"
+    return
+  fi
+
+  if command -v zoxide >/dev/null 2>&1; then
+    cd "$1" && zoxide add --score 10 "$DIR_NAME"
+  elif command -v autojump >/dev/null 2>&1; then
+    cd "$1" && autojump --increase "$DIR_NAME"
+  fi
+}
+
+# Convert directory path to session name
+# Preserves org context and handles domain simplification
+dir_to_session_name(){
+  local dir="$1"
+  echo "$dir" | \
+    sed "s#$HOME/##" | \
+    sed 's#^gocode/src/github\.com/##; s#^gocode/src/gitlab\.com/##' | \
+    sed -E 's#^gocode/src/([^.]+)\.[^/]+/#\1/#' | \
+    awk -F'/' 'BEGIN{OFS="/"} {
+      gsub(/\./, "_")
+      if (NF >= 3) {
+        print $1, $(NF-1), $NF
+      } else {
+        print
+      }
+    }'
+}
+
+# Convert session name back to directory path (reverse lookup in cache)
+session_name_to_dir(){
+  local name="$1"
+
+  if [[ ! -f "$TS_SMART_CACHE" ]]; then
+    echo >&2 "Cache file not found. Run with -r to refresh cache."
+    return 1
+  fi
+
+  while IFS= read -r dir; do
+    local session
+    session=$(dir_to_session_name "$dir")
+    if [[ "$session" == "$name" ]]; then
+      echo "$dir"
+      return 0
+    fi
+  done < "$TS_SMART_CACHE"
+
+  echo >&2 "No directory found for session name: $name"
+  return 1
+}
+
+# List all session names from cache
+list_session_names(){
+  if [[ ! -f "$TS_SMART_CACHE" ]]; then
+    echo >&2 "Cache file not found. Run with -r to refresh cache."
+    return 1
+  fi
+
+  while IFS= read -r dir; do
+    dir_to_session_name "$dir"
+  done < "$TS_SMART_CACHE"
+}
+
+# Generate directory→session name mapping and cache it
+generate_session_map(){
+  if [[ ! -f "$TS_SMART_CACHE" ]]; then
+    echo >&2 "Cache file not found. Run with -r to refresh cache."
+    return 1
+  fi
+
+  echo >&2 "Generating session map cache..."
+
+  local count=0
+  while IFS= read -r dir; do
+    local session
+    session=$(dir_to_session_name "$dir")
+    printf "%s\t%s\n" "$dir" "$session"
+    ((count++))
+  done < "$TS_SMART_CACHE" > "${TS_SESSION_MAP}.tmp"
+
+  mv "${TS_SESSION_MAP}.tmp" "$TS_SESSION_MAP"
+
+  echo >&2 "Generated map for $count directories → $TS_SESSION_MAP"
+}
+
+# Print the cached session map
+print_session_map(){
+  if [[ ! -f "$TS_SESSION_MAP" ]]; then
+    generate_session_map
+  fi
+
+  cat "$TS_SESSION_MAP"
+}
+
+# Get git remote origin for a directory or session name
+get_git_remote(){
+  local target="$1"
+  local dir=""
+
+  # Check if it's a valid directory path
+  if [[ -d "$target" ]]; then
+    dir="$target"
+  else
+    # Try to resolve as session name
+    if [[ ! -f "$TS_SMART_CACHE" ]]; then
+      refresh_cache
+    fi
+    dir=$(session_name_to_dir "$target" 2>/dev/null)
+    if [[ -z "$dir" ]]; then
+      echo >&2 "Error: '$target' is not a valid directory or session name"
+      return 1
+    fi
+  fi
+
+  # Check if it's a git repository
+  if [[ ! -d "$dir/.git" && ! -f "$dir/.git" ]]; then
+    echo >&2 "Error: '$dir' is not a git repository"
+    return 1
+  fi
+
+  # Get the remote origin URL
+  local remote
+  remote=$(git -C "$dir" remote get-url origin 2>/dev/null)
+  if [[ -z "$remote" ]]; then
+    echo >&2 "Error: No 'origin' remote found in '$dir'"
+    return 1
+  fi
+
+  echo "$remote"
+}
+
+# Convert git remote URL to session name
+remote_to_session_name(){
+  local url="$1"
+
+  # Remove .git suffix
+  url="${url%.git}"
+
+  # Handle different URL formats:
+  # https://repo1.dso.mil/big-bang/edge/peli-virtualization
+  # git@github.com:raft-tech/df-klv
+  # ssh://git@gitlab.com/xeedio/big-bang/edge
+
+  local path=""
+
+  if [[ "$url" =~ ^(https?|ssh)://([^/]+)/(.+)$ ]]; then
+    # HTTPS or SSH protocol
+    local domain="${BASH_REMATCH[2]}"
+    path="${BASH_REMATCH[3]}"
+
+    # Simplify domain
+    if [[ "$domain" == "github.com" || "$domain" == "gitlab.com" ]]; then
+      : # Remove these domains from path
+    elif [[ "$domain" =~ ^([^.]+)\..+$ ]]; then
+      # Extract first component (e.g., repo1.dso.mil -> repo1)
+      path="${BASH_REMATCH[1]}/$path"
+    else
+      path="$domain/$path"
+    fi
+  elif [[ "$url" =~ ^git@([^:]+):(.+)$ ]]; then
+    # git@ format
+    local domain="${BASH_REMATCH[1]}"
+    path="${BASH_REMATCH[2]}"
+
+    # Simplify domain
+    if [[ "$domain" == "github.com" || "$domain" == "gitlab.com" ]]; then
+      : # Remove these domains from path
+    elif [[ "$domain" =~ ^([^.]+)\..+$ ]]; then
+      path="${BASH_REMATCH[1]}/$path"
+    else
+      path="$domain/$path"
+    fi
+  else
+    echo >&2 "Error: Unsupported git URL format: $url"
+    return 1
+  fi
+
+  # Apply same transformation as dir_to_session_name
+  echo "$path" | awk -F'/' 'BEGIN{OFS="/"} {
+    gsub(/\./, "_")
+    if (NF >= 3) {
+      print $1, $(NF-1), $NF
+    } else {
+      print
+    }
+  }'
 }
 
 refresh_cache(){
   # Create the cache file if it doesn't exist
-  if [[ ! -f "$TS_CACHE" || ! -f "$TS_SMART_CACHE" ]]; then
+  if [[ ! -f "$TS_CACHE" ]]; then
     { find $TMUX_DIR_BASES -type d -name '.git'; find $TMUX_DIR_BASES -type f -name '.git' -exec grep -l -v '/modules/' {} +; } 2>/dev/null |\
-      grep -Ev "$FILTER_CACHE" |\
-      sed 's#/.git$##' > "$TS_CACHE"
+      tee "$TS_FIND_LOG" |\
+      sed 's#/.git$##' |\
+      grep -Ev "$FILTER_CACHE" > "$TS_CACHE"
 
     # Generate the sorted lists
-    sorted_autojump_stat=$(autojump --stat | awk '/^[0-9]+.[0-9]:\s+\// {print $2}' | grep -x -f "$TS_CACHE")
-    unmatched_entries=$(grep -vxFf <(echo "$sorted_autojump_stat") "$TS_CACHE" | sort)
-    echo -e "$unmatched_entries\n$sorted_autojump_stat" | tac > "$TS_SMART_CACHE"
+    sorted_autojump_stat=$(get_directory_priority | grep -x -f "$TS_CACHE")
+    unmatched_entries=$(grep -vxFf <(echo "$sorted_autojump_stat") "$TS_CACHE")
+    echo -e "${sorted_autojump_stat}\n${unmatched_entries}" > "$TS_SMART_CACHE"
   fi
 }
 
 expire_cache(){
   # Refresh cache if it's older than 60 minutes
-  if [[ -f "$TS_CACHE" && -f "$TS_SMART_CACHE" ]]; then
-    find "$TS_CACHE" "$TS_SMART_CACHE" -type f -mmin +600 -exec rm -f {} \;
+  if [[ -f "$TS_CACHE" ]]; then
+    find "$TS_CACHE" -type f -mmin +600 -exec rm -f {} \;
   fi
   refresh_cache
 }
+
+if [[ -f "$HOME/.local.alias" ]]; then
+  # shellcheck source=$HOME/.local.alias
+  source "$HOME/.local.alias"
+fi
 
 if [[ -z ${TMUX_DIR_BASES-} ]]; then
   echo >&2 "TMUX_DIR_BASES is not set"
@@ -65,50 +299,123 @@ if [[ -z ${TMUX_DIR_BASES-} ]]; then
   exit 1
 fi
 
-# Parse arguments
-while getopts ":ahklr" opt; do
-  case $opt in
-    a)
+# Parse arguments (handle both short and long options)
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -a|--active)
       TS_LIST="/tmp/.ts.active"
-      tmux list-sessions -F "#{session_name}" > "$TS_LIST"
+      # Exclude current session if running inside tmux
+      if [[ -n ${TMUX-} ]]; then
+        current_session=$(tmux display-message -p '#{session_name}')
+        tmux list-sessions -F "#{session_name}" | grep -vxF "$current_session" > "$TS_LIST"
+      else
+        tmux list-sessions -F "#{session_name}" > "$TS_LIST"
+      fi
       FZF_PREVIEW_ARGS=(
         --select-1
         --preview 'tmux capture-pane -J -p -e -t {}'
         --preview-window 'down:80%'
       )
+      shift
       ;;
-    k)
+    -k|--kill)
       KILL_SESSION=1
       TS_LIST="/tmp/.ts.active"
-      tmux list-sessions -F "#{session_name}" > "$TS_LIST"
+      # Exclude current session if running inside tmux
+      if [[ -n ${TMUX-} ]]; then
+        current_session=$(tmux display-message -p '#{session_name}')
+        tmux list-sessions -F "#{session_name}" | grep -vxF "$current_session" > "$TS_LIST"
+      else
+        tmux list-sessions -F "#{session_name}" > "$TS_LIST"
+      fi
       FZF_PREVIEW_ARGS=(
         --preview 'tmux capture-pane -J -p -e -t {}'
         --preview-window 'down:80%'
       )
+      shift
       ;;
-    l)
+    -l|--list)
       echo >&2 "Active TMUX sessions:"
       tmux list-sessions -F "#{session_name}"
       exit 0
       ;;
-    h)
+    -h|--help)
       usage
       exit 0
       ;;
-    r)
-      rm -f "$TS_CACHE" "$TS_SMART_CACHE"
+    -r|--refresh)
+      rm -f "$TS_CACHE" "$TS_SMART_CACHE" "$TS_FIND_LOG"
+      refresh_cache
+      exit 0
       ;;
-    \?)
-      echo "Invalid option: -$OPTARG" >&2
+    --list-names)
+      refresh_cache
+      list_session_names
+      exit 0
+      ;;
+    --list-dirs)
+      refresh_cache
+      cat "$TS_SMART_CACHE"
+      exit 0
+      ;;
+    --generate-map)
+      refresh_cache
+      generate_session_map
+      exit 0
+      ;;
+    --print-map)
+      print_session_map
+      exit 0
+      ;;
+    --dir-to-name)
+      if [[ -z "${2-}" ]]; then
+        echo >&2 "Error: --dir-to-name requires a directory argument"
+        usage
+        exit 1
+      fi
+      dir_to_session_name "$2"
+      exit 0
+      ;;
+    --name-to-dir)
+      if [[ -z "${2-}" ]]; then
+        echo >&2 "Error: --name-to-dir requires a session name argument"
+        usage
+        exit 1
+      fi
+      refresh_cache
+      session_name_to_dir "$2"
+      exit 0
+      ;;
+    --get-remote)
+      if [[ -z "${2-}" ]]; then
+        echo >&2 "Error: --get-remote requires a directory or session name argument"
+        usage
+        exit 1
+      fi
+      get_git_remote "$2"
+      exit 0
+      ;;
+    --remote-to-name)
+      if [[ -z "${2-}" ]]; then
+        echo >&2 "Error: --remote-to-name requires a git URL argument"
+        usage
+        exit 1
+      fi
+      remote_to_session_name "$2"
+      exit 0
+      ;;
+    -*)
+      echo >&2 "Invalid option: $1"
+      usage
+      exit 1
+      ;;
+    *)
+      # Non-option argument, treat as FZF_QUERY
+      FZF_QUERY="$*"
+      break
       ;;
   esac
 done
-
-shift $((OPTIND-1))
-
-if [[ $# -eq 1 ]]; then
-  FZF_QUERY="$1"
-fi
 
 refresh_cache
 
@@ -124,9 +431,8 @@ if [[ -n ${KILL_SESSION-} ]]; then
   exit 0
 fi
 
-selected_name=$(echo "$selected" |\
-  sed "s#$HOME/##;s#.*\.com/##;s#.*\.mil/##" |\
-  awk -F'/' 'BEGIN{OFS="/"} {gsub(/\./, "_", $0)} NF >= 3 {print substr($1, 1, 4),$(NF-1),$NF}; NF < 3 {print $(NF-1),$NF}')
+increment_directory "$selected"
+selected_name=$(dir_to_session_name "$selected")
 tmux_running=$(pgrep tmux)
 
 # We are not inside tmux and tmux is not running

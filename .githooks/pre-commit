@@ -3,27 +3,30 @@
 # Global pre-commit hook to prevent committing sensitive files
 # This hook will be called for all repositories via core.hooksPath
 
+# Avoid infinite recursion if a downstream hook shells back here
+if [ "${GLOBAL_PRECOMMIT_SHIM_RUNNING:-0}" = "1" ]; then
+    exit 0
+fi
+export GLOBAL_PRECOMMIT_SHIM_RUNNING=1
+
 # First, check if there's a local repository hook and run it
 # Check for local core.hooksPath setting
 local_hooks_path=$(git config --local core.hooksPath 2>/dev/null || echo "")
 
 if [ -n "$local_hooks_path" ] && [ -f "$local_hooks_path/pre-commit" ]; then
-    # Run local hook from configured path
-    "$local_hooks_path/pre-commit"
+    "$local_hooks_path/pre-commit" "$@"
     local_exit=$?
     if [ $local_exit -ne 0 ]; then
         exit $local_exit
     fi
 elif [ -f .githooks/pre-commit ]; then
-    # Check standard .githooks directory
-    .githooks/pre-commit
+    .githooks/pre-commit "$@"
     local_exit=$?
     if [ $local_exit -ne 0 ]; then
         exit $local_exit
     fi
 elif [ -f .git/hooks/pre-commit ]; then
-    # Fall back to .git/hooks
-    .git/hooks/pre-commit
+    .git/hooks/pre-commit "$@"
     local_exit=$?
     if [ $local_exit -ne 0 ]; then
         exit $local_exit
@@ -67,6 +70,47 @@ for file in $staged_files; do
             exit 1
         fi
     done
+done
+
+# Check staged content for references to blocked paths
+blocked_content_patterns=(
+    "ai_scripts/"
+    "ai_docs/"
+    "ai_logs/"
+    "ai_temp/"
+    "ai_tests/"
+    "ai_issues/"
+    ".claude/"
+    "AGENTS\.md"
+    "CLAUDE\.md"
+    "CLAUDE\.local\.md"
+)
+
+# Get the diff of staged changes
+staged_diff=$(git diff --cached)
+
+for pattern in "${blocked_content_patterns[@]}"; do
+    if echo "$staged_diff" | grep -E "^\+.*$pattern" > /dev/null 2>&1; then
+        echo "ERROR: Staged changes contain references to blocked paths/files"
+        echo "Found reference to: $pattern"
+        echo ""
+        echo "These paths must never be referenced in commits:"
+        echo "  - ai_scripts/"
+        echo "  - ai_docs/"
+        echo "  - ai_logs/"
+        echo "  - ai_temp/"
+        echo "  - ai_tests/"
+        echo "  - ai_issues/"
+        echo "  - .claude/"
+        echo "  - AGENTS.md"
+        echo "  - CLAUDE.md"
+        echo ""
+        echo "Offending lines:"
+        echo "$staged_diff" | grep -E "^\+.*$pattern" | head -5
+        echo ""
+        echo "Remove these references before committing."
+        exit 1
+    fi
 done
 
 # All checks passed

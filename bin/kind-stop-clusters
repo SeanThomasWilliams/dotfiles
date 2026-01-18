@@ -1,7 +1,25 @@
 #!/bin/bash
+# Stop all running kind cluster containers
+# Usage: kind-stop-clusters [-h]
 
 set -euo pipefail
 
-for cluster in $(kind get clusters); do
-  docker stop $(docker ps -q --filter "Name=${cluster}*")
+usage() {
+  echo "Usage: ${0##*/} [-h]"
+  echo "Stop all running kind cluster containers"
+  echo ""
+  echo "Options:"
+  echo "  -h    Show this help message"
+}
+
+[[ "${1:-}" == "-h" ]] && { usage; exit 0; }
+
+for cluster in $(kind get clusters 2>/dev/null); do
+  containers=$(docker ps -q --filter "Name=${cluster}*")
+  if [[ -n "$containers" ]]; then
+    echo "Stopping cluster: $cluster"
+    docker stop $containers
+  else
+    echo "Cluster already stopped: $cluster"
+  fi
 done

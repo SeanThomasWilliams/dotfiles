@@ -33,6 +33,8 @@ usage(){
 Usage: $0 [-t] [-g] [-i <gpu_index>] <input_file>
 
 Options:
+  -f
+    Force transcode even if already transcoded
   -g
     Enable GPU mode
   -i <gpu_index>
@@ -52,8 +54,11 @@ if [[ $# -lt 1 ]]; then
   exit 1
 fi
 
-while getopts ":ghi:nt" opt; do
+while getopts ":fghi:nt" opt; do
   case "$opt" in
+    f)
+      force_transcode=1
+      ;;
     g)
       gpu_node=1
       ;;
@@ -158,15 +163,17 @@ if [[ "$input_file" =~ .*\.tmp\.*$ ]]; then
   exit 0
 fi
 
-if is_transcoded "$input_file"; then
+if [[ ${force_transcode:-0} -eq 1 ]]; then
+  echo >&2 "Force mode enabled. Will transcode regardless of previous transcode status."
+elif is_transcoded "$input_file"; then
   dlog "File: $input_file is already transcoded. Skipping..."
   exit 0
-else
-  if [[ ${touch_only:-0} -eq 1 ]]; then
-    echo >&2 "Touching file: $input_file"
-    touch "$input_file"
-    exit 0
-  fi
+fi
+
+if [[ ${touch_only:-0} -eq 1 ]]; then
+  echo >&2 "Touching file: $input_file"
+  touch "$input_file"
+  exit 0
 fi
 
 file_bitrate=$(calculate_bitrate "$input_file")
@@ -209,7 +216,7 @@ esac
 
 if [[ $gpu_node -eq 1 ]]; then
   echo >&2 "GPU-${gpu_index} Transcoding: '$input_file'"
-  source_args=(-hwaccel_device "${gpu_index}" -hwaccel cuda -hwaccel_output_format auto)
+  source_args=(-hwaccel_device "${gpu_index}" -hwaccel cuda)
   if [[ $video_encoding == "x264" ]]; then
     video_codec_args=(-pix_fmt yuv420p -c:v h264_nvenc -profile:v high)
   else

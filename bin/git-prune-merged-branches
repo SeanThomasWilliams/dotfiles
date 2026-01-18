@@ -22,11 +22,17 @@ protected_branches=(
 gone_branches=$(git for-each-ref --format '%(refname) %(upstream:track)' refs/heads |\
   awk '$2 == "[gone]" {sub("refs/heads/", "", $1) ; print $1}')
 
+echo >&2 "Found the following gone branches: ${gone_branches-}"
+
 for branch in $gone_branches; do
   echo >&2 "Deleting branch $branch"
   # Check if branch is protected
   if [[ " ${protected_branches[*]} " =~ " ${branch} " ]]; then
     echo >&2 "Branch $branch is protected"
+    continue
+  fi
+  if [[ "$DRY_RUN" == true ]]; then
+    echo >&2 "Dry run: would delete branch $branch"
     continue
   fi
   git branch -D "$branch"

@@ -62,11 +62,11 @@ if [[ $VERBOSE -eq 1 ]]; then
   echo "+ ctags ${CTAGS_ARGS[*]}"
   ctags "${CTAGS_ARGS[@]}" --verbose
 else
-  ctags "${CTAGS_ARGS[@]}"
+  ctags "${CTAGS_ARGS[@]}" 2>/dev/null
 fi
 
 if ctags --help 2>/dev/null | grep -q -- '--output-format'; then
-  ctags -f - "${COMMON_ARGS[@]}" -L .ctags.files --output-format=json > .tags.json || true
+  ctags -f - "${COMMON_ARGS[@]}" -L .ctags.files --output-format=json > .tags.json 2>/dev/null || true
 fi
 
 mv .tags.tmp .tags

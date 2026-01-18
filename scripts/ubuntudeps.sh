@@ -40,6 +40,14 @@ EOF
   sudo apt install -yyq firefox
 }
 
+configure_wezterm_repo(){
+  local keyring="/usr/share/keyrings/wezterm-fury.gpg"
+  sudo install -m 0755 -d /usr/share/keyrings
+  curl -fsSL https://apt.fury.io/wez/gpg.key | sudo gpg --yes --dearmor -o "$keyring"
+  echo 'deb [signed-by=/usr/share/keyrings/wezterm-fury.gpg] https://apt.fury.io/wez/ * *' | sudo tee /etc/apt/sources.list.d/wezterm.list > /dev/null
+  sudo chmod 644 "$keyring"
+}
+
 INTERACTIVE_PACKAGES=(
   postfix
 )
@@ -59,6 +67,7 @@ CLI_PACKAGES=(
   cmake
   csvkit
   curl
+  dh-autoreconf
   direnv
   dnsmasq
   dstat
@@ -90,6 +99,7 @@ CLI_PACKAGES=(
   libjansson-dev
   libncurses5-dev
   libnss3-tools
+  libpam0g-dev
   libreadline-dev
   libssl-dev
   libtool-bin
@@ -118,6 +128,7 @@ CLI_PACKAGES=(
   sshuttle
   tcpdump
   tmux
+  wezterm
   universal-ctags
   unrar
   unzip
@@ -173,6 +184,8 @@ UI_PACKAGES=(
 )
 
 install_firefox
+
+configure_wezterm_repo
 
 sudo apt-get update -yyq
 sudo apt-get install -yyq "${INTERACTIVE_PACKAGES[@]}"

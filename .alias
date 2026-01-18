@@ -21,16 +21,6 @@ ew(){
 }
 export -f ew
 
-git-wt(){
-  if [[ -z $1 ]]; then
-    selected=$(git worktree list --porcelain | awk -F'/' '/^worktree/ {print $NF}' | fzf)
-  else
-    selected="$1"
-  fi
-  cd "$(git worktree list | awk -v ws="$selected" '$NF == "["ws"]" {print $1}')"
-}
-export -f git-wt
-
 load_session_manager_settings(){
   ### session managers
 
@@ -38,7 +28,7 @@ load_session_manager_settings(){
   shopt -s checkwinsize
 
   # term settings
-  export TERM="${TERM:-screen-256color}"
+  export TERM="xterm-256color"
   export TMUX_TMPDIR="$HOME/.local"
   alias ts="tmux-sessionizer"
 }
@@ -193,13 +183,13 @@ load_path_settings(){
     "/usr/local/opt/llvm/bin"
     "$HOME/anaconda3/condabin"
     "$HOME/anaconda3/bin"
+    "$ASDF_DATA_DIR/shims"
     "$HOME/bin"
     "$HOME/scripts"
     "$HOME/.npm-packages/bin"
     "$HOME/.cargo/bin"
     "$HOME/.yarn/bin"
     "$HOME/.local/bin"
-    "$ASDF_DATA_DIR/shims"
   )
 
   for path_part in "${PATH_PREPEND[@]}"; do
@@ -229,8 +219,8 @@ load_alias_settings(){
   alias tw='command t waiting'
   alias k9s='setterm --linewrap off; k9s'
   alias claude='claude --dangerously-skip-permissions'
-  alias gemini='gemini --yolo'
-  alias codex='codex --dangerously-bypass-approvals-and-sandbox'
+  alias gemini='gemini --approval-mode=yolo --sandbox=false'
+  alias codex='codex --ask-for-approval never --sandbox danger-full-access'
   alias terragrunt-clear-cache='find ./ -type d -name ".terragrunt-cache" -prune -exec rm -rf {} \;'
   alias terragrunt-clear-debug='find ./ -type f -name "terragrunt-debug.tfvars.json" -prune -exec rm -rf {} \;'
 
@@ -291,6 +281,15 @@ load_alias_settings(){
   alias .......='cd ../../../../../..'
   alias ........='cd ../../../../../../..'
   alias -- -='cd -'
+
+  # Code Agent CLI Settings
+  export CLAUDE_BASH_MAINTAIN_PROJECT_WORKING_DIR=1
+  export CLAUDE_CODE_DISABLE_AUTO_UPDATE=1
+  export DISABLE_AUTOUPDATER=1
+  export DISABLE_BUG_COMMAND=1
+  export DISABLE_TELEMETRY=1
+  export MAX_MCP_OUTPUT_TOKENS=10000
+  export OPENCODE_DISABLE_AUTOUPDATE=true
 }
 
 load_history_settings(){

@@ -4,12 +4,25 @@ if [[ -z "$DISPLAY" ]]; then
   export DISPLAY=:0
 fi
 
-if [[ -f /tmp/screen_off ]]; then
-  xset dpms force on
-  rm /tmp/screen_off
-  echo "Screen ON"
-else
+export LOG_FILE="/tmp/$(basename "$0").log"
+
+exec > >(tee -a "$LOG_FILE") 2>&1
+
+xset dpms q
+
+screen_on() {
+  if xset q | grep -q "Monitor is On"; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+if screen_on; then
+  echo >&2 "Turning screen off"
   xset dpms force off
-  touch /tmp/screen_off
-  echo "Screen OFF"
+else
+  echo >&2 "Turning screen on"
+  xset dpms force off
+  xset dpms force on
 fi
