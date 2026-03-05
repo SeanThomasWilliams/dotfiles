@@ -4,7 +4,7 @@
 	signingkey = 28E9D570C5261D1B
 
 [core]
-	editor = nvim
+	editor = /home/williamss/bin/git-editor-safe
 	excludesfile = ~/.gitexclude
 	quotePath = false
 	commitGraph = true
@@ -180,3 +180,12 @@
 	gpgSign = true
 [lfs]
 	locksverify = false
+
+#[credential "https://github.com"]
+#	helper = gh auth git-credential
+
+#[credential "https://gist.github.com"]
+#	helper = gh auth git-credential
+
+[sequence]
+	editor = /home/williamss/bin/git-editor-safe

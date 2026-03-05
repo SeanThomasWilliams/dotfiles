@@ -190,6 +190,7 @@ load_path_settings(){
     "$HOME/.cargo/bin"
     "$HOME/.yarn/bin"
     "$HOME/.local/bin"
+    "$HOME/.krew/bin"
   )
 
   for path_part in "${PATH_PREPEND[@]}"; do
@@ -218,7 +219,6 @@ load_alias_settings(){
   alias tt='command task $TASK_TAGS'
   alias tw='command t waiting'
   alias k9s='setterm --linewrap off; k9s'
-  alias claude='claude --dangerously-skip-permissions'
   alias gemini='gemini --approval-mode=yolo --sandbox=false'
   alias codex='codex --ask-for-approval never --sandbox danger-full-access'
   alias terragrunt-clear-cache='find ./ -type d -name ".terragrunt-cache" -prune -exec rm -rf {} \;'
@@ -289,7 +289,11 @@ load_alias_settings(){
   export DISABLE_BUG_COMMAND=1
   export DISABLE_TELEMETRY=1
   export MAX_MCP_OUTPUT_TOKENS=10000
+  export MIMALLOC_PURGE_DELAY=0
   export OPENCODE_DISABLE_AUTOUPDATE=true
+  export OPENCODE_EXPERIMENTAL_BASH_DEFAULT_TIMEOUT_MS=1200000
+  export OPENCODE_EXPERIMENTAL_OUTPUT_TOKEN_MAX=32000
+  export TELEMETRY_ENABLED=false
 }
 
 load_history_settings(){
@@ -330,6 +334,7 @@ load_extra_source_files(){
     "$HOME/.local/share/bash-completion/*.bash"
     "$HOME/anaconda3/etc/profile.d/*.sh"
     "$HOME/.asdf/completions/asdf.bash"
+    "$HOME/.cargo/env"
     "/Applications/iTerm.app/Contents/Resources/iterm2_shell_integration.bash"
   )
 

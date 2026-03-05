@@ -6,11 +6,22 @@ set -o pipefail
 
 git fetch --all --prune
 
+# Add --dry-run for testing
+if [[ "${1:-}" == "--dry-run" ]]; then
+  echo "Dry run mode enabled. No branches will be deleted."
+  DRY_RUN=true
+else
+  DRY_RUN=false
+fi
+
 protected_branches=(
   c1-prod
   c1-zone-a
   c1-zone-b
   dev
+  cf-dev
+  cf-peli
+  peli-cf-dev
   develop
   main
   master

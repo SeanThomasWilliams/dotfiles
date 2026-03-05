@@ -161,9 +161,9 @@ set $ws10 "10:mail"
 workspace_auto_back_and_forth no
 
 # Monitor Setup
-set $leftmon "DisplayPort-3"
-set $rightmon "DisplayPort-3"
-set $primarymon "DisplayPort-3"
+set $leftmon "HDMI-0"
+set $rightmon "HDMI-0"
+set $primarymon "HDMI-0"
 
 # Keybind to move workspace to other monitor
 #bindsym $mod+Shift+p      move workspace to output $primarymon
@@ -303,6 +303,8 @@ for_window [class="gnome-terminal-server"] title_format "Terminal"
 # for_window [class="[Gg]oogle-chrome"] layout stacking, move to workspace $ws9
 # for_window [window_role="pop-up"] floating enable
 # for_window [window_role="task_dialog"] floating enable
+# Disable huddle windows being floating
+for_window [class="(?i)slack"] floating disable
 
 for_window [class="F5 VPN"] move to workspace $ws8
 for_window [class="google-chrome" window_role="pop-up"] move to workspace $ws2
@@ -347,8 +349,10 @@ exec --no-startup-id i3-msg 'workspace $ws10; exec /usr/lib/thunderbird/thunderb
 # exec --no-startup-id i3-msg-wait 11 'workspace $ws9; exec google-chrome --profile-directory="Profile 3"'
 
 
-# STT-Suite key bindings (added by make install-i3)
-# $mod+v: Realtime typing (types as you speak)
-bindsym $mod+v exec --no-startup-id ~/.local/bin/stt-toggle-i3 --realtime true --log-level DEBUG
-# $mod+Shift+v: Bulk clipboard (records then copies to clipboard)
-bindsym $mod+Shift+v exec --no-startup-id ~/.local/bin/stt-toggle-i3 --mode both --realtime false --log-level DEBUG
+# STT-Suite key bindings
+# $mod+v: Bulk clipboard (records then copies to clipboard)
+bindsym $mod+v exec --no-startup-id ~/.local/bin/stt-toggle-i3 --mode both --realtime false
+# $mod+Shift+v: Realtime typing (types as you speak)
+bindsym $mod+Shift+v exec --no-startup-id ~/.local/bin/stt-toggle-i3 --realtime true
+# $mod+b: Toggle TTS audio output on/off
+bindsym $mod+b exec --no-startup-id /home/williamss/software/stt-suite/scripts/toggle-tts-audio.sh

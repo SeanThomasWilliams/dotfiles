@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+if [ "${1:-}" = "-h" ] || [ "${1:-}" = "--help" ]; then
+  printf 'Usage: git-editor-safe [file]\n'
+  printf 'Non-interactive mode when OPENCODE=1; otherwise opens nvim.\n'
+  exit 0
+fi
+
+if [ "${OPENCODE:-0}" = "1" ] || [ -n "${GIT_NONINTERACTIVE:-}" ] || [ -n "${CI:-}" ] || [ ! -t 0 ] || [ ! -t 1 ]; then
+  exit 0
+fi
+
+exec nvim "$@"

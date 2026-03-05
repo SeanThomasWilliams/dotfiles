@@ -1,5 +1,9 @@
 # bash completion for GNU make                             -*- shell-script -*-
 
+if [[ "${DEBUG-}" -eq 1 ]]; then
+  set -x
+fi
+
 update_cache(){
   local makefile makefile_md5 makefile_cache makefile_dir makefile_list
 

@@ -184,8 +184,8 @@ fi
 
 if [[ $file_bitrate -lt 1000 ]]; then
   bitrate=1000
-elif [[ $file_bitrate -gt 2500 ]]; then
-  bitrate=2500
+elif [[ $file_bitrate -gt 4000 ]]; then
+  bitrate=4000
 else
   bitrate="$file_bitrate"
 fi

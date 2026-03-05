@@ -329,6 +329,7 @@ while [[ $# -gt 0 ]]; do
         tmux list-sessions -F "#{session_name}" > "$TS_LIST"
       fi
       FZF_PREVIEW_ARGS=(
+        --select-1
         --preview 'tmux capture-pane -J -p -e -t {}'
         --preview-window 'down:80%'
       )
@@ -435,14 +436,13 @@ increment_directory "$selected"
 selected_name=$(dir_to_session_name "$selected")
 tmux_running=$(pgrep tmux)
 
+expire_cache &
+
 # We are not inside tmux and tmux is not running
 if [[ -z ${TMUX-} && -z ${tmux_running-} ]]; then
   # Start a new session and enter it
-  tmux -2 new-session -s "$selected_name" -c "$selected"
-  exit 0
+  exec tmux -2 new-session -s "$selected_name" -c "$selected"
 fi
-
-expire_cache &
 
 # Tmux is running. Check if session exists
 if ! tmux has-session -t=$selected_name 2> /dev/null; then
@@ -455,5 +455,5 @@ if [[ -z ${TMUX-} ]]; then
   tmux -2 attach -t "$selected_name"
 else
   # Switch the client to the session if inside tmux
-  tmux -2 switch-client -t "$selected_name"
+  exec tmux -2 switch-client -t "$selected_name"
 fi

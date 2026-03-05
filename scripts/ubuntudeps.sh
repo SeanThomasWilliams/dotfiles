@@ -1,9 +1,34 @@
 #!/bin/bash
 
-set -x
 set -euo pipefail
 
+install_nvidia_drivers(){
+  if command -v nvidia-smi &>/dev/null; then
+    echo >&2 "Nvidia drivers already installed"
+    return 0
+  fi
+
+  # Install nvidia drivers
+  if lspci | grep -q -i nvidia; then
+    echo >&2 "Nvidia card detected"
+    sudo apt-get install "linux-headers-$(uname -r)"
+    curl -fSsL https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-keyring_1.1-1_all.deb -o /tmp/cuda-keyring.deb
+    sudo dpkg -i /tmp/cuda-keyring.deb
+    rm -f /tmp/cuda-keyring.deb
+
+    sudo apt-get update -yyq
+    sudo apt-get install -yyq cuda-toolkit nvidia-container-runtime
+  fi
+}
+
 install_docker(){
+  # Check if Docker is already installed
+  local docker_sources_list="/etc/apt/sources.list.d/docker.list"
+  if [[ -f "$docker_sources_list" ]]; then
+    echo >&2 "Docker already installed"
+    return 0
+  fi
+
   # Add Docker's official GPG key:
   sudo install -m 0755 -d /etc/apt/keyrings
   sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
@@ -21,14 +46,25 @@ install_docker(){
 }
 
 install_aws_session_manager(){
+  if command -v session-manager-plugin &>/dev/null; then
+    echo >&2 "AWS Session Manager Plugin already installed"
+    return 0
+  fi
+
   curl -fSsL -O "https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_64bit/session-manager-plugin.deb"
   sudo apt-get install -yyq ./session-manager-plugin.deb
   rm -f ./session-manager-plugin.deb
 }
 
-install_firefox(){
+configure_firefox_repo(){
+  local moztermppa="/etc/apt/preferences.d/mozillateamppa"
+  if [[ -f "$moztermppa" ]]; then
+    echo >&2 "Firefox already installed"
+    return 0
+  fi
+
   sudo add-apt-repository ppa:mozillateam/ppa -y
-cat <<EOF | sudo tee /etc/apt/preferences.d/mozillateamppa
+cat <<EOF | sudo tee "$moztermppa"
 Package: firefox*
 Pin: release o=LP-PPA-mozillateam
 Pin-Priority: 1001
@@ -37,11 +73,15 @@ Package: firefox*
 Pin: release o=Ubuntu
 Pin-Priority: -1
 EOF
-  sudo apt install -yyq firefox
 }
 
 configure_wezterm_repo(){
   local keyring="/usr/share/keyrings/wezterm-fury.gpg"
+  if [[ -f "$keyring" ]]; then
+    echo >&2 "Wezterm already installed"
+    return 0
+  fi
+
   sudo install -m 0755 -d /usr/share/keyrings
   curl -fsSL https://apt.fury.io/wez/gpg.key | sudo gpg --yes --dearmor -o "$keyring"
   echo 'deb [signed-by=/usr/share/keyrings/wezterm-fury.gpg] https://apt.fury.io/wez/ * *' | sudo tee /etc/apt/sources.list.d/wezterm.list > /dev/null
@@ -78,6 +118,7 @@ CLI_PACKAGES=(
   fonts-noto
   fonts-symbola
   fzf
+  g++
   gawk
   gcc
   gettext
@@ -86,7 +127,6 @@ CLI_PACKAGES=(
   gnutls-bin
   grep
   htop
-  imagemagick
   jq
   libbcpkix-java
   libbcprov-java
@@ -107,7 +147,6 @@ CLI_PACKAGES=(
   libxslt1-dev
   libyaml-dev
   lm-sensors
-  lynx
   make
   maven
   mkcert
@@ -120,7 +159,9 @@ CLI_PACKAGES=(
   openssh-server
   pandoc
   parallel
+  pkg-config
   plocate
+  python3
   rar
   sed
   silversearcher-ag
@@ -128,7 +169,6 @@ CLI_PACKAGES=(
   sshuttle
   tcpdump
   tmux
-  wezterm
   universal-ctags
   unrar
   unzip
@@ -181,35 +221,41 @@ UI_PACKAGES=(
   xmlto
   xsel
   xsettingsd
+
+  imagemagick
+  libfontconfig1-dev
+  libxcb-xfixes0-dev
+  libxkbcommon-dev
+  wezterm
+  firefox
 )
 
-install_firefox
+echo >&2 "Updating package lists..."
 
+echo >&2 "Configuring repos"
+configure_firefox_repo
 configure_wezterm_repo
+install_docker
+install_nvidia_drivers
 
+echo >&2 "Installing interactive packages"
 sudo apt-get update -yyq
 sudo apt-get install -yyq "${INTERACTIVE_PACKAGES[@]}"
 
+echo >&2 "Installing CLI packages"
 export DEBIAN_FRONTEND=noninteractive
 sudo apt-get install -yyq "${CLI_PACKAGES[@]}"
 
+echo >&2 "Installing UI packages"
 if command -v xrandr &>/dev/null; then
   sudo apt-get install -yyq "${UI_PACKAGES[@]}"
 fi
 
-install_docker
+echo >&2 "Installing single packages"
 install_aws_session_manager
 
-# Install nvidia drivers
-if lspci | grep -q -i nvidia; then
-  echo >&2 "Nvidia card detected"
-  sudo apt-get install "linux-headers-$(uname -r)"
-  curl -fSsL https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-keyring_1.1-1_all.deb -o /tmp/cuda-keyring.deb
-  sudo dpkg -i /tmp/cuda-keyring.deb
-  rm -f /tmp/cuda-keyring.deb
-
-  sudo apt-get update -yyq
-  sudo apt-get install -yyq cuda-toolkit nvidia-container-runtime
-fi
+echo >&2 "Cleaning up..."
 
 sudo apt autoremove -yyq
+
+echo >&2 "Done"

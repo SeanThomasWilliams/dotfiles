@@ -16,10 +16,16 @@ usage() {
 
 for cluster in $(kind get clusters 2>/dev/null); do
   containers=$(docker ps -q --filter "Name=${cluster}*")
+
   if [[ -n "$containers" ]]; then
-    echo "Stopping cluster: $cluster"
-    docker stop $containers
+    for container in $containers; do
+      echo >&2 "Changing restart polcy on ${container}"
+      docker update --restart=unless-stopped "${container}" &>/dev/null
+    done
+
+    echo >&2 "Stopping cluster: $cluster"
+    docker stop $containers &>/dev/null
   else
-    echo "Cluster already stopped: $cluster"
+    echo >&2 "Cluster already stopped: $cluster"
   fi
 done
