@@ -11,7 +11,7 @@ TS_SMART_CACHE="$HOME/.ts.smart.cache"
 TS_FIND_LOG="$HOME/.ts.find.log"
 TS_SESSION_MAP="$HOME/.ts.session-map.cache"
 TS_LIST="$TS_SMART_CACHE"
-FILTER_CACHE='asdf|/\.[a-z]|ai_'
+FILTER_CACHE='asdf|plugged|/\.[a-z]|ai_'
 
 FZF_QUERY=""
 FZF_PREVIEW_ARGS=(

@@ -1,4 +1,4 @@
 .headers on
-.mode column
+.mode column --wrap 0
 .nullvalue ¤
 .prompt "> "
