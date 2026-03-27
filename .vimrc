@@ -18,17 +18,15 @@ Plug 'benekastah/neomake'
 Plug 'bling/vim-airline'
 Plug 'ekalinin/Dockerfile.vim'
 Plug 'ellisonleao/gruvbox.nvim'
-Plug 'fatih/vim-go', { 'tag': '*' }
+Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries' }
 Plug 'folke/tokyonight.nvim', { 'branch': 'main' }
 Plug 'gagoar/StripWhiteSpaces'
 Plug 'honza/vim-snippets'
 Plug 'hrsh7th/cmp-buffer'
 Plug 'hrsh7th/cmp-cmdline'
-Plug 'hrsh7th/cmp-nvim-lsp'
 Plug 'hrsh7th/cmp-path'
 Plug 'hrsh7th/nvim-cmp'
 Plug 'jacoborus/tender.vim'
-Plug 'jose-elias-alvarez/null-ls.nvim'
 Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'junegunn/fzf.vim'
 Plug 'jvirtanen/vim-hcl'
@@ -39,7 +37,6 @@ Plug 'ludovicchabant/vim-gutentags'
 Plug 'majutsushi/tagbar'
 Plug 'mbbill/undotree'
 Plug 'mustache/vim-mustache-handlebars'
-Plug 'neovim/nvim-lspconfig', { 'do': 'npm i -g pyright' }
 Plug 'nvim-lua/lsp-status.nvim'
 Plug 'nvim-lua/plenary.nvim'
 Plug 'nvim-tree/nvim-web-devicons'
@@ -63,9 +60,9 @@ Plug 'tpope/vim-surround'
 Plug 'vim-perl/vim-perl'
 Plug 'vimwiki/vimwiki'
 Plug 'will133/vim-dirdiff'
-Plug 'yetone/avante.nvim', { 'branch': 'main', 'do': 'make' }
 Plug 'zbirenbaum/copilot-cmp'
 Plug 'zbirenbaum/copilot.lua'
+Plug 'mason-org/mason.nvim'
 
 " Required, plugins available after.
 call plug#end()

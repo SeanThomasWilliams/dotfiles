@@ -1,7 +1,55 @@
-local nvim_lsp = require("lspconfig")
+#local nvim_lsp = require("lspconfig")
 local lsp_status = require("lsp-status")
 local cmp = require('cmp')
 local harpoon = require("harpoon")
+
+require("mason").setup({
+    ui = {
+        icons = {
+            package_installed = "✓",
+            package_pending = "➜",
+            package_uninstalled = "✗"
+        }
+    }
+})
+
+vim.lsp.enable({
+    "bash",
+    "lua",
+    "go",
+    "terraform",
+    "yaml",
+    "ansible",
+})
+
+vim.api.nvim_create_autocmd('LspAttach', {
+  group = vim.api.nvim_create_augroup('my.lsp', {}),
+  callback = function(ev)
+    local client = assert(vim.lsp.get_client_by_id(ev.data.client_id))
+    if client:supports_method('textDocument/implementation') then
+      -- Create a keymap for vim.lsp.buf.implementation ...
+    end
+    -- Enable auto-completion. Note: Use CTRL-Y to select an item. |complete_CTRL-Y|
+    if client:supports_method('textDocument/completion') then
+      -- Optional: trigger autocompletion on EVERY keypress. May be slow!
+      -- local chars = {}; for i = 32, 126 do table.insert(chars, string.char(i)) end
+      -- client.server_capabilities.completionProvider.triggerCharacters = chars
+      vim.lsp.completion.enable(true, client.id, ev.buf, {autotrigger = true})
+    end
+    -- Auto-format ("lint") on save.
+    -- Usually not needed if server supports "textDocument/willSaveWaitUntil".
+    if not client:supports_method('textDocument/willSaveWaitUntil')
+        and client:supports_method('textDocument/formatting') then
+      vim.api.nvim_create_autocmd('BufWritePre', {
+        group = vim.api.nvim_create_augroup('my.lsp', {clear=false}),
+        buffer = ev.buf,
+        callback = function()
+          vim.lsp.buf.format({ bufnr = ev.buf, id = client.id, timeout_ms = 1000 })
+        end,
+      })
+    end
+  end,
+})
 
 vim.g.mapleader = '\\'
 
@@ -10,6 +58,17 @@ local has_words_before = function()
   local line, col = unpack(vim.api.nvim_win_get_cursor(0))
   return col ~= 0 and vim.api.nvim_buf_get_text(0, line-1, 0, line-1, col, {})[1]:match("^%s*$") == nil
 end
+
+vim.diagnostic.config({
+  -- Use the default configuration
+  -- virtual_lines = true
+
+  -- Alternatively, customize specific options
+  virtual_lines = {
+   -- Only show virtual line diagnostics for the current cursor line
+   current_line = true,
+  },
+})
 
 --- sops
 require('nvim_sops').setup({
@@ -230,7 +289,7 @@ cmp.setup({
     -- Copilot Source
     { name = "copilot", group_index = 2 },
     -- Other Sources
-    { name = "nvim_lsp", group_index = 2 },
+    -- { name = "nvim_lsp", group_index = 2 },
     { name = "path", group_index = 2 },
     { name = "buffer", group_index = 2 },
     { name = 'render-markdown', group_index = 2 },
@@ -256,32 +315,7 @@ cmp.setup.cmdline(':', {
 })
 
 -- Set up lspconfig.
-local capabilities = require('cmp_nvim_lsp').default_capabilities()
-
--- Use a loop to conveniently call 'setup' on multiple servers and
--- map buffer local keybindings when the language server attaches
-local servers = {
-    "gopls",
-    "dockerls",
-    "ts_ls",
-    "bashls",
-    "jedi_language_server",
-    "rust_analyzer",
-    "terraformls",
-    "clangd"
-}
-
-for _, lsp in ipairs(servers) do
-    nvim_lsp[lsp].setup {
-        capabilities = capabilities,
-        on_attach = on_attach,
-        flags = {
-            debounce_text_changes = 150
-        }
-    }
-end
-
-nvim_lsp["terraformls"].filetypes = {"terraform", "tf", "hcl"}
+-- local capabilities = require('cmp_nvim_lsp').default_capabilities()
 
 -- Function to find the root directory of the project
 local function find_project_root()
@@ -324,44 +358,6 @@ vim.keymap.set("n", "<leader>4", function() harpoon:list():select(4) end)
 -- Toggle previous & next buffers stored within Harpoon list
 vim.keymap.set("n", "<C-N>", function() harpoon:list():next() end)
 vim.keymap.set("n", "<C-M>", function() harpoon:list():prev() end)
-
-require('avante_lib').load()
-require('avante').setup ({
-  provider = "gemini",
-  openai = {
-    endpoint = "https://api.openai.com/v1",
-    model = "gpt-4o-mini",
-    timeout = 30000, -- timeout in milliseconds
-    temperature = 0, -- adjust if needed
-    max_tokens = 8192,
-  },
-  claude = {
-    endpoint = "https://api.anthropic.com",
-    model = "claude-3-5-sonnet-20241022",
-    temperature = 0,
-    max_tokens = 4096,
-    disable_tools = true,
-  },
-  gemini20 = {
-    endpoint = "https://generativelanguage.googleapis.com/v1beta/models",
-    model = "gemini-2.0-flash",
-    timeout = 30000, -- Timeout in milliseconds
-    temperature = 0,
-    max_tokens = 8192,
-  },
-  gemini = {
-    endpoint = "https://generativelanguage.googleapis.com/v1beta/models",
-    model = "gemini-2.5-flash",
-    timeout = 30000, -- Timeout in milliseconds
-    temperature = 0,
-    max_tokens = 65536,
-    generationConfig = {
-      thinkingConfig = {
-        thinkingBudget = 1024,
-      },
-    },
-  },
-})
 
 require('nvim-web-devicons').setup {
  -- globally enable different highlight colors per icon (default to true)

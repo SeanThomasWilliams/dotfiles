@@ -35,11 +35,7 @@ git checkout $latest_tag
 
 rm -f ~/anaconda3/bin/libtool*
 
-make CMAKE_BUILD_TYPE=RelWithDebInfo CMAKE_EXTRA_FLAGS="-DUSE_BUNDLED_LUAJIT=ON -DUSE_BUNDLED_LUAROCKS=ON"
+make CMAKE_BUILD_TYPE=RelWithDebInfo \
+  CMAKE_EXTRA_FLAGS="-DUSE_BUNDLED_LUAJIT=ON -DUSE_BUNDLED_LUAROCKS=ON -DCMAKE_INSTALL_PREFIX=/usr"
 
-sudo make install
-if sudo make install; then
-  sudo rm -rf "$HOME/software/neovim.git"
-else
-  echo "Installation failed. The repository has not been removed for debugging purposes."
-fi
+sudo make CMAKE_INSTALL_PREFIX=/usr install
