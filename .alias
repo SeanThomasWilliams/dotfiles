@@ -68,6 +68,10 @@ load_ansible_settings(){
 }
 
 load_node_settings(){
+  export NVM_DIR="$HOME/.config/nvm"
+  [ -s "$NVM_DIR/nvm.sh" ] && source "$NVM_DIR/nvm.sh"  # This loads nvm
+  [ -s "$NVM_DIR/bash_completion" ] && source "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
   if ! command -v node &> /dev/null; then
     return
   fi

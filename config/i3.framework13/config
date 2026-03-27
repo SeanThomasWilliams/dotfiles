@@ -165,9 +165,9 @@ set $ws10 "10:mail"
 workspace_auto_back_and_forth no
 
 # Monitor Setup
-set $leftmon "eDP-1"
-set $rightmon "eDP-1"
-set $primarymon "eDP-1"
+set $leftmon "eDP"
+set $rightmon "DisplayPort-3"
+set $primarymon "eDP"
 
 # Keybind to move workspace to other monitor
 #bindsym $mod+Shift+p      move workspace to output $primarymon
