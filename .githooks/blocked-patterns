@@ -1,0 +1,20 @@
+# Shared blocked-path patterns for git hooks.
+# Sourced by ~/.githooks/pre-commit and ~/.githooks/commit-msg.
+# One ERE pattern per line. Blank lines and lines starting with '#' are ignored.
+#
+# These patterns are matched against:
+#   - staged file paths (pre-commit file-name check)
+#   - staged diff additions (pre-commit content check)
+#   - commit message body (commit-msg check)
+
+ai_scripts/
+ai_docs/
+ai_logs/
+ai_temp/
+ai_tests/
+ai_issues/
+ai_wiki/
+\.claude/
+AGENTS\.md
+CLAUDE\.md
+CLAUDE\.local\.md

@@ -134,6 +134,7 @@
 [http]
 	sslVerify = false
 	followRedirects = true
+	postBuffer = 157286400
 
 [credential]
 	helper = store

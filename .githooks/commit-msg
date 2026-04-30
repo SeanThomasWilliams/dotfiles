@@ -1,0 +1,63 @@
+#!/bin/bash
+#
+# Global commit-msg hook. Rejects commit messages that contain:
+#   1. Literal backslash-n sequences (usually a shell-quoting bug that
+#      produces a single-line message rendered with visible "\n" on
+#      GitLab / GitHub).
+#   2. References to paths the pre-commit hook already blocks from file
+#      content. The shared pattern list lives alongside this hook.
+#
+# Usage: installed via `git config --global core.hooksPath ~/.githooks`.
+# Git invokes this hook with $1 = path to the commit message file and
+# an optional $2 = source (message, template, merge, squash, commit).
+# Exit 0 = accept, non-zero = reject the commit.
+
+set -u
+
+msg_file="${1:-}"
+[[ -r "$msg_file" ]] || exit 0
+
+# Skip auto-generated sources: merges, squashes, amends-with-prior-msg.
+case "${2:-}" in
+    merge|squash|commit) exit 0 ;;
+esac
+
+# Strip comment lines before scanning, matching git's own finalization.
+scan_content=$(grep -v '^#' "$msg_file")
+
+# --- Check 1: literal backslash-n ---
+if [[ "$scan_content" =~ \\n ]]; then
+    {
+        echo "ERROR: commit message contains a literal backslash-n sequence."
+        echo "This usually means the message was passed as a single-quoted"
+        echo "string with escaped newlines that the shell did not expand."
+        echo ""
+        echo "Fix: use a heredoc or an editor so real newlines are written."
+        echo ""
+        echo "Offending lines:"
+        grep -n '\\n' "$msg_file" | head -5
+    } >&2
+    exit 1
+fi
+
+# --- Check 2: blocked path references (shared list) ---
+patterns_file="$(dirname "${BASH_SOURCE[0]}")/blocked-patterns"
+if [[ -r "$patterns_file" ]]; then
+    # Read non-comment, non-empty patterns.
+    mapfile -t blocked_patterns < <(grep -vE '^\s*(#|$)' "$patterns_file")
+    for pattern in "${blocked_patterns[@]}"; do
+        if grep -qE "$pattern" <<<"$scan_content"; then
+            {
+                echo "ERROR: commit message references a blocked path."
+                echo "Matched pattern from $patterns_file: $pattern"
+                echo ""
+                echo "Commit messages must not mention internal-only paths"
+                echo "(same list the pre-commit hook enforces for file"
+                echo "content). Remove the reference and try again."
+            } >&2
+            exit 1
+        fi
+    done
+fi
+
+exit 0

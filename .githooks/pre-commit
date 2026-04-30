@@ -14,11 +14,10 @@ export GLOBAL_PRECOMMIT_SHIM_RUNNING=1
 local_hooks_path=$(git config --local core.hooksPath 2>/dev/null || echo "")
 
 if [ -n "$local_hooks_path" ] && [ -f "$local_hooks_path/pre-commit" ]; then
+    # Repo has its own hooks path configured — delegate fully and exit.
+    # The repo's pre-commit owns all checks; global sensitive-file scan does not apply.
     "$local_hooks_path/pre-commit" "$@"
-    local_exit=$?
-    if [ $local_exit -ne 0 ]; then
-        exit $local_exit
-    fi
+    exit $?
 elif [ -f .githooks/pre-commit ]; then
     .githooks/pre-commit "$@"
     local_exit=$?

@@ -1,27 +1,76 @@
-#!/bin/bash
-# this prints out branch ahead/behind status vs current branch for each branch
+#!/usr/bin/env bash
+# Print ahead/behind status for active Git branches vs the current branch.
+# Usage: git-branch-status [-h]
+# Filters tags, version refs, and release refs so output focuses on active work.
 
-base=$(git rev-parse --abbrev-ref HEAD)
+set -euo pipefail
 
-{
-  echo "Behind,Ahead,Branch,Baseline Branch"
-  git for-each-ref --format="%(refname:short) %(upstream:short)" refs/ |\
-    while read -r local remote; do
-      if [[ -x $remote ]]; then
-        branches=("$local")
-      else
-        branches=("$local" "$remote")
-      fi
+usage() {
+    cat <<'EOF'
+Usage: git-branch-status [-h]
 
-      for branch in "${branches[@]}"; do
-        # Check that branch is not empty
-        [[ -n "${branch-}" ]] || continue
-        # Don't compare base current branch
-        [[ $branch != "$base" ]] || continue
-        git rev-list --left-right "${branch}"..."${base}" -- 2>/dev/null > /tmp/git_upstream_status_delta || continue
-        LEFT_AHEAD=$(grep -c '^<' /tmp/git_upstream_status_delta)
-        RIGHT_AHEAD=$(grep -c '^>' /tmp/git_upstream_status_delta)
-        echo "-${RIGHT_AHEAD},+${LEFT_AHEAD},$branch,$base"
-      done
-    done | sort -g -t ',' -k1 -k2 -k1 -u
-} | column -s, -t
+Print each active branch's behind/ahead status compared with the current branch.
+Tags, version-only refs such as v1.2.3 or v2026.5.17, and release refs such
+as origin/ssf/release/2025.29.1 are filtered out.
+
+OPTIONS:
+    -h, --help      Show this help message
+EOF
+}
+
+is_active_branch_ref() {
+    local branch="$1"
+    local leaf="${branch##*/}"
+
+    [[ -n "$branch" ]] || return 1
+    [[ "$branch" != "HEAD" ]] || return 1
+    [[ "$branch" != */HEAD ]] || return 1
+
+    # Skip branch names that are just version refs, with or without a remote.
+    [[ ! "$leaf" =~ ^v[0-9]+([.][0-9]+){2,}$ ]] || return 1
+
+    # Skip release ref paths such as release/1.2.3 or origin/ssf/release/2025.29.1.
+    [[ ! "$branch" =~ (^|/)release/ ]] || return 1
+
+    return 0
+}
+
+main() {
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            -h|--help)
+                usage
+                return 0
+                ;;
+            *)
+                echo "Unknown option: $1" >&2
+                usage >&2
+                return 1
+                ;;
+        esac
+    done
+
+    local base
+    base=$(git rev-parse --abbrev-ref HEAD)
+
+    local delta_file
+    delta_file=$(mktemp)
+    trap 'rm -f "${delta_file:-}"' EXIT
+
+    {
+        echo "Behind,Ahead,Branch,Baseline Branch"
+        git for-each-ref --format="%(refname:short) %(symref:short)" refs/heads refs/remotes | \
+            while read -r branch symref; do
+                [[ -z "$symref" ]] || continue
+                is_active_branch_ref "$branch" || continue
+                [[ "$branch" != "$base" ]] || continue
+
+                git rev-list --left-right "${branch}"..."${base}" -- 2>/dev/null > "$delta_file" || continue
+                left_ahead=$(grep -c '^<' "$delta_file" || true)
+                right_ahead=$(grep -c '^>' "$delta_file" || true)
+                echo "-${right_ahead},+${left_ahead},$branch,$base"
+            done | sort -t ',' -k1,1g -k2,2g -k3,3 -u
+    } | column -s, -t
+}
+
+main "$@"

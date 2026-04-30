@@ -36,6 +36,7 @@
 .ctags
 .ctags.files
 .direnv/
+.pi/
 .env*
 .ipython
 .netrwhist
@@ -66,6 +67,7 @@ ai_logs/
 ai_scripts/
 ai_temp/
 ai_tests/
+ai_wiki/
 asdf/
 docs/tech-specs/
 init.vim

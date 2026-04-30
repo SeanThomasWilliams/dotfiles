@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-install_nvidia_drivers(){
+install_nvidia_drivers() {
   if command -v nvidia-smi &>/dev/null; then
     echo >&2 "Nvidia drivers already installed"
     return 0
@@ -21,7 +21,7 @@ install_nvidia_drivers(){
   fi
 }
 
-install_docker(){
+install_docker() {
   # Check if Docker is already installed
   local docker_sources_list="/etc/apt/sources.list.d/docker.list"
   if [[ -f "$docker_sources_list" ]]; then
@@ -36,16 +36,16 @@ install_docker(){
 
   # Add the repository to Apt sources:
   echo \
-      "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
-        $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
-          sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+    "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+        $(. /etc/os-release && echo "$VERSION_CODENAME") stable" |
+    sudo tee /etc/apt/sources.list.d/docker.list >/dev/null
 
   sudo apt-get update -yyq
   sudo apt-get remove -yyq docker.io docker-doc docker-compose docker-compose-v2 podman-docker containerd runc
   sudo apt-get install -yyq docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 }
 
-install_aws_session_manager(){
+install_aws_session_manager() {
   if command -v session-manager-plugin &>/dev/null; then
     echo >&2 "AWS Session Manager Plugin already installed"
     return 0
@@ -56,7 +56,7 @@ install_aws_session_manager(){
   rm -f ./session-manager-plugin.deb
 }
 
-configure_firefox_repo(){
+configure_firefox_repo() {
   local moztermppa="/etc/apt/preferences.d/mozillateamppa"
   if [[ -f "$moztermppa" ]]; then
     echo >&2 "Firefox already installed"
@@ -64,7 +64,7 @@ configure_firefox_repo(){
   fi
 
   sudo add-apt-repository ppa:mozillateam/ppa -y
-cat <<EOF | sudo tee "$moztermppa"
+  cat <<EOF | sudo tee "$moztermppa"
 Package: firefox*
 Pin: release o=LP-PPA-mozillateam
 Pin-Priority: 1001
@@ -75,7 +75,7 @@ Pin-Priority: -1
 EOF
 }
 
-configure_wezterm_repo(){
+configure_wezterm_repo() {
   local keyring="/usr/share/keyrings/wezterm-fury.gpg"
   if [[ -f "$keyring" ]]; then
     echo >&2 "Wezterm already installed"
@@ -84,7 +84,7 @@ configure_wezterm_repo(){
 
   sudo install -m 0755 -d /usr/share/keyrings
   curl -fsSL https://apt.fury.io/wez/gpg.key | sudo gpg --yes --dearmor -o "$keyring"
-  echo 'deb [signed-by=/usr/share/keyrings/wezterm-fury.gpg] https://apt.fury.io/wez/ * *' | sudo tee /etc/apt/sources.list.d/wezterm.list > /dev/null
+  echo 'deb [signed-by=/usr/share/keyrings/wezterm-fury.gpg] https://apt.fury.io/wez/ * *' | sudo tee /etc/apt/sources.list.d/wezterm.list >/dev/null
   sudo chmod 644 "$keyring"
 }
 
@@ -237,6 +237,7 @@ configure_firefox_repo
 configure_wezterm_repo
 install_docker
 install_nvidia_drivers
+sudo add-apt-repository ppa:git-core/ppa -y
 
 echo >&2 "Installing interactive packages"
 sudo apt-get update -yyq
