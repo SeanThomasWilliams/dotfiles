@@ -1,16 +1,19 @@
 #!/bin/bash
 
 if [[ $# -lt 1 ]]; then
-  echo >&2 "Usage: $0 <branch-name> [remote-name]";
-  exit 1;
+  echo >&2 "Usage: $0 <branch-name> [remote-name]"
+  exit 1
 fi
 
 BRANCH=$1
 
+# If branch starts with "origin/", remove the "origin/" prefix
+BRANCH=${BRANCH#origin/}
+
 if [[ $# -gt 1 ]]; then
-    REMOTE=$2
+  REMOTE=$2
 else
-    REMOTE=origin
+  REMOTE=origin
 fi
 
 git branch -D "$BRANCH"

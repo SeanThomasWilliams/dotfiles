@@ -30,7 +30,7 @@
     # The width can be negative.  In this case the actual width is the
     # screen width minus the width defined in within the geometry option.
     # geometry = "300x5-30+20"
-    geometry = "250x50-24+24"
+    geometry = "250x5-24+24"
 
     # Show how many messages are currently hidden (because of geometry).
     indicate_hidden = yes
@@ -154,7 +154,7 @@
     ignore_newline = no
 
     # Stack together notifications with the same content
-    stack_duplicates = false
+    stack_duplicates = true
 
     # Hide the count of stacked notifications with the same content
     hide_duplicate_count = yes
@@ -177,7 +177,7 @@
 
     # Paths to default icons.
     #icon_path =/usr/share/icons/HighContrast/16x16/status/:/usr/share/icons/HighContrast/16x16/devices/:/usr/share/icons/HighContrast/16x16/apps/
-    icon_path = /usr/share/icons/gnome/16x16/status/:/usr/share/icons/gnome/16x16/devices/
+    icon_path = /usr/share/icons/gnome/16x16/status/:/usr/share/icons/gnome/16x16/devices/:/usr/share/icons/hicolor/128x128/apps/:/usr/share/pixmaps/
 
     ### History ###
 
@@ -186,10 +186,11 @@
     sticky_history = yes
 
     # Maximum amount of notifications kept in history
-    history_length = 20
+    history_length = 10
 
-    # Number of active notifications
-    notification_limit = 5
+    # Dunst 1.5 controls the active notification count through the height
+    # component of geometry; notification_limit is ignored in this version.
+    # notification_limit = 5
 
     ### Misc/Advanced ###
 
@@ -200,7 +201,7 @@
     browser = /usr/bin/sensible-browser
 
     # Always run rule-defined scripts, even if the notification is suppressed
-    always_run_script = true
+    always_run_script = false
 
     # Define the title of the windows spawned by dunst
     title = Dunst
@@ -211,7 +212,7 @@
     # Print a notification on startup.
     # This is mainly for error detection, since dbus (re-)starts dunst
     # automatically after a crash.
-    startup_notification = true
+    startup_notification = false
 
     # Manage dunst's desire for talking
     # Can be one of the following values:
@@ -220,7 +221,7 @@
     #  mesg: Important Messages
     #  info: all unimportant stuff
     # debug: all less than unimportant stuff
-    verbosity = mesg
+    verbosity = warn
 
     # Define the corner radius of the notification window
     # in pixel size. If the radius is 0, you have no rounded
@@ -233,7 +234,7 @@
     # Useful to enforce the timeout set by dunst configuration. Without this
     # parameter, an application may close the notification sent before the
     # user defined timeout.
-    ignore_dbusclose = false
+    ignore_dbusclose = true
 
     ### Legacy
 
@@ -307,4 +308,4 @@
     background = "#2f343f"
     foreground = "#d8dee8"
     frame_color = "#bf616a"
-    timeout = 0gg
+    timeout = 0

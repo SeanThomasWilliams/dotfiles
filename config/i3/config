@@ -34,7 +34,8 @@ exec --no-startup-id system-config-printer-applet
 
 # Screen Saver / Power Saving
 exec --no-startup-id xset s 3600 3600
-exec --no-startup-id xset dpms 0 0 3600
+# Avoid NVIDIA/Xorg DPMS monitor-off wake lag; keep blanking but do not power off the display.
+exec --no-startup-id xset -dpms
 
 # Desktop background
 exec --no-startup-id feh --bg-scale "$HOME/Pictures/lake-monroe.jpg"
@@ -339,7 +340,7 @@ assign [class="[Rr]emote-viewer"] $ws8
 # exec --no-startup-id i3-msg 'workspace $ws2; exec chrome-app.sh Messages'
 # exec --no-startup-id i3-msg 'workspace $ws2; exec chrome-app.sh YouTube Music'
 exec --no-startup-id i3-msg 'workspace $ws2; exec signal-desktop'
-exec --no-startup-id i3-msg 'workspace $ws4; exec i3-sensible-terminal'
+exec --no-startup-id i3-msg 'workspace $ws4; exec i3-sensible-terminal tmux -2 new-session -A -s software/stt-suite -c software/stt-suite'
 #exec --no-startup-id i3-msg 'workspace $ws5; exec chrome-app.sh Microsoft Teams'
 exec --no-startup-id i3-msg 'workspace $ws6; exec slack'
 exec --no-startup-id i3-msg 'workspace $ws10; exec /usr/lib/thunderbird/thunderbird'

@@ -12,7 +12,9 @@ fi
 #  idProduct          0x5814 SCR3500 A Contact Reader
 
 
-USB_FILTER="-1,0x04e6,0x5116,-1,1|-1,0x04e6,0x581d,-1,1|-1,0x04e6,0x5814,-1,1"
+# Include an explicit final deny-all rule. Allow-only entries are not enough to
+# protect host HID devices from SPICE USB redirection defaults.
+USB_FILTER="-1,0x04e6,0x5116,-1,1|-1,0x04e6,0x581d,-1,1|-1,0x04e6,0x5814,-1,1|-1,-1,-1,-1,0"
 
 # Take SPICE_VM_HOST from environment variable or default to localhost
 SPICE_VM_HOST="${SPICE_VM_HOST:-localhost}"

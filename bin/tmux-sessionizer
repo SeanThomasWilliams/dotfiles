@@ -54,6 +54,20 @@ Session Naming:
 EOF
 }
 
+log() {
+  echo >&2 "[$(date +'%Y-%m-%d %H:%M:%S')] $*"
+}
+
+debug() {
+  if [[ ${DEBUG:-0} -eq 1 ]]; then
+    log "DEBUG: $*"
+  fi
+}
+
+error() {
+  log "ERROR: $*"
+}
+
 # autojump --stat (lowest -> highest)
 # 392.3:  /home/williamss/gocode/src/github.com/raft-tech
 # zoxide query --score --list (highest -> lowest)
@@ -64,7 +78,7 @@ get_directory_priority() {
   elif command -v autojump >/dev/null 2>&1; then
     autojump --stat | awk '/^[0-9]+.[0-9]:\s+\// {print $2}' | tac
   else
-    echo >&2 "Neither zoxide nor autojump is installed."
+    error "Neither zoxide nor autojump is installed."
     exit 1
   fi
 }
@@ -77,7 +91,7 @@ increment_directory() {
   DIR_NAME="$(realpath "$1")"
 
   if [[ ! -d "$DIR_NAME" ]]; then
-    echo >&2 "Invalid directory: $DIR_NAME"
+    error "Invalid directory: $DIR_NAME"
     return
   fi
 
@@ -111,7 +125,7 @@ session_name_to_dir() {
   local name="$1"
 
   if [[ ! -f "$TS_SMART_CACHE" ]]; then
-    echo >&2 "Cache file not found. Run with -r to refresh cache."
+    error "Cache file not found. Run with -r to refresh cache."
     return 1
   fi
 
@@ -124,14 +138,14 @@ session_name_to_dir() {
     fi
   done <"$TS_SMART_CACHE"
 
-  echo >&2 "No directory found for session name: $name"
+  error "No directory found for session name: $name"
   return 1
 }
 
 # List all session names from cache
 list_session_names() {
   if [[ ! -f "$TS_SMART_CACHE" ]]; then
-    echo >&2 "Cache file not found. Run with -r to refresh cache."
+    error "Cache file not found. Run with -r to refresh cache."
     return 1
   fi
 
@@ -143,11 +157,11 @@ list_session_names() {
 # Generate directory→session name mapping and cache it
 generate_session_map() {
   if [[ ! -f "$TS_SMART_CACHE" ]]; then
-    echo >&2 "Cache file not found. Run with -r to refresh cache."
+    error "Cache file not found. Run with -r to refresh cache."
     return 1
   fi
 
-  echo >&2 "Generating session map cache..."
+  debug "Generating session map cache..."
 
   local count=0
   while IFS= read -r dir; do
@@ -159,14 +173,14 @@ generate_session_map() {
 
   # If ${TS_SESSION_MAP}.tmp has at least 10 lines, move it to the final location
   if [[ $(wc -l <"${TS_SESSION_MAP}.tmp") -lt 10 ]]; then
-    echo >&2 "Error: Generated session map has fewer than 10 entries. Aborting cache update."
+    error "Error: Generated session map has fewer than 10 entries. Aborting cache update."
     rm -f "${TS_SESSION_MAP}.tmp"
     return 1
   fi
 
   mv "${TS_SESSION_MAP}.tmp" "$TS_SESSION_MAP"
 
-  echo >&2 "Generated map for $count directories → $TS_SESSION_MAP"
+  debug "Generated map for $count directories → $TS_SESSION_MAP"
 }
 
 # Print the cached session map
@@ -193,14 +207,14 @@ get_git_remote() {
     fi
     dir=$(session_name_to_dir "$target" 2>/dev/null)
     if [[ -z "$dir" ]]; then
-      echo >&2 "Error: '$target' is not a valid directory or session name"
+      error "Error: '$target' is not a valid directory or session name"
       return 1
     fi
   fi
 
   # Check if it's a git repository
   if [[ ! -d "$dir/.git" && ! -f "$dir/.git" ]]; then
-    echo >&2 "Error: '$dir' is not a git repository"
+    error "Error: '$dir' is not a git repository"
     return 1
   fi
 
@@ -208,7 +222,7 @@ get_git_remote() {
   local remote
   remote=$(git -C "$dir" remote get-url origin 2>/dev/null)
   if [[ -z "$remote" ]]; then
-    echo >&2 "Error: No 'origin' remote found in '$dir'"
+    error "Error: No 'origin' remote found in '$dir'"
     return 1
   fi
 
@@ -257,7 +271,7 @@ remote_to_session_name() {
       path="$domain/$path"
     fi
   else
-    echo >&2 "Error: Unsupported git URL format: $url"
+    error "Error: Unsupported git URL format: $url"
     return 1
   fi
 
@@ -295,7 +309,7 @@ refresh_cache() {
     echo -e "${sorted_autojump_stat}\n${unmatched_entries}" >"$TS_SMART_CACHE"
 
     if ! generate_session_map; then
-      echo >&2 "Failed to generate session map cache. Removing invalid cache files."
+      error "Failed to generate session map cache. Removing invalid cache files."
       return 1
     fi
   fi
@@ -316,7 +330,7 @@ if [[ -f "$HOME/.local.alias" ]]; then
 fi
 
 if [[ -z ${TMUX_DIR_BASES-} ]]; then
-  echo >&2 "TMUX_DIR_BASES is not set"
+  error "TMUX_DIR_BASES is not set"
   usage
   exit 1
 fi
@@ -358,7 +372,7 @@ while [[ $# -gt 0 ]]; do
     shift
     ;;
   -l | --list)
-    echo >&2 "Active TMUX sessions:"
+    log "Active TMUX sessions:"
     tmux list-sessions -F "#{session_name}"
     exit 0
     ;;
@@ -392,7 +406,7 @@ while [[ $# -gt 0 ]]; do
     ;;
   --dir-to-name)
     if [[ -z "${2-}" ]]; then
-      echo >&2 "Error: --dir-to-name requires a directory argument"
+      error "Error: --dir-to-name requires a directory argument"
       usage
       exit 1
     fi
@@ -401,7 +415,7 @@ while [[ $# -gt 0 ]]; do
     ;;
   --name-to-dir)
     if [[ -z "${2-}" ]]; then
-      echo >&2 "Error: --name-to-dir requires a session name argument"
+      error "Error: --name-to-dir requires a session name argument"
       usage
       exit 1
     fi
@@ -411,7 +425,7 @@ while [[ $# -gt 0 ]]; do
     ;;
   --get-remote)
     if [[ -z "${2-}" ]]; then
-      echo >&2 "Error: --get-remote requires a directory or session name argument"
+      error "Error: --get-remote requires a directory or session name argument"
       usage
       exit 1
     fi
@@ -420,7 +434,7 @@ while [[ $# -gt 0 ]]; do
     ;;
   --remote-to-name)
     if [[ -z "${2-}" ]]; then
-      echo >&2 "Error: --remote-to-name requires a git URL argument"
+      error "Error: --remote-to-name requires a git URL argument"
       usage
       exit 1
     fi
@@ -428,7 +442,7 @@ while [[ $# -gt 0 ]]; do
     exit 0
     ;;
   -*)
-    echo >&2 "Invalid option: $1"
+    error "Invalid option: $1"
     usage
     exit 1
     ;;
@@ -449,7 +463,7 @@ if [[ -z $selected ]]; then
 fi
 
 if [[ -n ${KILL_SESSION-} ]]; then
-  echo >&2 "Killing session: $selected"
+  log "Killing session: $selected"
   tmux kill-session -t "$selected"
   exit 0
 fi

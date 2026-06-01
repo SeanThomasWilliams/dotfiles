@@ -36,10 +36,10 @@
 .ctags
 .ctags.files
 .direnv/
-.pi/
 .env*
 .ipython
 .netrwhist
+.pi/
 .rgignore
 .stignore
 .stversions/
@@ -52,6 +52,7 @@
 /*PLAN.md
 /*REQUIREMENT*.md
 /*STATUS*.md
+/.agents/
 /.leann
 /.mcp.json
 /vim/bundle/

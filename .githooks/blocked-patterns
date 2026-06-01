@@ -14,6 +14,7 @@ ai_temp/
 ai_tests/
 ai_issues/
 ai_wiki/
+\.pi/
 \.claude/
 AGENTS\.md
 CLAUDE\.md
