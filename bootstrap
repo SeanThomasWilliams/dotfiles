@@ -2,7 +2,7 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
 # Darwin/Linux
@@ -25,7 +25,7 @@ for fname in "$SCRIPT_DIR"/.*; do
     continue
   fi
 
-  if ! [[ "$fname_base" = *.json || "$fname_base" = *.conf || "$fname_base" = *.local ]]; then
+  if ! [[ "$fname_base" = *.json || "$fname_base" = *.conf || "$fname_base" = *.local || "$fname_base" = *.lua ]]; then
     if [[ "$fname_base" =~ \..*\..* ]]; then
       echo >&2 "Skipping dotfile variant $fname"
       continue
