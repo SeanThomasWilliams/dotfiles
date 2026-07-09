@@ -3,7 +3,7 @@
 
 set -eu -o pipefail
 
-usage(){
+usage() {
   cat >&2 <<EOF
 Replace all instances of the first string with the second string in all matching files
 
@@ -26,6 +26,8 @@ Options:
     Max directory depth to search
   -t
     Filetype (sh, py, etc)
+  -v
+    Debug mode (print commands as they are executed)
   -h
     Show usage and exit
 EOF
@@ -33,50 +35,53 @@ EOF
 
 sed="sed"
 
-if command -v gsed &> /dev/null; then
+if command -v gsed &>/dev/null; then
   export sed="gsed"
-fi
-
-if [[ -n ${DEBUG-} ]]; then
-  set -x
 fi
 
 TARGET_DIR=('.')
 IGNORE_PATTERN='^\.[a-z]|/\.[a-z]|\.zst|\.gz|\.tgz|\.cache'
 
-while getopts ':ad:f:n:t:h' opt; do
+while getopts ':ad:f:n:t:hv' opt; do
   case "${opt}" in
-    a)
-      IGNORE_PATTERN='\.git|\.zst|\.gz|\.tgz'
-      ;;
-    d)
-      TARGET_DIR=("${OPTARG}")
-      ;;
-    f)
-      FILE_NAME="${OPTARG}"
-      ;;
-    n)
-      MAX_DEPTH="${OPTARG}"
-      ;;
-    t)
-      FILE_TYPE="${OPTARG}"
-      ;;
-    h)
-      usage
-      exit 0
-      ;;
-    *)
-      usage
-      exit 1
-      ;;
+  a)
+    IGNORE_PATTERN='\.git|\.zst|\.gz|\.tgz'
+    ;;
+  d)
+    TARGET_DIR=("${OPTARG}")
+    ;;
+  f)
+    FILE_NAME="${OPTARG}"
+    ;;
+  n)
+    MAX_DEPTH="${OPTARG}"
+    ;;
+  t)
+    FILE_TYPE="${OPTARG}"
+    ;;
+  v)
+    DEBUG=1
+    ;;
+  h)
+    usage
+    exit 0
+    ;;
+  *)
+    usage
+    exit 1
+    ;;
   esac
 done
 
-shift $((OPTIND-1))
+shift $((OPTIND - 1))
 
 if [[ $# -lt 1 ]]; then
   usage
   exit 1
+fi
+
+if [[ -n ${DEBUG-} ]]; then
+  set -x
 fi
 
 if [[ $# -ge 1 ]]; then
@@ -115,21 +120,21 @@ fi
 
 FIND_CMD=(
   find "${FIND_GLOBAL_ARGS[@]}"
-  -type f \
+  -type f
   -ipath "$FILE_GLOB"
   -print0
 )
 
 if [[ -z ${REPLACE_STRING-} ]]; then
   echo >&2 "Preview of matching files contents: "
-  "${FIND_CMD[@]}" 2>/dev/null |\
-    $sed --null-data 's#^\./##' |\
-    grep --null-data -Ev "${IGNORE_PATTERN}" |\
+  "${FIND_CMD[@]}" 2>/dev/null |
+    $sed --null-data 's#^\./##' |
+    grep --null-data -Ev "${IGNORE_PATTERN}" |
     xargs -0 grep --color -- "$FIND_STRING"
   exit
 fi
 
-"${FIND_CMD[@]}" 2>/dev/null |\
-  $sed --null-data 's#^\./##' |\
-  grep --null-data -Ev "${IGNORE_PATTERN}" |\
+"${FIND_CMD[@]}" 2>/dev/null |
+  $sed --null-data 's#^\./##' |
+  grep --null-data -Ev "${IGNORE_PATTERN}" |
   xargs -0 $sed -i "s#$FIND_STRING#$REPLACE_STRING#g"

@@ -1,5 +1,15 @@
 #!/bin/bash
+# Configure connected X11 displays and keep i3 monitor assignments in sync.
 # shellcheck disable=SC2034,SC2016
+
+usage() {
+  echo "Usage: $(basename "$0") [-h]"
+}
+
+if [[ ${1-} == "-h" || ${1-} == "--help" ]]; then
+  usage
+  exit 0
+fi
 
 set -o pipefail
 
@@ -205,6 +215,10 @@ elif [[ -n ${DP_4_CONNECTED-} ]]; then
       --output DP-4 --left-of "$DEFAULT_OUTPUT" --rotate normal --auto
     update_i3_config "$DEFAULT_OUTPUT" "DP-4" "$DEFAULT_OUTPUT"
   fi
+elif [[ -n ${HDMI_1_CONNECTED-} ]]; then
+  echo >&2 "Using connected external output HDMI-1 (primary)"
+  xrandr --output HDMI-1 --primary --auto
+  update_i3_config "HDMI-1" "HDMI-1" "HDMI-1"
 elif [[ -n ${HDMI_1_0_CONNECTED-} ]]; then
   echo >&2 "Using connected external output HDMI-1-0 (primary)"
   xrandr --output HDMI-1-0 --primary --mode 3840x2160 --rotate normal

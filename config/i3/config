@@ -162,9 +162,9 @@ set $ws10 "10:mail"
 workspace_auto_back_and_forth no
 
 # Monitor Setup
-set $leftmon "HDMI-0"
-set $rightmon "HDMI-0"
-set $primarymon "HDMI-0"
+set $leftmon "HDMI-1"
+set $rightmon "HDMI-1"
+set $primarymon "HDMI-1"
 
 # Keybind to move workspace to other monitor
 #bindsym $mod+Shift+p      move workspace to output $primarymon

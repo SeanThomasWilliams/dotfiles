@@ -24,21 +24,40 @@ elif [ -f .githooks/pre-commit ]; then
   if [ $local_exit -ne 0 ]; then
     exit $local_exit
   fi
-elif [ -f .git/hooks/pre-commit ]; then
-  .git/hooks/pre-commit "$@"
-  local_exit=$?
-  if [ $local_exit -ne 0 ]; then
-    exit $local_exit
-  fi
 fi
+
+patterns_file="$(dirname "${BASH_SOURCE[0]}")/blocked-patterns"
+
+read_blocked_content_patterns() {
+  if [ -r "$patterns_file" ]; then
+    grep -vE '^\s*(#|$)' "$patterns_file"
+  else
+    printf '%s\n' \
+      'ai_scripts/' \
+      'ai_docs/' \
+      'ai_logs/' \
+      'ai_temp/' \
+      'ai_tests/' \
+      'ai_issues/' \
+      'ai_wiki/' \
+      '\.agents/skills/' \
+      '\.pi/' \
+      '\.claude/' \
+      'AGENTS\.md' \
+      'CLAUDE\.md' \
+      'CLAUDE\.local\.md'
+  fi
+}
 
 # Get list of staged files
 staged_files=$(git diff --cached --name-only)
 
-# Define patterns to block
+# Define patterns to block as new paths
 blocked_patterns=(
   "^CLAUDE\.md$"
+  "^AGENTS\.md$"
   "^\.pi/"
+  "^\.agents/skills/"
   "^\.claude/"
   "^\.code/"
   "^\.codex/"
@@ -48,70 +67,139 @@ blocked_patterns=(
   "^tests/results/"
 )
 
-# Check each staged file against blocked patterns
+is_already_tracked_in_head() {
+  git cat-file -e "HEAD:$1" 2>/dev/null
+}
+
+has_tracked_prefix_in_head() {
+  git ls-tree -r --name-only HEAD -- "$1" 2>/dev/null | grep -q .
+}
+
+path_allowed_by_repo_context() {
+  local file="$1"
+  if is_already_tracked_in_head "$file"; then
+    return 0
+  fi
+  case "$file" in
+    ai_wiki/*)
+      has_tracked_prefix_in_head "ai_wiki"
+      ;;
+    .agents/skills/*)
+      has_tracked_prefix_in_head ".agents/skills"
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
+pattern_allowed_by_repo_context() {
+  local pattern="$1"
+  case "$pattern" in
+    'AGENTS\.md')
+      is_already_tracked_in_head "AGENTS.md"
+      ;;
+    'CLAUDE\.md')
+      is_already_tracked_in_head "CLAUDE.md"
+      ;;
+    'CLAUDE\.local\.md')
+      is_already_tracked_in_head "CLAUDE.local.md"
+      ;;
+    'ai_wiki/')
+      has_tracked_prefix_in_head "ai_wiki"
+      ;;
+    'ai_scripts/')
+      has_tracked_prefix_in_head "ai_scripts"
+      ;;
+    'ai_docs/')
+      has_tracked_prefix_in_head "ai_docs"
+      ;;
+    'ai_logs/')
+      has_tracked_prefix_in_head "ai_logs"
+      ;;
+    'ai_temp/')
+      has_tracked_prefix_in_head "ai_temp"
+      ;;
+    'ai_tests/')
+      has_tracked_prefix_in_head "ai_tests"
+      ;;
+    'ai_issues/')
+      has_tracked_prefix_in_head "ai_issues"
+      ;;
+    '\.agents/skills/')
+      has_tracked_prefix_in_head ".agents/skills"
+      ;;
+    '\.pi/')
+      has_tracked_prefix_in_head ".pi"
+      ;;
+    '\.claude/')
+      has_tracked_prefix_in_head ".claude"
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
+# Check each staged file against blocked patterns. These patterns block adding
+# new AI/local-control files to repos that do not already track them. If the
+# exact path already exists in HEAD, allow normal edits/deletes. ai_wiki/ and
+# .agents/skills/ may also grow when the repo already tracks that tree.
 for file in $staged_files; do
   for pattern in "${blocked_patterns[@]}"; do
     if echo "$file" | grep -qE "$pattern"; then
+      if path_allowed_by_repo_context "$file"; then
+        continue
+      fi
       echo "ERROR: Attempting to commit blocked file: $file"
-      echo "Files matching these patterns are not allowed in commits:"
+      echo "Files matching these patterns are not allowed as new tracked files:"
       echo "  - ai_*/* (AI-related directories)"
       echo "  - .tags*"
       echo "  - .ctags*"
       echo "  - .pi/*"
+      echo "  - .agents/skills/* (unless this repo already tracks .agents/skills/)"
       echo "  - .claude/*"
       echo "  - .code/*"
       echo "  - .codex/*"
       echo "  - .tests/results/*"
       echo "  - CLAUDE.md"
+      echo "  - AGENTS.md"
+      echo "  - ai_wiki/* (unless this repo already tracks ai_wiki/)"
       echo ""
-      echo "To remove this file from staging:"
+      echo "Already-tracked matching paths may be edited. To remove a new blocked file from staging:"
       echo "  git reset HEAD \"$file\""
       exit 1
     fi
   done
 done
 
-# Check staged content for references to blocked paths
-blocked_content_patterns=(
-  "ai_scripts/"
-  "ai_docs/"
-  "ai_logs/"
-  "ai_temp/"
-  "ai_tests/"
-  "ai_issues/"
-  "ai_wiki/"
-  "\.pi/"
-  "\.claude/"
-  "CLAUDE\.md"
-  "CLAUDE\.local\.md"
-)
+# Check staged content for references to blocked paths. Skip files and patterns
+# that are valid for this repository because the path already exists here.
+mapfile -t blocked_content_patterns < <(read_blocked_content_patterns)
 
-# Get the diff of staged changes
-staged_diff=$(git diff --cached)
-
-for pattern in "${blocked_content_patterns[@]}"; do
-  if echo "$staged_diff" | grep -E "^\+.*$pattern" >/dev/null 2>&1; then
-    echo "ERROR: Staged changes contain references to blocked paths/files"
-    echo "Found reference to: $pattern"
-    echo ""
-    echo "These paths must never be referenced in commits:"
-    echo "  - ai_scripts/"
-    echo "  - ai_docs/"
-    echo "  - ai_logs/"
-    echo "  - ai_temp/"
-    echo "  - ai_tests/"
-    echo "  - ai_issues/"
-    echo "  - ai_wiki/"
-    echo "  - .pi/"
-    echo "  - .claude/"
-    echo "  - CLAUDE.md"
-    echo ""
-    echo "Offending lines:"
-    echo "$staged_diff" | grep -E "^\+.*$pattern" | head -5
-    echo ""
-    echo "Remove these references before committing."
-    exit 1
+for file in $staged_files; do
+  if path_allowed_by_repo_context "$file"; then
+    continue
   fi
+  file_diff=$(git diff --cached -- "$file")
+  for pattern in "${blocked_content_patterns[@]}"; do
+    if pattern_allowed_by_repo_context "$pattern"; then
+      continue
+    fi
+    if echo "$file_diff" | grep -E "^\+.*$pattern" >/dev/null 2>&1; then
+      echo "ERROR: Staged changes contain references to blocked paths/files"
+      echo "Found reference to: $pattern"
+      echo "File: $file"
+      echo ""
+      echo "These paths must not be introduced in repos that do not already track them."
+      echo ""
+      echo "Offending lines:"
+      echo "$file_diff" | grep -E "^\+.*$pattern" | head -5
+      echo ""
+      echo "Remove these references before committing."
+      exit 1
+    fi
+  done
 done
 
 # All checks passed

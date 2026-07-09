@@ -9,15 +9,79 @@
 # - Clone URL: https://github.com/newren/git-filter-repo.git
 # - Clones to: ~/gocode/src/github.com/newren/git-filter-repo
 
-# Check if a URL is provided
-if [ -z "$1" ]; then
-  echo "Usage: $0 <git-url>"
-  echo "Example: $0 https://github.com/newren/git-filter-repo"
+usage() {
+  cat <<'EOF'
+Usage: git clone-url [--dry-run] [--debug] <git-url>
+       git clone-url <git-url> [--dry-run] [--debug]
+
+Clone a git URL to $HOME/gocode/src/<host>/<repo-path>.
+
+Options:
+  --dry-run   Show the target path and git command without creating directories or cloning.
+  --debug     Enable shell tracing with set -x.
+  -h, --help  Show this help.
+
+Example:
+  git clone-url --dry-run https://github.com/newren/git-filter-repo
+EOF
+}
+
+DRY_RUN=0
+DEBUG=0
+INPUT_URL=""
+
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --dry-run)
+      DRY_RUN=1
+      ;;
+    --debug)
+      DEBUG=1
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    --)
+      shift
+      while [ "$#" -gt 0 ]; do
+        if [ -n "$INPUT_URL" ]; then
+          echo "Error: unexpected argument '$1'" >&2
+          usage >&2
+          exit 1
+        fi
+        INPUT_URL="$1"
+        shift
+      done
+      break
+      ;;
+    -*)
+      echo "Error: unknown option '$1'" >&2
+      usage >&2
+      exit 1
+      ;;
+    *)
+      if [ -n "$INPUT_URL" ]; then
+        echo "Error: unexpected argument '$1'" >&2
+        usage >&2
+        exit 1
+      fi
+      INPUT_URL="$1"
+      ;;
+  esac
+  shift
+done
+
+if [ -z "$INPUT_URL" ]; then
+  usage >&2
   exit 1
 fi
 
+if [ "$DEBUG" -eq 1 ]; then
+  set -x
+fi
+
 GOPATH="${HOME}/gocode"
-INPUT_URL="$1"
 CLONE_URL=""
 RELATIVE_PATH_IN_REPO=""
 
@@ -48,24 +112,45 @@ fi
 # Example: https://github.com/newren/git-filter-repo.git -> github.com/newren/git-filter-repo
 URL_PATH=$(echo "$CLONE_URL" | sed -E 's/https?:\/\///; s/\.git$//')
 
-# Extract domain, owner and repo from the URL_PATH
+# Extract domain and repository path from the URL_PATH
 # Example: github.com/newren/git-filter-repo
 # domain will be 'github.com'
-# owner will be 'newren'
-# repo will be 'git-filter-repo'
+# repo path will be 'newren/git-filter-repo'
 DOMAIN=$(echo "$URL_PATH" | cut -d'/' -f1)
-OWNER=$(echo "$URL_PATH" | cut -d'/' -f2 | tr '[:upper:]' '[:lower:]')
-REPO=$(echo "$URL_PATH" | cut -d'/' -f3 | tr '[:upper:]' '[:lower:]')
+REPO_PATH=$(echo "$URL_PATH" | cut -d'/' -f2- | tr '[:upper:]' '[:lower:]')
+
+if [ -z "$DOMAIN" ] || [ -z "$REPO_PATH" ] || [ "$REPO_PATH" = "$URL_PATH" ]; then
+  echo "Error: Could not extract repository path from '$INPUT_URL'." >&2
+  exit 1
+fi
 
 # Construct the full target directory path
-TARGET_DIR="${GOPATH}/src/${DOMAIN}/${OWNER}/${REPO}"
-PARENT_DIR="${GOPATH}/src/${DOMAIN}/${OWNER}"
-
-# Create the parent directory if it doesn't exist
-mkdir -p "$PARENT_DIR"
+TARGET_DIR="${GOPATH}/src/${DOMAIN}/${REPO_PATH}"
+PARENT_DIR=$(dirname "$TARGET_DIR")
 
 # Convert TARGET_DIR to relative path from $HOME
 RELATIVE_TARGET="${TARGET_DIR#$HOME/}"
+
+if [ "$DRY_RUN" -eq 1 ]; then
+  echo "Dry run: target directory: $TARGET_DIR" >&2
+  echo "Dry run: clone URL: $CLONE_URL" >&2
+  if [ -d "$TARGET_DIR" ] && [ -d "$TARGET_DIR/.git" ]; then
+    echo "Dry run: would run: (cd \"$TARGET_DIR\" && git pull >/dev/null 2>&1)" >&2
+  else
+    echo "Dry run: would run: mkdir -p \"$PARENT_DIR\"" >&2
+    echo "Dry run: would run: git clone -q \"$CLONE_URL\" \"$TARGET_DIR\" 2>/dev/null" >&2
+  fi
+
+  if [ -n "$RELATIVE_PATH_IN_REPO" ]; then
+    echo "${TARGET_DIR}/${RELATIVE_PATH_IN_REPO}"
+  else
+    echo "$TARGET_DIR"
+  fi
+  exit 0
+fi
+
+# Create the parent directory if it doesn't exist
+mkdir -p "$PARENT_DIR"
 
 # Check if the repository already exists
 if [ -d "$TARGET_DIR" ] && [ -d "$TARGET_DIR/.git" ]; then

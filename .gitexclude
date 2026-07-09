@@ -84,6 +84,7 @@ rke2.yaml
 tags
 tags.*
 temp
+tmp/
 uploads/
 usage_tracking*.json
 yarn.lock
