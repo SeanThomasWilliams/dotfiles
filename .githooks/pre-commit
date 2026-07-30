@@ -1,13 +1,29 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# pre-commit - run global and delegated repository commit guards.
+usage() {
+  printf '%s\n' 'Usage: pre-commit [-h|--help]'
+}
 
-# Global pre-commit hook to prevent committing sensitive files
-# This hook will be called for all repositories via core.hooksPath
+set -euo pipefail
+
+case "${1:-}" in
+  -h | --help) usage; exit 0 ;;
+  "") ;;
+  *) usage >&2; exit 2 ;;
+esac
 
 # Avoid infinite recursion if a downstream hook shells back here
 if [ "${GLOBAL_PRECOMMIT_SHIM_RUNNING:-0}" = "1" ]; then
   exit 0
 fi
 export GLOBAL_PRECOMMIT_SHIM_RUNNING=1
+
+SKILL_CONFLICT_GUARD="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/check-skill-conflicts"
+if [[ ! -x "${SKILL_CONFLICT_GUARD}" ]]; then
+  echo "ERROR: skill conflict guard is missing or not executable: ${SKILL_CONFLICT_GUARD}" >&2
+  exit 1
+fi
+"${SKILL_CONFLICT_GUARD}"
 
 # First, check if there's a local repository hook and run it
 # Check for local core.hooksPath setting
@@ -83,6 +99,13 @@ path_allowed_by_repo_context() {
   case "$file" in
     ai_wiki/*)
       has_tracked_prefix_in_head "ai_wiki"
+      ;;
+    .githooks/*)
+      has_tracked_prefix_in_head ".githooks"
+      ;;
+    skills/*)
+      [[ "$(git rev-parse --show-toplevel 2>/dev/null)" == "${HOME}/.agents" ]] &&
+        has_tracked_prefix_in_head "skills"
       ;;
     .agents/skills/*)
       has_tracked_prefix_in_head ".agents/skills"

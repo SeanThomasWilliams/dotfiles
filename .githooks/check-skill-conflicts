@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+# check-skill-conflicts - reject staged project skills that duplicate a global skill.
+usage() {
+	printf '%s\n' 'Usage: check-skill-conflicts [-h|--help]'
+}
+
+set -euo pipefail
+
+case "${1:-}" in
+-h | --help)
+	usage
+	exit 0
+	;;
+"") ;;
+*)
+	usage >&2
+	exit 2
+	;;
+esac
+
+REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null)" || {
+	echo "ERROR: not in a git repository; cannot check skill conflicts" >&2
+	exit 1
+}
+GLOBAL_SKILLS_ROOT="${AGENTS_GLOBAL_SKILLS_ROOT:-${HOME}/.agents/skills}"
+
+[[ -d "${GLOBAL_SKILLS_ROOT}" ]] || exit 0
+cd "${REPO_ROOT}"
+
+while IFS= read -r -d '' path; do
+	case "${path}" in
+	.agents/skills/*/*)
+		remainder="${path#.agents/skills/}"
+		skill_name="${remainder%%/*}"
+		global_skill="${GLOBAL_SKILLS_ROOT}/${skill_name}/SKILL.md"
+		if [[ -f "${global_skill}" ]]; then
+			echo "ERROR: Project skill '${skill_name}' duplicates the global skill authority." >&2
+			echo "Global skill: ${global_skill}" >&2
+			echo "Staged project path: ${path}" >&2
+			echo "Consolidate the change into the global skill and remove the project duplicate." >&2
+			exit 1
+		fi
+		;;
+	esac
+done < <(git diff --cached --name-only -z --diff-filter=ACMRTUXB)
+
+exit 0
