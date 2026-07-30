@@ -27,19 +27,59 @@ GLOBAL_SKILLS_ROOT="${AGENTS_GLOBAL_SKILLS_ROOT:-${HOME}/.agents/skills}"
 [[ -d "${GLOBAL_SKILLS_ROOT}" ]] || exit 0
 cd "${REPO_ROOT}"
 
+read_skill_name() {
+	sed -n -E '/^name:[[:space:]]*/ {
+		s/^name:[[:space:]]*//
+		s/^['\''"]//
+		s/['\''"]$//
+		p
+		q
+	}'
+}
+
+global_skill_for_name() {
+	local expected_name="$1"
+	local manifest manifest_name
+	if [[ -f "${GLOBAL_SKILLS_ROOT}/${expected_name}/SKILL.md" ]]; then
+		printf '%s\n' "${GLOBAL_SKILLS_ROOT}/${expected_name}/SKILL.md"
+		return 0
+	fi
+	while IFS= read -r -d '' manifest; do
+		manifest_name="$(read_skill_name <"${manifest}")"
+		if [[ "${manifest_name}" == "${expected_name}" ]]; then
+			printf '%s\n' "${manifest}"
+			return 0
+		fi
+	done < <(find "${GLOBAL_SKILLS_ROOT}" -mindepth 2 -maxdepth 2 -type f -name SKILL.md -print0)
+	return 1
+}
+
+reject_conflict() {
+	local skill_name="$1"
+	local global_skill="$2"
+	local staged_path="$3"
+	echo "ERROR: Project skill '${skill_name}' duplicates the global skill authority." >&2
+	echo "Global skill: ${global_skill}" >&2
+	echo "Staged project path: ${staged_path}" >&2
+	echo "Consolidate the change into the global skill and remove the project duplicate." >&2
+	exit 1
+}
+
 while IFS= read -r -d '' path; do
 	case "${path}" in
 	.agents/skills/*/*)
 		remainder="${path#.agents/skills/}"
-		skill_name="${remainder%%/*}"
-		global_skill="${GLOBAL_SKILLS_ROOT}/${skill_name}/SKILL.md"
-		if [[ -f "${global_skill}" ]]; then
-			echo "ERROR: Project skill '${skill_name}' duplicates the global skill authority." >&2
-			echo "Global skill: ${global_skill}" >&2
-			echo "Staged project path: ${path}" >&2
-			echo "Consolidate the change into the global skill and remove the project duplicate." >&2
-			exit 1
-		fi
+		skill_directory="${remainder%%/*}"
+		manifest=".agents/skills/${skill_directory}/SKILL.md"
+		manifest_name="$(git show ":${manifest}" 2>/dev/null | read_skill_name || true)"
+
+		for skill_name in "${skill_directory}" "${manifest_name}"; do
+			[[ -n "${skill_name}" ]] || continue
+			global_skill="$(global_skill_for_name "${skill_name}" || true)"
+			if [[ -n "${global_skill}" ]]; then
+				reject_conflict "${skill_name}" "${global_skill}" "${path}"
+			fi
+		done
 		;;
 	esac
 done < <(git diff --cached --name-only -z --diff-filter=ACMRTUXB)
