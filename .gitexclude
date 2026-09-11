@@ -59,7 +59,8 @@
 /vim/init.vim
 /vim/plugged/
 /vim/tmp/
-AGENT*.md
+AGENTS.md
+SUBAGENTS.md
 Anaconda*.sh
 CLAUDE*.md
 __pycache__

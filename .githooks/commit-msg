@@ -44,6 +44,21 @@ is_already_tracked_in_head() {
     git cat-file -e "HEAD:$1" 2>/dev/null
 }
 
+is_xeedio_origin() {
+    local origin_url
+    origin_url="$(git remote get-url origin 2>/dev/null)" || return 1
+    case "${origin_url}" in
+        https://github.com/xeedio/* | git@github.com:xeedio/* | ssh://git@github.com/xeedio/* | https://gitlab.com/xeedio/* | git@gitlab.com:xeedio/* | ssh://git@gitlab.com/xeedio/*)
+            return 0
+            ;;
+        *) return 1 ;;
+    esac
+}
+
+instruction_file_allowed() {
+    is_already_tracked_in_head "$1" || is_xeedio_origin
+}
+
 has_tracked_prefix_in_head() {
     git ls-tree -r --name-only HEAD -- "$1" 2>/dev/null | grep -q .
 }
@@ -51,8 +66,11 @@ has_tracked_prefix_in_head() {
 pattern_allowed_by_repo_context() {
     local pattern="$1"
     case "$pattern" in
-        'AGENTS\.md')
-            is_already_tracked_in_head "AGENTS.md"
+        '(^|[^[:alnum:]_])AGENTS\.md([^[:alnum:]_]|$)')
+            instruction_file_allowed "AGENTS.md"
+            ;;
+        '(^|[^[:alnum:]_])SUBAGENTS\.md([^[:alnum:]_]|$)')
+            instruction_file_allowed "SUBAGENTS.md"
             ;;
         'CLAUDE\.md')
             is_already_tracked_in_head "CLAUDE.md"

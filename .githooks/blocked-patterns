@@ -17,6 +17,7 @@ ai_wiki/
 \.agents/skills/
 \.pi/
 \.claude/
-AGENTS\.md
+(^|[^[:alnum:]_])AGENTS\.md([^[:alnum:]_]|$)
+(^|[^[:alnum:]_])SUBAGENTS\.md([^[:alnum:]_]|$)
 CLAUDE\.md
 CLAUDE\.local\.md
