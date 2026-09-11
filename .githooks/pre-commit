@@ -93,7 +93,7 @@ is_xeedio_origin() {
   local origin_url
   origin_url="$(git remote get-url origin 2>/dev/null)" || return 1
   case "${origin_url}" in
-    https://github.com/xeedio/* | git@github.com:xeedio/* | ssh://git@github.com/xeedio/* | https://gitlab.com/xeedio/* | git@gitlab.com:xeedio/* | ssh://git@gitlab.com/xeedio/*)
+    https://github.com/xeedio/* | git@github.com:xeedio/* | github.com:xeedio/* | ssh://git@github.com/xeedio/* | https://gitlab.com/xeedio/* | git@gitlab.com:xeedio/* | gitlab.com:xeedio/* | ssh://git@gitlab.com/xeedio/*)
       return 0
       ;;
     *) return 1 ;;
