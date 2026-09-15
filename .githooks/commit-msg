@@ -56,7 +56,11 @@ is_xeedio_origin() {
 }
 
 instruction_file_allowed() {
-    is_already_tracked_in_head "$1" || is_xeedio_origin
+    if [[ "$1" == "SUBAGENTS.md" ]]; then
+        is_already_tracked_in_head "$1" || is_already_tracked_in_head "AGENTS.md"
+    else
+        is_already_tracked_in_head "$1" || is_xeedio_origin
+    fi
 }
 
 has_tracked_prefix_in_head() {
