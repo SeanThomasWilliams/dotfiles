@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+usage() {
+  echo "Usage: $(basename "$0") <names|all> <value>" >&2
+}
+
+[[ $# -eq 2 ]] || { usage; exit 2; }
+scope="$1"
+value="$2"
+hook_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+match_file() {
+  local file="$1" pattern status
+  [[ -r "$file" ]] || return 1
+
+  while IFS= read -r pattern || [[ -n "$pattern" ]]; do
+    pattern="${pattern%$'\r'}"
+    [[ "$pattern" =~ ^[[:space:]]*(#|$) ]] && continue
+
+    set +e
+    printf '%s\n' "$value" | grep -Eiq -- "$pattern"
+    status=$?
+    set -e
+    case "$status" in
+      0) printf '%s\n' "$pattern"; return 0 ;;
+      1) ;;
+      *) printf 'invalid ERE: %s\n' "$pattern"; return 0 ;;
+    esac
+  done < "$file"
+  return 1
+}
+
+case "$scope" in
+  names)
+    match_file "$hook_dir/blocked-names"
+    ;;
+  all)
+    match_file "$hook_dir/blocked-names" || match_file "$hook_dir/blocked-patterns"
+    ;;
+  *)
+    usage
+    exit 2
+    ;;
+esac

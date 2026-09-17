@@ -53,6 +53,8 @@
 /*REQUIREMENT*.md
 /*STATUS*.md
 /.agents/
+/.githooks/blocked-names
+/.githooks/blocked-patterns
 /.leann
 /.mcp.json
 /vim/bundle/

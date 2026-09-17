@@ -17,13 +17,31 @@ set -u
 msg_file="${1:-}"
 [[ -r "$msg_file" ]] || exit 0
 
-# Skip auto-generated sources: merges, squashes, amends-with-prior-msg.
+# Strip comment lines before scanning, matching git's own finalization.
+scan_content=$(grep -v '^#' "$msg_file")
+
+hook_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+blocked_value_guard="${hook_dir}/check-blocked-value"
+if [[ ! -x "$blocked_value_guard" ]]; then
+    echo "ERROR: blocked value guard is missing or not executable: $blocked_value_guard" >&2
+    exit 1
+fi
+
+current_branch="$(git symbolic-ref --quiet --short HEAD 2>/dev/null || true)"
+if [[ -n "$current_branch" ]] && matched_pattern="$("$blocked_value_guard" all "$current_branch")"; then
+    printf 'ERROR: current branch %q matches blocked pattern %q\n' "$current_branch" "$matched_pattern" >&2
+    exit 1
+fi
+
+if matched_pattern="$("$blocked_value_guard" all "$scan_content")"; then
+    printf 'ERROR: commit message matches blocked pattern %q\n' "$matched_pattern" >&2
+    exit 1
+fi
+
+# Skip remaining prose checks for auto-generated sources.
 case "${2:-}" in
     merge|squash|commit) exit 0 ;;
 esac
-
-# Strip comment lines before scanning, matching git's own finalization.
-scan_content=$(grep -v '^#' "$msg_file")
 
 # --- Check 1: literal backslash-n ---
 if [[ "$scan_content" =~ \\n ]]; then
