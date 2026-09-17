@@ -13,7 +13,7 @@ while read -r old_oid new_oid ref_name; do
   case "$ref_name" in
     refs/heads/*)
       branch_name="${ref_name#refs/heads/}"
-      if matched_pattern="$($check_blocked all "$branch_name")"; then
+      if matched_pattern="$($check_blocked names "$branch_name")"; then
         printf 'ERROR: branch name %q matches blocked pattern %q\n' "$branch_name" "$matched_pattern" >&2
         exit 1
       fi

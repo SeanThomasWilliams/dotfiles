@@ -19,7 +19,7 @@ reject_blocked_ref() {
     refs/heads/*) branch_name="${ref_name#refs/heads/}" ;;
     *) return 0 ;;
   esac
-  if matched_pattern="$("${BLOCKED_VALUE_GUARD}" all "${branch_name}")"; then
+  if matched_pattern="$("${BLOCKED_VALUE_GUARD}" names "${branch_name}")"; then
     printf 'ERROR: pushed branch %q matches blocked pattern %q\n' "${branch_name}" "${matched_pattern}" >&2
     return 1
   fi
@@ -29,7 +29,7 @@ reject_commit_blocked_values() {
   local commit="$1" path message added_lines matched_pattern
 
   message="$(git log -1 --format=%B "${commit}")"
-  if matched_pattern="$("${BLOCKED_VALUE_GUARD}" all "${message}")"; then
+  if matched_pattern="$("${BLOCKED_VALUE_GUARD}" names "${message}")"; then
     printf 'ERROR: pushed commit %s message matches blocked pattern %q\n' "${commit}" "${matched_pattern}" >&2
     return 1
   fi
@@ -41,7 +41,7 @@ reject_commit_blocked_values() {
         return 1
         ;;
     esac
-    if matched_pattern="$("${BLOCKED_VALUE_GUARD}" all "${path}")"; then
+    if matched_pattern="$("${BLOCKED_VALUE_GUARD}" names "${path}")"; then
       printf 'ERROR: pushed commit %s path %q matches blocked pattern %q\n' "${commit}" "${path}" "${matched_pattern}" >&2
       return 1
     fi
@@ -49,7 +49,7 @@ reject_commit_blocked_values() {
       .gitexclude | .githooks/*) continue ;;
     esac
     added_lines="$(git diff-tree --root -m -p --unified=0 --no-commit-id "${commit}" -- "${path}" | grep -E '^\+' | grep -vE '^\+\+\+' || true)"
-    if [[ -n "${added_lines}" ]] && matched_pattern="$("${BLOCKED_VALUE_GUARD}" all "${added_lines}")"; then
+    if [[ -n "${added_lines}" ]] && matched_pattern="$("${BLOCKED_VALUE_GUARD}" names "${added_lines}")"; then
       printf 'ERROR: pushed commit %s additions in %q match blocked pattern %q\n' "${commit}" "${path}" "${matched_pattern}" >&2
       return 1
     fi

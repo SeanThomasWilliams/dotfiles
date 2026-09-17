@@ -68,7 +68,7 @@ if [[ ! -x "${BLOCKED_VALUE_GUARD}" ]]; then
 fi
 
 CURRENT_BRANCH="$(git symbolic-ref --quiet --short HEAD 2>/dev/null || true)"
-if [[ -n "${CURRENT_BRANCH}" ]] && matched_pattern="$("${BLOCKED_VALUE_GUARD}" all "${CURRENT_BRANCH}")"; then
+if [[ -n "${CURRENT_BRANCH}" ]] && matched_pattern="$("${BLOCKED_VALUE_GUARD}" names "${CURRENT_BRANCH}")"; then
   printf 'ERROR: current branch %q matches blocked pattern %q\n' "${CURRENT_BRANCH}" "${matched_pattern}" >&2
   exit 1
 fi
@@ -86,7 +86,7 @@ reject_blocked_staged_values() {
         ;;
     esac
 
-    if matched_pattern="$("${BLOCKED_VALUE_GUARD}" all "${file}")"; then
+    if matched_pattern="$("${BLOCKED_VALUE_GUARD}" names "${file}")"; then
       printf 'ERROR: staged path %q matches blocked pattern %q\n' "${file}" "${matched_pattern}" >&2
       return 1
     fi
@@ -96,7 +96,7 @@ reject_blocked_staged_values() {
     esac
 
     added_lines="$(git diff --cached --unified=0 -- "${file}" | grep -E '^\+' | grep -vE '^\+\+\+' || true)"
-    if [[ -n "${added_lines}" ]] && matched_pattern="$("${BLOCKED_VALUE_GUARD}" all "${added_lines}")"; then
+    if [[ -n "${added_lines}" ]] && matched_pattern="$("${BLOCKED_VALUE_GUARD}" names "${added_lines}")"; then
       printf 'ERROR: staged additions in %q match blocked pattern %q\n' "${file}" "${matched_pattern}" >&2
       return 1
     fi

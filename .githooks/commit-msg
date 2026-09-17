@@ -28,12 +28,12 @@ if [[ ! -x "$blocked_value_guard" ]]; then
 fi
 
 current_branch="$(git symbolic-ref --quiet --short HEAD 2>/dev/null || true)"
-if [[ -n "$current_branch" ]] && matched_pattern="$("$blocked_value_guard" all "$current_branch")"; then
+if [[ -n "$current_branch" ]] && matched_pattern="$("$blocked_value_guard" names "$current_branch")"; then
     printf 'ERROR: current branch %q matches blocked pattern %q\n' "$current_branch" "$matched_pattern" >&2
     exit 1
 fi
 
-if matched_pattern="$("$blocked_value_guard" all "$scan_content")"; then
+if matched_pattern="$("$blocked_value_guard" names "$scan_content")"; then
     printf 'ERROR: commit message matches blocked pattern %q\n' "$matched_pattern" >&2
     exit 1
 fi
