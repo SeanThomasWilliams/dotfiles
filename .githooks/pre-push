@@ -91,11 +91,12 @@ while read -r local_ref local_oid remote_ref remote_oid; do
   reject_blocked_ref "${remote_ref}" || exit 1
 
   commits=()
-  if [[ "${remote_oid}" == "${zero_oid}" ]]; then
-    mapfile -t commits < <(git rev-list "${local_oid}" --not --remotes)
-  else
-    mapfile -t commits < <(git rev-list "${remote_oid}..${local_oid}")
+  rev_list_args=("${local_oid}" --not --remotes)
+  if [[ "${remote_oid}" != "${zero_oid}" ]]; then
+    # The supplied OID is authoritative when a local remote-tracking ref is stale.
+    rev_list_args+=("${remote_oid}")
   fi
+  mapfile -t commits < <(git rev-list "${rev_list_args[@]}")
   for commit in "${commits[@]}"; do
     reject_commit_disposable_ai_paths "${commit}" || exit 1
     reject_commit_blocked_values "${commit}" || exit 1
