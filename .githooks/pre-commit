@@ -163,7 +163,7 @@ is_already_tracked_in_head() {
 }
 
 has_tracked_prefix_in_head() {
-  git ls-tree -r --name-only HEAD -- "$1" 2>/dev/null | grep -q .
+  git ls-tree -r --name-only HEAD -- "$1" 2>/dev/null | grep . >/dev/null
 }
 
 root_agents_allows_new_instruction() {
@@ -173,7 +173,7 @@ root_agents_allows_new_instruction() {
 has_tracked_instruction_name() {
   local name="$1"
   git ls-tree -r --name-only HEAD 2>/dev/null |
-    grep -Eq "(^|/)${name//./\\.}$"
+    grep -E "(^|/)${name//./\\.}$" >/dev/null
 }
 
 is_instruction_path() {
