@@ -131,7 +131,7 @@ expect_commit_msg() {
   msg_file="${SCRATCH}/commit-message-${checks}"
   printf '%s\n' "${message}" >"${msg_file}"
   set +e
-  output="$(cd "${repo}" && "${FIXTURE_HOOKS}/commit-msg" "${msg_file}" 2>&1)"
+  output="$(cd "${repo}" && bash -o pipefail "${FIXTURE_HOOKS}/commit-msg" "${msg_file}" 2>&1)"
   status=$?
   set -e
   if { [[ "${expected}" == pass ]] && ((status == 0)); } ||
@@ -218,6 +218,22 @@ for path in 'ai_wiki/new.md' 'ai_scripts/new.sh' '.agents/skills/new-skill/SKILL
   stage_write "${REPO}" "${path}"
   expect_pre_commit pass "existing governed tree may grow: ${path}" "${REPO}"
 done
+
+LARGE_REPO="${SCRATCH}/repo-large-tree"
+init_repo "${LARGE_REPO}" true
+mkdir -p "${LARGE_REPO}/ai_wiki/bulk"
+for i in $(seq -w 1 6000); do
+  printf 'tracked\n' >"${LARGE_REPO}/ai_wiki/bulk/entry-${i}.md"
+done
+git -C "${LARGE_REPO}" add -- ai_wiki/bulk
+git -C "${LARGE_REPO}" commit -q -m 'test: create large tracked tree'
+stage_write "${LARGE_REPO}" 'AGENTS.md'
+expect_pre_commit pass 'tracked AGENTS modification allowed in a large tree' "${LARGE_REPO}"
+reset_repo "${LARGE_REPO}"
+stage_write "${LARGE_REPO}" 'ai_wiki/new.md'
+expect_pre_commit pass 'tracked prefix growth allowed in a large tree' "${LARGE_REPO}"
+expect_commit_msg pass 'tracked AGENTS reference allowed in a large tree with pipefail' "${LARGE_REPO}" 'docs: update AGENTS.md'
+expect_commit_msg pass 'tracked prefix reference allowed in a large tree with pipefail' "${LARGE_REPO}" 'docs: update ai_wiki/new.md'
 
 reset_repo "${REPO}"
 stage_write "${REPO}" '.agents/skills/example/work/item'
