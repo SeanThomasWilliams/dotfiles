@@ -17,13 +17,31 @@ set -u
 msg_file="${1:-}"
 [[ -r "$msg_file" ]] || exit 0
 
-# Skip auto-generated sources: merges, squashes, amends-with-prior-msg.
+# Strip comment lines before scanning, matching git's own finalization.
+scan_content=$(grep -v '^#' "$msg_file")
+
+hook_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+blocked_value_guard="${hook_dir}/check-blocked-value"
+if [[ ! -x "$blocked_value_guard" ]]; then
+    echo "ERROR: blocked value guard is missing or not executable: $blocked_value_guard" >&2
+    exit 1
+fi
+
+current_branch="$(git symbolic-ref --quiet --short HEAD 2>/dev/null || true)"
+if [[ -n "$current_branch" ]] && matched_pattern="$("$blocked_value_guard" names "$current_branch")"; then
+    printf 'ERROR: current branch %q matches blocked pattern %q\n' "$current_branch" "$matched_pattern" >&2
+    exit 1
+fi
+
+if matched_pattern="$(printf '%s\n' "$scan_content" | "$blocked_value_guard" names)"; then
+    printf 'ERROR: commit message matches blocked pattern %q\n' "$matched_pattern" >&2
+    exit 1
+fi
+
+# Skip remaining prose checks for auto-generated sources.
 case "${2:-}" in
     merge|squash|commit) exit 0 ;;
 esac
-
-# Strip comment lines before scanning, matching git's own finalization.
-scan_content=$(grep -v '^#' "$msg_file")
 
 # --- Check 1: literal backslash-n ---
 if [[ "$scan_content" =~ \\n ]]; then
@@ -44,43 +62,25 @@ is_already_tracked_in_head() {
     git cat-file -e "HEAD:$1" 2>/dev/null
 }
 
-is_xeedio_origin() {
-    local origin_url
-    origin_url="$(git remote get-url origin 2>/dev/null)" || return 1
-    case "${origin_url}" in
-        https://github.com/xeedio/* | git@github.com:xeedio/* | github.com:xeedio/* | ssh://git@github.com/xeedio/* | https://gitlab.com/xeedio/* | git@gitlab.com:xeedio/* | gitlab.com:xeedio/* | ssh://git@gitlab.com/xeedio/*)
-            return 0
-            ;;
-        *) return 1 ;;
-    esac
-}
-
-instruction_file_allowed() {
-    if [[ "$1" == "SUBAGENTS.md" ]]; then
-        is_already_tracked_in_head "$1" || is_already_tracked_in_head "AGENTS.md"
-    else
-        is_already_tracked_in_head "$1" || is_xeedio_origin
-    fi
-}
-
 has_tracked_prefix_in_head() {
     git ls-tree -r --name-only HEAD -- "$1" 2>/dev/null | grep -q .
+}
+
+has_tracked_instruction_name() {
+    local name="$1"
+    git ls-tree -r --name-only HEAD 2>/dev/null |
+        grep -Eq "(^|/)${name//./\\.}$"
 }
 
 pattern_allowed_by_repo_context() {
     local pattern="$1"
     case "$pattern" in
         '(^|[^[:alnum:]_])AGENTS\.md([^[:alnum:]_]|$)')
-            instruction_file_allowed "AGENTS.md"
+            has_tracked_instruction_name "AGENTS.md"
             ;;
         '(^|[^[:alnum:]_])SUBAGENTS\.md([^[:alnum:]_]|$)')
-            instruction_file_allowed "SUBAGENTS.md"
-            ;;
-        'CLAUDE\.md')
-            is_already_tracked_in_head "CLAUDE.md"
-            ;;
-        'CLAUDE\.local\.md')
-            is_already_tracked_in_head "CLAUDE.local.md"
+            has_tracked_instruction_name "SUBAGENTS.md" ||
+                is_already_tracked_in_head "AGENTS.md"
             ;;
         'ai_wiki/')
             has_tracked_prefix_in_head "ai_wiki"
@@ -88,29 +88,8 @@ pattern_allowed_by_repo_context() {
         'ai_scripts/')
             has_tracked_prefix_in_head "ai_scripts"
             ;;
-        'ai_docs/')
-            has_tracked_prefix_in_head "ai_docs"
-            ;;
-        'ai_logs/')
-            has_tracked_prefix_in_head "ai_logs"
-            ;;
-        'ai_temp/')
-            has_tracked_prefix_in_head "ai_temp"
-            ;;
-        'ai_tests/')
-            has_tracked_prefix_in_head "ai_tests"
-            ;;
-        'ai_issues/')
-            has_tracked_prefix_in_head "ai_issues"
-            ;;
         '\.agents/skills/')
             has_tracked_prefix_in_head ".agents/skills"
-            ;;
-        '\.pi/')
-            has_tracked_prefix_in_head ".pi"
-            ;;
-        '\.claude/')
-            has_tracked_prefix_in_head ".claude"
             ;;
         *)
             return 1

@@ -94,6 +94,15 @@ done
 # Binaries
 mkdir -p "$HOME"/bin
 ln -vsfn "$SCRIPT_DIR"/bin/* "$HOME"/bin/
+
+make -C "$SCRIPT_DIR" wrappers
+WRAPPED_CLI_DIR="$HOME/.local/libexec/dotfiles"
+mkdir -p "$WRAPPED_CLI_DIR"
+for wrapped_cli in gh glab; do
+  install -m 0111 "$SCRIPT_DIR/build/$wrapped_cli" "$WRAPPED_CLI_DIR/$wrapped_cli"
+  ln -vsfn "$WRAPPED_CLI_DIR/$wrapped_cli" "$HOME/bin/$wrapped_cli"
+done
+
 for binfile in "${SCRIPT_DIR}/${UNAME_S}"/bin/*; do
   [[ ! -f "$binfile" ]] && continue
   ln -vsfn "$binfile" "$HOME"/bin/"$(basename "$binfile")"

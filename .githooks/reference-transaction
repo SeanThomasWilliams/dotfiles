@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+[[ "${1:-}" == "prepared" ]] || exit 0
+
+hook_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+check_blocked="$hook_dir/check-blocked-value"
+zero_oid=0000000000000000000000000000000000000000
+
+while read -r old_oid new_oid ref_name; do
+  [[ "$new_oid" != "$zero_oid" ]] || continue
+  case "$ref_name" in
+    refs/heads/*)
+      branch_name="${ref_name#refs/heads/}"
+      if matched_pattern="$($check_blocked names "$branch_name")"; then
+        printf 'ERROR: branch name %q matches blocked pattern %q\n' "$branch_name" "$matched_pattern" >&2
+        exit 1
+      fi
+      ;;
+  esac
+done

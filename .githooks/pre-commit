@@ -18,7 +18,98 @@ if [ "${GLOBAL_PRECOMMIT_SHIM_RUNNING:-0}" = "1" ]; then
 fi
 export GLOBAL_PRECOMMIT_SHIM_RUNNING=1
 
-SKILL_CONFLICT_GUARD="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/check-skill-conflicts"
+REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null)" || {
+  echo "ERROR: not in a Git repository" >&2
+  exit 1
+}
+GIT_DIR="$(git rev-parse --path-format=absolute --git-dir 2>/dev/null)" || exit 1
+GIT_COMMON_DIR="$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null)" || exit 1
+if [[ "${GIT_DIR}" != "${GIT_COMMON_DIR}" ]]; then
+  echo "ERROR: commits are allowed only from the canonical checkout; Git worktrees are not allowed" >&2
+  exit 1
+fi
+case "${REPO_ROOT}" in
+  /tmp | /tmp/* | /var/tmp | /var/tmp/* | /dev/shm | /dev/shm/*)
+    echo "ERROR: commits are not allowed from temporary source checkouts: ${REPO_ROOT}" >&2
+    exit 1
+    ;;
+esac
+
+is_disposable_ai_path() {
+  case "$1" in
+    ai_temp | ai_temp/* | ai_logs | ai_logs/*) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+reject_staged_disposable_ai_paths() {
+  local status old_path path
+  while IFS= read -r -d '' status; do
+    if [[ "${status}" == R* || "${status}" == C* ]]; then
+      IFS= read -r -d '' old_path || return 1
+      IFS= read -r -d '' path || return 1
+    else
+      IFS= read -r -d '' path || return 1
+    fi
+    if is_disposable_ai_path "${path}"; then
+      printf 'ERROR: ai_temp and ai_logs are disposable and may only be deleted, not committed: %q\n' "${path}" >&2
+      return 1
+    fi
+  done < <(git diff --cached --name-status -z --diff-filter=ACMRTUXB)
+}
+
+reject_staged_disposable_ai_paths || exit 1
+
+HOOK_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+BLOCKED_VALUE_GUARD="${HOOK_DIR}/check-blocked-value"
+if [[ ! -x "${BLOCKED_VALUE_GUARD}" ]]; then
+  echo "ERROR: blocked value guard is missing or not executable: ${BLOCKED_VALUE_GUARD}" >&2
+  exit 1
+fi
+
+CURRENT_BRANCH="$(git symbolic-ref --quiet --short HEAD 2>/dev/null || true)"
+if [[ -n "${CURRENT_BRANCH}" ]] && matched_pattern="$("${BLOCKED_VALUE_GUARD}" names "${CURRENT_BRANCH}")"; then
+  printf 'ERROR: current branch %q matches blocked pattern %q\n' "${CURRENT_BRANCH}" "${matched_pattern}" >&2
+  exit 1
+fi
+
+reject_blocked_staged_values() {
+  local file matched_pattern
+  while IFS= read -r -d '' file; do
+    case "${file}" in
+      .githooks/blocked-names | .githooks/blocked-patterns)
+        if git cat-file -e ":${file}" 2>/dev/null; then
+          printf 'ERROR: local block policy file must not be committed: %q\n' "${file}" >&2
+          return 1
+        fi
+        continue
+        ;;
+    esac
+
+    if matched_pattern="$("${BLOCKED_VALUE_GUARD}" names "${file}")"; then
+      printf 'ERROR: staged path %q matches blocked pattern %q\n' "${file}" "${matched_pattern}" >&2
+      return 1
+    fi
+
+    case "${file}" in
+      .gitexclude | .githooks/*) continue ;;
+    esac
+
+    if matched_pattern="$(
+      git diff --cached --unified=0 -- "${file}" |
+        grep -E '^\+' |
+        grep -vE '^\+\+\+' |
+        "${BLOCKED_VALUE_GUARD}" names
+    )"; then
+      printf 'ERROR: staged additions in %q match blocked pattern %q\n' "${file}" "${matched_pattern}" >&2
+      return 1
+    fi
+  done < <(git diff --cached --name-only --diff-filter=ACMRTUXB -z)
+}
+
+reject_blocked_staged_values || exit 1
+
+SKILL_CONFLICT_GUARD="${HOOK_DIR}/check-skill-conflicts"
 if [[ ! -x "${SKILL_CONFLICT_GUARD}" ]]; then
   echo "ERROR: skill conflict guard is missing or not executable: ${SKILL_CONFLICT_GUARD}" >&2
   exit 1
@@ -56,73 +147,93 @@ read_blocked_content_patterns() {
       'ai_tests/' \
       'ai_issues/' \
       'ai_wiki/' \
+      '\.agents/skills/.*/work/' \
       '\.agents/skills/' \
       '\.pi/' \
       '\.claude/' \
+      '(^|[^[:alnum:]_])[^/[:space:]]*\.override\.md([^[:alnum:]_]|$)' \
       '(^|[^[:alnum:]_])AGENTS\.md([^[:alnum:]_]|$)' \
       '(^|[^[:alnum:]_])SUBAGENTS\.md([^[:alnum:]_]|$)' \
-      'CLAUDE\.md' \
-      'CLAUDE\.local\.md'
+      '(^|[^[:alnum:]_])CLAUDE[^/[:space:]]*'
   fi
 }
-
-# Get list of staged files
-staged_files=$(git diff --cached --name-only)
-
-# Define patterns to block as new paths
-blocked_patterns=(
-  "^CLAUDE\.md$"
-  "^AGENTS\.md$"
-  "^SUBAGENTS\.md$"
-  "^\.pi/"
-  "^\.agents/skills/"
-  "^\.claude/"
-  "^\.code/"
-  "^\.codex/"
-  "^\.ctags"
-  "^\.tags"
-  "^ai_.*/"
-  "^tests/results/"
-)
 
 is_already_tracked_in_head() {
   git cat-file -e "HEAD:$1" 2>/dev/null
-}
-
-is_xeedio_origin() {
-  local origin_url
-  origin_url="$(git remote get-url origin 2>/dev/null)" || return 1
-  case "${origin_url}" in
-    https://github.com/xeedio/* | git@github.com:xeedio/* | github.com:xeedio/* | ssh://git@github.com/xeedio/* | https://gitlab.com/xeedio/* | git@gitlab.com:xeedio/* | gitlab.com:xeedio/* | ssh://git@gitlab.com/xeedio/*)
-      return 0
-      ;;
-    *) return 1 ;;
-  esac
-}
-
-instruction_file_allowed() {
-  if [[ "$1" == "SUBAGENTS.md" ]]; then
-    is_already_tracked_in_head "$1" || is_already_tracked_in_head "AGENTS.md"
-  else
-    is_already_tracked_in_head "$1" || is_xeedio_origin
-  fi
 }
 
 has_tracked_prefix_in_head() {
   git ls-tree -r --name-only HEAD -- "$1" 2>/dev/null | grep -q .
 }
 
-path_allowed_by_repo_context() {
+root_agents_allows_new_instruction() {
+  is_already_tracked_in_head "AGENTS.md" && git cat-file -e ":AGENTS.md" 2>/dev/null
+}
+
+has_tracked_instruction_name() {
+  local name="$1"
+  git ls-tree -r --name-only HEAD 2>/dev/null |
+    grep -Eq "(^|/)${name//./\\.}$"
+}
+
+is_instruction_path() {
+  case "$1" in
+    AGENTS.md | */AGENTS.md | SUBAGENTS.md | */SUBAGENTS.md) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+is_skill_work_path() {
+  case "$1" in
+    .agents/skills/*/work | .agents/skills/*/work/*) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+is_always_blocked_path() {
+  local file="$1" basename wrapped
+  basename="${file##*/}"
+  wrapped="/${file}/"
+  case "$basename" in
+    *.override.md | CLAUDE*) return 0 ;;
+    .ctags | .tags*) return 0 ;;
+  esac
+  case "$wrapped" in
+    */.pi/*|*/.claude/*|*/.code/*|*/.codex/*|*/ai_temp/*|*/ai_logs/*|*/ai_issues/*|*/ai_tests/*|*/ai_docs/*|*/tests/results/*)
+      return 0
+      ;;
+  esac
+  case "$file" in
+    ai_wiki/* | ai_scripts/*) return 1 ;;
+    ai_*/*) return 0 ;;
+  esac
+  return 1
+}
+
+staged_path_allowed() {
   local file="$1"
+  if is_skill_work_path "$file"; then
+    return 1
+  fi
+  if is_instruction_path "$file" && is_already_tracked_in_head "$file"; then
+    return 0
+  fi
+  if is_always_blocked_path "$file"; then
+    return 1
+  fi
   if is_already_tracked_in_head "$file"; then
     return 0
   fi
+  if is_instruction_path "$file"; then
+    root_agents_allows_new_instruction
+    return
+  fi
   case "$file" in
-    AGENTS.md | SUBAGENTS.md)
-      instruction_file_allowed "$file"
-      ;;
     ai_wiki/*)
       has_tracked_prefix_in_head "ai_wiki"
+      ;;
+    ai_scripts/*)
+      has_tracked_prefix_in_head "ai_scripts"
       ;;
     .githooks/*)
       has_tracked_prefix_in_head ".githooks"
@@ -135,7 +246,7 @@ path_allowed_by_repo_context() {
       has_tracked_prefix_in_head ".agents/skills"
       ;;
     *)
-      return 1
+      return 0
       ;;
   esac
 }
@@ -144,16 +255,11 @@ pattern_allowed_by_repo_context() {
   local pattern="$1"
   case "$pattern" in
     '(^|[^[:alnum:]_])AGENTS\.md([^[:alnum:]_]|$)')
-      instruction_file_allowed "AGENTS.md"
+      has_tracked_instruction_name "AGENTS.md"
       ;;
     '(^|[^[:alnum:]_])SUBAGENTS\.md([^[:alnum:]_]|$)')
-      instruction_file_allowed "SUBAGENTS.md"
-      ;;
-    'CLAUDE\.md')
-      is_already_tracked_in_head "CLAUDE.md"
-      ;;
-    'CLAUDE\.local\.md')
-      is_already_tracked_in_head "CLAUDE.local.md"
+      has_tracked_instruction_name "SUBAGENTS.md" ||
+        is_already_tracked_in_head "AGENTS.md"
       ;;
     'ai_wiki/')
       has_tracked_prefix_in_head "ai_wiki"
@@ -161,29 +267,8 @@ pattern_allowed_by_repo_context() {
     'ai_scripts/')
       has_tracked_prefix_in_head "ai_scripts"
       ;;
-    'ai_docs/')
-      has_tracked_prefix_in_head "ai_docs"
-      ;;
-    'ai_logs/')
-      has_tracked_prefix_in_head "ai_logs"
-      ;;
-    'ai_temp/')
-      has_tracked_prefix_in_head "ai_temp"
-      ;;
-    'ai_tests/')
-      has_tracked_prefix_in_head "ai_tests"
-      ;;
-    'ai_issues/')
-      has_tracked_prefix_in_head "ai_issues"
-      ;;
     '\.agents/skills/')
       has_tracked_prefix_in_head ".agents/skills"
-      ;;
-    '\.pi/')
-      has_tracked_prefix_in_head ".pi"
-      ;;
-    '\.claude/')
-      has_tracked_prefix_in_head ".claude"
       ;;
     *)
       return 1
@@ -191,67 +276,36 @@ pattern_allowed_by_repo_context() {
   esac
 }
 
-# Check each staged file against blocked patterns. These patterns block adding
-# new AI/local-control files to repos that do not already track them. If the
-# exact path already exists in HEAD, allow normal edits/deletes. ai_wiki/ and
-# .agents/skills/ may also grow when the repo already tracks that tree.
-for file in $staged_files; do
-  for pattern in "${blocked_patterns[@]}"; do
-    if echo "$file" | grep -qE "$pattern"; then
-      if path_allowed_by_repo_context "$file"; then
-        continue
-      fi
-      echo "ERROR: Attempting to commit blocked file: $file"
-      echo "Files matching these patterns are not allowed as new tracked files:"
-      echo "  - ai_*/* (AI-related directories)"
-      echo "  - .tags*"
-      echo "  - .ctags*"
-      echo "  - .pi/*"
-      echo "  - .agents/skills/* (unless this repo already tracks .agents/skills/)"
-      echo "  - .claude/*"
-      echo "  - .code/*"
-      echo "  - .codex/*"
-      echo "  - .tests/results/*"
-      echo "  - CLAUDE.md"
-      echo "  - AGENTS.md"
-      echo "  - SUBAGENTS.md"
-      echo "  - ai_wiki/* (unless this repo already tracks ai_wiki/)"
-      echo ""
-      echo "Already-tracked matching paths may be edited. To remove a new blocked file from staging:"
-      echo "  git reset HEAD \"$file\""
-      exit 1
-    fi
-  done
-done
-
-# Check staged content for references to blocked paths. Skip files and patterns
-# that are valid for this repository because the path already exists here.
-mapfile -t blocked_content_patterns < <(read_blocked_content_patterns)
-
-for file in $staged_files; do
-  if path_allowed_by_repo_context "$file"; then
-    continue
+# Deletions are intentionally absent from this stream and are always allowed.
+# Existing instruction files are editable at any depth. New instruction files
+# require an existing root AGENTS.md. Private roots and skill work trees remain
+# blocked even when their exact paths already exist in HEAD.
+while IFS= read -r -d '' file; do
+  if ! staged_path_allowed "$file"; then
+    printf 'ERROR: staged path is blocked by the global path policy: %q\n' "$file" >&2
+    exit 1
   fi
-  file_diff=$(git diff --cached -- "$file")
+done < <(git diff --cached --name-only --diff-filter=ACMRTUXB -z)
+
+# Scan added content independently of whether the containing file is tracked.
+# Hook policy files are exempt because they must name the patterns they enforce.
+mapfile -t blocked_content_patterns < <(read_blocked_content_patterns)
+while IFS= read -r -d '' file; do
+  case "$file" in
+    .gitexclude | .githooks/*) continue ;;
+  esac
+  file_diff="$(git diff --cached -- "$file")"
   for pattern in "${blocked_content_patterns[@]}"; do
     if pattern_allowed_by_repo_context "$pattern"; then
       continue
     fi
-    if echo "$file_diff" | grep -E "^\+.*$pattern" >/dev/null 2>&1; then
-      echo "ERROR: Staged changes contain references to blocked paths/files"
-      echo "Found reference to: $pattern"
-      echo "File: $file"
-      echo ""
-      echo "These paths must not be introduced in repos that do not already track them."
-      echo ""
-      echo "Offending lines:"
-      echo "$file_diff" | grep -E "^\+.*$pattern" | head -5
-      echo ""
-      echo "Remove these references before committing."
+    if printf '%s\n' "$file_diff" | grep -E "^\+.*$pattern" >/dev/null 2>&1; then
+      echo "ERROR: staged additions reference a blocked private path" >&2
+      echo "Matched pattern: $pattern" >&2
+      printf 'File: %q\n' "$file" >&2
       exit 1
     fi
   done
-done
+done < <(git diff --cached --name-only --diff-filter=ACMRTUXB -z)
 
-# All checks passed
 exit 0
