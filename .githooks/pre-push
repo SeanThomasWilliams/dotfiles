@@ -19,17 +19,16 @@ reject_blocked_ref() {
     refs/heads/*) branch_name="${ref_name#refs/heads/}" ;;
     *) return 0 ;;
   esac
-  if matched_pattern="$("${BLOCKED_VALUE_GUARD}" names "${branch_name}")"; then
+  if matched_pattern="$(printf '%s\n' "${branch_name}" | "${BLOCKED_VALUE_GUARD}" names)"; then
     printf 'ERROR: pushed branch %q matches blocked pattern %q\n' "${branch_name}" "${matched_pattern}" >&2
     return 1
   fi
 }
 
 reject_commit_blocked_values() {
-  local commit="$1" path message added_lines matched_pattern
+  local commit="$1" path matched_pattern
 
-  message="$(git log -1 --format=%B "${commit}")"
-  if matched_pattern="$("${BLOCKED_VALUE_GUARD}" names "${message}")"; then
+  if matched_pattern="$(git log -1 --format=%B "${commit}" | "${BLOCKED_VALUE_GUARD}" names)"; then
     printf 'ERROR: pushed commit %s message matches blocked pattern %q\n' "${commit}" "${matched_pattern}" >&2
     return 1
   fi
@@ -41,19 +40,23 @@ reject_commit_blocked_values() {
         return 1
         ;;
     esac
-    if matched_pattern="$("${BLOCKED_VALUE_GUARD}" names "${path}")"; then
+    if matched_pattern="$(printf '%s\n' "${path}" | "${BLOCKED_VALUE_GUARD}" names)"; then
       printf 'ERROR: pushed commit %s path %q matches blocked pattern %q\n' "${commit}" "${path}" "${matched_pattern}" >&2
       return 1
     fi
     case "${path}" in
       .gitexclude | .githooks/*) continue ;;
     esac
-    added_lines="$(git diff-tree --root -m -p --unified=0 --no-commit-id "${commit}" -- "${path}" | grep -E '^\+' | grep -vE '^\+\+\+' || true)"
-    if [[ -n "${added_lines}" ]] && matched_pattern="$("${BLOCKED_VALUE_GUARD}" names "${added_lines}")"; then
+    if matched_pattern="$(
+      git diff-tree --root -c -p --unified=0 --no-commit-id "${commit}" -- "${path}" |
+        grep -E '^\+' |
+        grep -vE '^\+\+\+' |
+        "${BLOCKED_VALUE_GUARD}" names
+    )"; then
       printf 'ERROR: pushed commit %s additions in %q match blocked pattern %q\n' "${commit}" "${path}" "${matched_pattern}" >&2
       return 1
     fi
-  done < <(git diff-tree --root -m --no-commit-id --name-only -r -z --diff-filter=ACMRTUXB "${commit}")
+  done < <(git diff-tree --root -c --no-commit-id --name-only -r -z --diff-filter=ACMRTUXB "${commit}")
 }
 
 is_disposable_ai_path() {
@@ -77,55 +80,75 @@ reject_commit_disposable_ai_paths() {
       printf 'ERROR: pushed commits may only delete ai_temp and ai_logs paths: %q (%s)\n' "${path}" "${commit}" >&2
       return 1
     fi
-  done < <(git diff-tree --root -m --no-commit-id --name-status -r -z -M -C --diff-filter=ACMRTUXB "${commit}")
+  done < <(git diff-tree --root -c --no-commit-id --name-status -r -z -M -C --diff-filter=ACMRTUXB "${commit}")
 }
 
 zero_oid=0000000000000000000000000000000000000000
-published_oids=()
+scan_limit=50
+state_dir="$(mktemp -d "${TMPDIR:-/tmp}/pre-push.XXXXXX")"
+trap 'rm -rf -- "${state_dir}"' EXIT
+published_refs_file="${state_dir}/published-refs"
+ref_lines_file="${state_dir}/ref-lines"
+rev_input_file="${state_dir}/rev-input"
+commits_file="${state_dir}/commits"
+cat >"${ref_lines_file}"
+
 published_refs_available=1
-if [[ -z "${1:-}" ]] || ! published_refs="$(git ls-remote --heads --tags "$1")"; then
+if [[ -z "${1:-}" ]] || ! git ls-remote --heads --tags "$1" >"${published_refs_file}"; then
   echo "WARNING: could not list published refs; scanning the full per-ref update range" >&2
   published_refs_available=0
-else
-  while read -r published_oid _; do
-    [[ -n "${published_oid:-}" ]] || continue
-    if git cat-file -e "${published_oid}^{commit}" 2>/dev/null; then
-      published_oids+=("${published_oid}")
-    fi
-  done <<<"${published_refs}"
 fi
 
-ref_lines=()
 while read -r local_ref local_oid remote_ref remote_oid; do
   [[ -n "${local_ref:-}" ]] || continue
-  ref_lines+=("${local_ref} ${local_oid} ${remote_ref} ${remote_oid}")
   [[ "${local_oid}" != "${zero_oid}" ]] || continue
 
   reject_blocked_ref "${local_ref}" || exit 1
   reject_blocked_ref "${remote_ref}" || exit 1
 
-  commits=()
   if [[ "${published_refs_available}" -eq 1 ]]; then
-    mapfile -t commits < <(
-      {
-        printf '%s\n' "${local_oid}"
-        if [[ "${remote_oid}" != "${zero_oid}" ]]; then
-          printf '^%s\n' "${remote_oid}"
-        fi
-        for published_oid in "${published_oids[@]}"; do
+    {
+      printf '%s\n' "${local_oid}"
+      if [[ "${remote_oid}" != "${zero_oid}" ]]; then
+        printf '^%s\n' "${remote_oid}"
+      fi
+      while read -r published_oid _; do
+        [[ -n "${published_oid:-}" ]] || continue
+        if git cat-file -e "${published_oid}^{commit}" 2>/dev/null; then
           printf '^%s\n' "${published_oid}"
-        done
-      } | git rev-list --stdin
-    )
+        fi
+      done <"${published_refs_file}"
+    } >"${rev_input_file}"
+    if ! git rev-list --max-count="$((scan_limit + 1))" --stdin <"${rev_input_file}" >"${commits_file}"; then
+      printf 'ERROR: could not enumerate unpublished commits for %q\n' "${local_ref}" >&2
+      exit 1
+    fi
   elif [[ "${remote_oid}" == "${zero_oid}" ]]; then
-    mapfile -t commits < <(git rev-list "${local_oid}" --not --remotes)
-  else
-    mapfile -t commits < <(git rev-list "${remote_oid}..${local_oid}")
+    if ! git rev-list --max-count="$((scan_limit + 1))" "${local_oid}" --not --remotes >"${commits_file}"; then
+      printf 'ERROR: could not enumerate unpublished commits for %q\n' "${local_ref}" >&2
+      exit 1
+    fi
+  elif ! git rev-list --max-count="$((scan_limit + 1))" "${remote_oid}..${local_oid}" >"${commits_file}"; then
+    printf 'ERROR: could not enumerate unpublished commits for %q\n' "${local_ref}" >&2
+    exit 1
   fi
-  for commit in "${commits[@]}"; do
+
+  inspected=0
+  over_limit=0
+  while IFS= read -r commit; do
+    [[ -n "${commit}" ]] || continue
+    if ((inspected >= scan_limit)); then
+      over_limit=1
+      break
+    fi
+    inspected=$((inspected + 1))
     reject_commit_disposable_ai_paths "${commit}" || exit 1
     reject_commit_blocked_values "${commit}" || exit 1
-  done
-done
+  done <"${commits_file}"
+  if ((over_limit)); then
+    printf 'WARNING: %q has more than %d unpublished commits; inspected only the newest %d and allowed older commits to continue\n' \
+      "${local_ref}" "${scan_limit}" "${scan_limit}" >&2
+  fi
+done <"${ref_lines_file}"
 
-printf '%s\n' "${ref_lines[@]}" | git lfs pre-push "$@"
+git lfs pre-push "$@" <"${ref_lines_file}"

@@ -3,13 +3,20 @@
 set -euo pipefail
 
 usage() {
-  echo "Usage: $(basename "$0") <names|all> <value>" >&2
+  echo "Usage: $(basename "$0") <names|all> [value]" >&2
+  echo "       omit value to read it from standard input" >&2
 }
 
-[[ $# -eq 2 ]] || { usage; exit 2; }
+[[ $# -ge 1 && $# -le 2 ]] || { usage; exit 2; }
 scope="$1"
-value="$2"
 hook_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+input_file="$(mktemp "${TMPDIR:-/tmp}/check-blocked-value.XXXXXX")"
+trap 'rm -f -- "${input_file}"' EXIT
+if [[ $# -eq 2 ]]; then
+  printf '%s\n' "$2" >"${input_file}"
+else
+  cat >"${input_file}"
+fi
 
 match_file() {
   local file="$1" pattern status
@@ -20,7 +27,7 @@ match_file() {
     [[ "$pattern" =~ ^[[:space:]]*(#|$) ]] && continue
 
     set +e
-    printf '%s\n' "$value" | grep -Eiq -- "$pattern"
+    grep -Eiq -- "$pattern" "${input_file}"
     status=$?
     set -e
     case "$status" in
