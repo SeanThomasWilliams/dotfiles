@@ -102,14 +102,86 @@ increment_directory() {
   fi
 }
 
-# Convert directory path to session name
-# Preserves org context and handles domain simplification
+# Convert a repository host and path to the shared tmux session name.
+host_path_to_session_name() {
+  local host="${1,,}"
+  local path="$2"
+  host="${host%%:*}"
+  host="${host%.}"
+  path="${path#/}"
+  while [[ "$path" == */ ]]; do
+    path="${path%/}"
+  done
+  path="${path%.git}"
+
+  local -a host_parts=()
+  local -a repo_parts=()
+  IFS='.' read -r -a host_parts <<<"$host"
+  IFS='/' read -r -a repo_parts <<<"$path"
+
+  local first_host_label="${host_parts[0]}"
+  local host_part_count=${#host_parts[@]}
+  local repo_part_count=${#repo_parts[@]}
+  local prefix=""
+
+  if [[ "$first_host_label" == git* && "$first_host_label" == *-* ]]; then
+    prefix="${first_host_label#*-}"
+  elif ((host_part_count == 2)); then
+    prefix="${repo_parts[0]-}"
+  elif ((host_part_count > 2)); then
+    case "$first_host_label" in
+    git | gitlab | github | gitea | code | repo | depot | bitbucket)
+      local remaining_subdomains=$((host_part_count - 3))
+      if ((remaining_subdomains > 0)); then
+        prefix="${host_parts[1]}"
+        if ((remaining_subdomains > 1)); then
+          prefix+="-${host_parts[2]}"
+        fi
+      else
+        prefix="${host_parts[1]}"
+      fi
+      ;;
+    *)
+      prefix="$first_host_label"
+      ;;
+    esac
+  else
+    prefix="$first_host_label"
+  fi
+
+  prefix="${prefix//./_}"
+  local result="$prefix"
+  local tail_start=0
+  if ((repo_part_count > 2)); then
+    tail_start=$((repo_part_count - 2))
+  fi
+  if ((host_part_count == 2)) && [[ "${repo_parts[tail_start]-}" == "$prefix" ]]; then
+    ((tail_start++))
+  fi
+  local i part
+  for ((i = tail_start; i < repo_part_count; i++)); do
+    part="${repo_parts[i]//./_}"
+    result+="/$part"
+  done
+
+  printf '%s\n' "$result"
+}
+
+# Convert directory path to session name.
 dir_to_session_name() {
   local dir="$1"
+
+  if [[ "$dir" == "$HOME/gocode/src/"* ]]; then
+    local relative_path="${dir#"$HOME/gocode/src/"}"
+    local host="${relative_path%%/*}"
+    if [[ "$relative_path" == */* ]]; then
+      host_path_to_session_name "$host" "${relative_path#*/}"
+      return
+    fi
+  fi
+
   echo "$dir" |
     sed "s#$HOME/##" |
-    sed 's#^gocode/src/github\.com/##; s#^gocode/src/gitlab\.com/##' |
-    sed -E 's#^gocode/src/([^.]+)\.[^/]+/#\1/#' |
     awk -F'/' 'BEGIN{OFS="/"} {
       gsub(/\./, "_")
       if (NF >= 3) {
@@ -232,58 +304,22 @@ get_git_remote() {
 # Convert git remote URL to session name
 remote_to_session_name() {
   local url="$1"
-
-  # Remove .git suffix
-  url="${url%.git}"
-
-  # Handle different URL formats:
-  # https://repo1.dso.mil/big-bang/edge/peli-virtualization
-  # git@github.com:raft-tech/df-klv
-  # ssh://git@gitlab.com/xeedio/big-bang/edge
-
+  local host=""
   local path=""
 
   if [[ "$url" =~ ^(https?|ssh)://([^/]+)/(.+)$ ]]; then
-    # HTTPS or SSH protocol
-    local domain="${BASH_REMATCH[2]}"
+    host="${BASH_REMATCH[2]}"
     path="${BASH_REMATCH[3]}"
-
-    # Simplify domain
-    if [[ "$domain" == "github.com" || "$domain" == "gitlab.com" ]]; then
-      : # Remove these domains from path
-    elif [[ "$domain" =~ ^([^.]+)\..+$ ]]; then
-      # Extract first component (e.g., repo1.dso.mil -> repo1)
-      path="${BASH_REMATCH[1]}/$path"
-    else
-      path="$domain/$path"
-    fi
-  elif [[ "$url" =~ ^git@([^:]+):(.+)$ ]]; then
-    # git@ format
-    local domain="${BASH_REMATCH[1]}"
-    path="${BASH_REMATCH[2]}"
-
-    # Simplify domain
-    if [[ "$domain" == "github.com" || "$domain" == "gitlab.com" ]]; then
-      : # Remove these domains from path
-    elif [[ "$domain" =~ ^([^.]+)\..+$ ]]; then
-      path="${BASH_REMATCH[1]}/$path"
-    else
-      path="$domain/$path"
-    fi
+    host="${host##*@}"
+  elif [[ "$url" =~ ^([^@:/]+@)?([^:]+):(.+)$ ]]; then
+    host="${BASH_REMATCH[2]}"
+    path="${BASH_REMATCH[3]}"
   else
     error "Error: Unsupported git URL format: $url"
     return 1
   fi
 
-  # Apply same transformation as dir_to_session_name
-  echo "$path" | awk -F'/' 'BEGIN{OFS="/"} {
-    gsub(/\./, "_")
-    if (NF >= 3) {
-      print $1, $(NF-1), $NF
-    } else {
-      print
-    }
-  }'
+  host_path_to_session_name "$host" "$path"
 }
 
 refresh_cache() {
@@ -372,7 +408,6 @@ while [[ $# -gt 0 ]]; do
     shift
     ;;
   -l | --list)
-    log "Active TMUX sessions:"
     tmux list-sessions -F "#{session_name}"
     exit 0
     ;;
@@ -463,7 +498,6 @@ if [[ -z $selected ]]; then
 fi
 
 if [[ -n ${KILL_SESSION-} ]]; then
-  log "Killing session: $selected"
   tmux kill-session -t "$selected"
   exit 0
 fi
