@@ -183,10 +183,10 @@
 	locksverify = false
 
 [credential "https://github.com"]
-	helper = gh auth git-credential
+	helper = !gh auth git-credential
 
 [credential "https://gist.github.com"]
-	helper = gh auth git-credential
+	helper = !gh auth git-credential
 
 [sequence]
 	editor = /home/williamss/bin/git-editor-safe
