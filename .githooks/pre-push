@@ -7,6 +7,8 @@ command -v git-lfs >/dev/null 2>&1 || {
 }
 
 HOOK_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || true)"
+readonly PI_EXTENSIONS_ROOT="/home/williamss/gocode/src/github.com/xeedio/pi-extensions"
 BLOCKED_VALUE_GUARD="${HOOK_DIR}/check-blocked-value"
 if [[ ! -x "${BLOCKED_VALUE_GUARD}" ]]; then
   echo "ERROR: blocked value guard is missing or not executable: ${BLOCKED_VALUE_GUARD}" >&2
@@ -40,6 +42,10 @@ reject_commit_blocked_values() {
         return 1
         ;;
     esac
+    # Match pre-commit's narrow Pi Extensions source exemption; policy files above remain blocked.
+    if [[ "${REPO_ROOT}" == "${PI_EXTENSIONS_ROOT}" ]]; then
+      continue
+    fi
     if matched_pattern="$(printf '%s\n' "${path}" | "${BLOCKED_VALUE_GUARD}" names)"; then
       printf 'ERROR: pushed commit %s path %q matches blocked pattern %q\n' "${commit}" "${path}" "${matched_pattern}" >&2
       return 1
