@@ -61,6 +61,7 @@ reject_staged_disposable_ai_paths() {
 reject_staged_disposable_ai_paths || exit 1
 
 HOOK_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+readonly PI_EXTENSIONS_ROOT="/home/williamss/gocode/src/github.com/xeedio/pi-extensions"
 BLOCKED_VALUE_GUARD="${HOOK_DIR}/check-blocked-value"
 if [[ ! -x "${BLOCKED_VALUE_GUARD}" ]]; then
   echo "ERROR: blocked value guard is missing or not executable: ${BLOCKED_VALUE_GUARD}" >&2
@@ -85,6 +86,12 @@ reject_blocked_staged_values() {
         continue
         ;;
     esac
+
+    # Peer names can be legitimate code and paths in this one checkout. Keep every other
+    # global and repository guard active, including the blocked-policy-file case above.
+    if [[ "${REPO_ROOT}" == "${PI_EXTENSIONS_ROOT}" ]]; then
+      continue
+    fi
 
     if matched_pattern="$("${BLOCKED_VALUE_GUARD}" names "${file}")"; then
       printf 'ERROR: staged path %q matches blocked pattern %q\n' "${file}" "${matched_pattern}" >&2
