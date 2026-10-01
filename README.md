@@ -43,7 +43,8 @@ Yarn cannot resolve its upstream dependency reference. Git LFS is installed
 before plugin checkouts because the personal Git configuration enables its
 filters and checkout hook. Tree-sitter uses its `master` branch to retain the
 configured `configs.setup` API on Neovim 0.11; its rewritten `main` branch
-requires Neovim 0.12 or newer.
+requires Neovim 0.12 or newer. Neovim-only Lua setup, SOPS integration and
+TokyoNight colors are limited to Neovim; Vim retains the shared Vimscript setup.
 
 The bootstrap replaces home-directory configuration links. Run it only in the
 user account being configured, not on another workstation. It does not set

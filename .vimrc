@@ -32,7 +32,9 @@ Plug 'junegunn/fzf.vim'
 Plug 'jvirtanen/vim-hcl'
 Plug 'leafgarland/typescript-vim'
 Plug 'lilydjwg/colorizer'
-Plug 'lucidph3nx/nvim-sops'
+if has('nvim')
+  Plug 'lucidph3nx/nvim-sops'
+endif
 Plug 'ludovicchabant/vim-gutentags'
 Plug 'majutsushi/tagbar'
 Plug 'mbbill/undotree'
@@ -67,7 +69,9 @@ Plug 'mason-org/mason.nvim'
 " Required, plugins available after.
 call plug#end()
 
-lua require('init')
+if has('nvim')
+  lua require('init')
+endif
 
 "+----------------- Basic Configurations ------------+
 " GUI Configuration
@@ -186,7 +190,9 @@ set tags=./.tags                  " Look for tags in this file
 " }}}
 
 " {{{ colorscheme/style options
-colorscheme tokyonight-storm
+if has('nvim')
+  colorscheme tokyonight-storm
+endif
 let g:airline_theme = 'tender'
 " Enable true color
 if exists('+termguicolors')
