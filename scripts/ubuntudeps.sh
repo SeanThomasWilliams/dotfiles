@@ -7,10 +7,19 @@ apt_get() {
 }
 
 install_packages() {
-  local package candidate
+  local package policy candidate line
   local available=()
   for package in "$@"; do
-    candidate=$(apt-cache policy "$package" | awk '/Candidate:/ {print $2; exit}')
+    # Capture the full report and parse it without a producer pipe: a consumer
+    # that exits early closes the pipe and SIGPIPEs apt-cache, which
+    # `set -o pipefail` turns into a fatal 141 abort.
+    policy=$(apt-cache policy "$package")
+    candidate=
+    while IFS= read -r line; do
+      [[ $line == *'Candidate:'* ]] || continue
+      candidate=${line##* }
+      break
+    done <<<"$policy"
     if [[ -n "$candidate" && "$candidate" != '(none)' ]]; then
       available+=("$package")
     else
