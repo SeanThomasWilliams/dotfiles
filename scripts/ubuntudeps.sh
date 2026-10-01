@@ -149,6 +149,7 @@ CLI_PACKAGES=(
   openssh-server
   pandoc
   parallel
+  pciutils
   pkg-config
   plocate
   python3
