@@ -23,7 +23,9 @@ plugins synchronously without a graphical window, and installs the defined
 Python, Ruby, Node and Go helpers. Python editor packages live in
 `~/.local/share/dotfiles/venv`, leaving the system Python untouched. Helper
 commands are available through `~/.local/bin`. A tracked-file deployment with
-no `.gitmodules` does not need Git metadata.
+no `.gitmodules` does not need Git metadata. The TypeScript language server
+uses 5.3.0 for Ubuntu's Node version. `lua-fmt` is explicitly skipped because
+Yarn cannot resolve its upstream dependency reference.
 
 The bootstrap replaces home-directory configuration links. Run it only in the
 user account being configured, not on another workstation. It does not set
