@@ -3,6 +3,12 @@
 set -eux
 set -o pipefail
 
+# Private Python environment for editor providers; the system interpreter is
+# PEP 668 externally-managed on current Ubuntu and must stay untouched.
+PYTHON_VENV="$HOME/.local/share/dotfiles/venv"
+# User-local install prefix; ~/.local/bin is already on PATH from .profile.
+USER_LOCAL="$HOME/.local"
+
 yarn_packages=(
   bash-language-server
   diagnostic-languageserver
@@ -28,21 +34,33 @@ pip_packages=(
   pynvim
 )
 
-# Python Packages
-python -m pip install --upgrade "${pip_packages[@]}"
+export PATH="$USER_LOCAL/bin:$PATH"
+mkdir -p "$USER_LOCAL/bin"
+
+# Python Packages (private venv only; never the system interpreter)
+[[ -x "$PYTHON_VENV/bin/python" ]] || python3 -m venv "$PYTHON_VENV"
+"$PYTHON_VENV/bin/python" -m pip install --upgrade "${pip_packages[@]}"
+ln -sfn "$PYTHON_VENV/bin/cmake-language-server" "$USER_LOCAL/bin/cmake-language-server"
 
 # Ruby Gem deps
-gem install --user neovim
+gem install --user-install --no-document neovim
 gem environment
+RUBY_USER_BIN="$(ruby -r rubygems -e 'puts Gem.user_dir')/bin"
+ln -sfn "$RUBY_USER_BIN/neovim-ruby-host" "$USER_LOCAL/bin/neovim-ruby-host"
 
-# Node Packages
+# Node Packages (user-local prefix only; no sudo global npm)
+export NPM_CONFIG_PREFIX="$USER_LOCAL"
 if ! command -v yarn &>/dev/null; then
-  npm install -g -f yarn || sudo npm install -g -f yarn
+  npm install -g -f yarn
 fi
-yarn global add --force --non-interactive "${yarn_packages[@]}"
+yarn global add --prefix "$USER_LOCAL" --force --non-interactive "${yarn_packages[@]}"
 
-# Go binaries
+# Vim plugins must exist before the editor installs its Go tooling.
+nvim --headless '+PlugInstall --sync' +qall
+
+# Go binaries (installed under ~/.local/bin so the editor finds them on PATH)
 mkdir -p ~/gocode/src/github.com/
+export GOBIN="$USER_LOCAL/bin"
 go install golang.org/x/tools/gopls@latest
 go install github.com/mattn/efm-langserver@latest
-nvim +GoInstallBinaries +qall
+nvim --headless +GoInstallBinaries +qall

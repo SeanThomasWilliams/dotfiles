@@ -11,7 +11,11 @@ HOSTNAME_S="$(hostname -s)"
 XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
 mkdir -p "$XDG_CONFIG_HOME"
 
-git submodule update --init --recursive
+if [[ -f "$SCRIPT_DIR/.gitmodules" ]]; then
+  git submodule update --init --recursive
+else
+  echo >&2 "No declared submodules"
+fi
 
 for fname in "$SCRIPT_DIR"/.*; do
   [[ ! -f $fname ]] && continue # Skip non-files
@@ -58,6 +62,7 @@ ln -sfn "$SCRIPT_DIR"/.vimrc "$XDG_CONFIG_HOME/nvim/init.vim"
 
 # Config dir
 for dname in "$SCRIPT_DIR"/config/*; do
+  [[ -e "$dname" ]] || continue
   dname_src="$dname"
   dname_base=$(basename "$dname")
   dname_target="$XDG_CONFIG_HOME/$dname_base"
@@ -93,7 +98,10 @@ done
 
 # Binaries
 mkdir -p "$HOME"/bin
-ln -vsfn "$SCRIPT_DIR"/bin/* "$HOME"/bin/
+for binfile in "$SCRIPT_DIR"/bin/*; do
+  [[ -e "$binfile" || -L "$binfile" ]] || continue
+  ln -vsfn "$binfile" "$HOME/bin/"
+done
 
 make -C "$SCRIPT_DIR" wrappers
 WRAPPED_CLI_DIR="$HOME/.local/libexec/dotfiles"
@@ -109,7 +117,10 @@ for binfile in "${SCRIPT_DIR}/${UNAME_S}"/bin/*; do
 done
 
 mkdir -p "$HOME"/scripts
-ln -vsfn "$SCRIPT_DIR"/scripts/* "$HOME"/scripts/
+for scriptsfile in "$SCRIPT_DIR"/scripts/*; do
+  [[ -e "$scriptsfile" || -L "$scriptsfile" ]] || continue
+  ln -vsfn "$scriptsfile" "$HOME/scripts/"
+done
 for scriptsfile in "${SCRIPT_DIR}/${UNAME_S}"/scripts/*; do
   [[ ! -f "$scriptsfile" ]] && continue
   ln -vsfn "$scriptsfile" "$HOME"/scripts/"$(basename "$scriptsfile")"
@@ -119,10 +130,7 @@ done
 rm -f "$HOME"/.vim
 ln -sfn "$SCRIPT_DIR"/vim "$HOME"/.vim
 
-# Vim plugins
-nvim +PlugInstall! +qall
-
-# Vim Remote plugins
-nvim +UpdateRemotePlugins +qall
-
 "$SCRIPT_DIR/install-helpers"
+
+# Providers and plugins are installed before remote-plugin registration.
+nvim --headless +UpdateRemotePlugins +qall

@@ -633,7 +633,9 @@ nnoremap <leader>c :tabc<CR>
 "make Y behave more like C and D
 nmap Y y$
 
-if !empty(glob($HOME . '/anaconda3/bin/python3'))
+if executable($HOME . '/.local/share/dotfiles/venv/bin/python3')
+  let g:python3_host_prog = $HOME . '/.local/share/dotfiles/venv/bin/python3'
+elseif !empty(glob($HOME . '/anaconda3/bin/python3'))
   let g:python3_host_prog = $HOME . '/anaconda3/bin/python3'
 endif
 
@@ -650,7 +652,7 @@ function! ChompedSystem( ... )
 endfunction
 
 " Python site-packages
-let g:site_packages = ChompedSystem('python -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())"')
+let g:site_packages = ChompedSystem(shellescape(get(g:, 'python3_host_prog', 'python3')) . ' -c ' . shellescape('import sysconfig; print(sysconfig.get_path("purelib"))'))
 
 " FZF configuration
 nnoremap <C-p> :execute ':Files' . g:site_packages<CR>
