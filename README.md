@@ -19,8 +19,9 @@ lock, reports unavailable packages individually, keeps an installed Docker,
 and does not autoremove packages or add Firefox/Git PPAs. Wezterm keeps its
 declared Fury repository and becomes the user's XDG default terminal and the
 system `x-terminal-emulator` alternative. Tailscale uses its official repository
-for the installed Ubuntu release; its daemon starts without enrollment. This
-setup never runs `tailscale up` or `tailscale login` or supplies an auth key.
+for the installed Ubuntu release and installs the package only, leaving normal
+package-maintainer service handling unchanged. It does not control the daemon,
+enroll a device, reset or delete an existing identity, or supply an auth key.
 
 Native Ubuntu libvirt, QEMU and virt-manager packages provide virtualization;
 the daemon is enabled and the user joins `libvirt` and `kvm`. Use a fresh login
@@ -50,8 +51,9 @@ GNOME display layouts, greeter settings or battery policy. Successful package
 installation alone is not proof that wrappers, plugins or helpers ran; retain
 the output of both commands and check those tools in a fresh login shell.
 Check the selected terminal with `xdg-terminal-exec --print-id --print-cmd` and
-its actual graphical launch. An unconfigured Tailscale daemon should report
-`NeedsLogin` in `tailscale status --json`, not a connected device.
+its actual graphical launch. Observe Tailscale membership with
+`tailscale status --json` read-only; preserve any existing identity and network
+settings rather than changing them to meet an unenrolled-state check.
 
 ## Desktop and shell startup
 

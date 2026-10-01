@@ -295,10 +295,6 @@ install_packages "${INTERACTIVE_PACKAGES[@]}"
 echo >&2 "Installing CLI packages"
 install_packages "${CLI_PACKAGES[@]}"
 configure_virtualization
-# Start the software only. Enrollment is a separate account action, never here.
-if command -v tailscaled &>/dev/null; then
-  sudo -n systemctl enable --now tailscaled.service
-fi
 install_docker
 install_nvidia_drivers
 
