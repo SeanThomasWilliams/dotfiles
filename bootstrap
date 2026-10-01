@@ -132,5 +132,8 @@ ln -sfn "$SCRIPT_DIR"/vim "$HOME"/.vim
 
 "$SCRIPT_DIR/install-helpers"
 
+# Keep editor setup here so command-line helpers can be upgraded independently.
+nvim --headless '+PlugInstall --sync' +qall
+nvim --headless +GoInstallBinaries +qall
 # Providers and plugins are installed before remote-plugin registration.
 nvim --headless +UpdateRemotePlugins +qall

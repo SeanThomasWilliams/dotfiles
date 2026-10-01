@@ -57,12 +57,8 @@ if ! command -v yarn &>/dev/null; then
 fi
 yarn global add --prefix "$USER_LOCAL" --force --non-interactive "${yarn_packages[@]}"
 
-# Vim plugins must exist before the editor installs its Go tooling.
-nvim --headless '+PlugInstall --sync' +qall
-
 # Go binaries (installed under ~/.local/bin so the editor finds them on PATH)
 mkdir -p ~/gocode/src/github.com/
 export GOBIN="$USER_LOCAL/bin"
 go install golang.org/x/tools/gopls@latest
 go install github.com/mattn/efm-langserver@latest
-nvim --headless +GoInstallBinaries +qall

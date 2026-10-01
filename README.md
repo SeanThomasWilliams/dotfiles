@@ -11,12 +11,25 @@ From this directory, as the intended user with passwordless sudo:
 ./bootstrap
 ```
 
-Run the same commands again to repeat the setup. The dependency script uses
-noninteractive apt, reports unavailable packages individually, keeps an
-installed Docker, and does not autoremove packages or add Firefox/Git PPAs.
-Wezterm uses its existing declared repository. NVIDIA packages are skipped on
-machines without NVIDIA hardware; otherwise Ubuntu's driver packages are used,
-not a CUDA repository for a different Ubuntu release.
+Run the same commands again to repeat the setup. To upgrade the declared
+packages and command-line helpers without relinking configuration or replaying
+editor installation, run `./scripts/ubuntudeps.sh` and `./install-helpers` only.
+The dependency script uses noninteractive apt, waits for a temporary package
+lock, reports unavailable packages individually, keeps an installed Docker,
+and does not autoremove packages or add Firefox/Git PPAs. Wezterm keeps its
+declared Fury repository and becomes the user's XDG default terminal and the
+system `x-terminal-emulator` alternative. Tailscale uses its official repository
+for the installed Ubuntu release; its daemon starts without enrollment. This
+setup never runs `tailscale up` or `tailscale login` or supplies an auth key.
+
+Native Ubuntu libvirt, QEMU and virt-manager packages provide virtualization;
+the daemon is enabled and the user joins `libvirt` and `kvm`. Use a fresh login
+shell to exercise the new groups with `virsh -c qemu:///system list --all` and
+`virsh -c qemu:///system capabilities`. GNOME remote-desktop, OpenSSL and native
+Python GI/libsecret dependencies are included; remote access configuration is
+separate. NVIDIA packages are skipped on machines without NVIDIA hardware;
+otherwise Ubuntu's driver packages are used, not a CUDA repository for a
+different Ubuntu release.
 
 The bootstrap builds the wrappers, links personal configuration, installs Vim
 plugins synchronously without a graphical window, and installs the defined
@@ -36,6 +49,9 @@ user account being configured, not on another workstation. It does not set
 GNOME display layouts, greeter settings or battery policy. Successful package
 installation alone is not proof that wrappers, plugins or helpers ran; retain
 the output of both commands and check those tools in a fresh login shell.
+Check the selected terminal with `xdg-terminal-exec --print-id --print-cmd` and
+its actual graphical launch. An unconfigured Tailscale daemon should report
+`NeedsLogin` in `tailscale status --json`, not a connected device.
 
 ## Desktop and shell startup
 
