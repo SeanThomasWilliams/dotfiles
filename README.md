@@ -25,7 +25,11 @@ Python, Ruby, Node and Go helpers. Python editor packages live in
 commands are available through `~/.local/bin`. A tracked-file deployment with
 no `.gitmodules` does not need Git metadata. The TypeScript language server
 uses 5.3.0 for Ubuntu's Node version. `lua-fmt` is explicitly skipped because
-Yarn cannot resolve its upstream dependency reference.
+Yarn cannot resolve its upstream dependency reference. Git LFS is installed
+before plugin checkouts because the personal Git configuration enables its
+filters and checkout hook. Tree-sitter uses its `master` branch to retain the
+configured `configs.setup` API on Neovim 0.11; its rewritten `main` branch
+requires Neovim 0.12 or newer.
 
 The bootstrap replaces home-directory configuration links. Run it only in the
 user account being configured, not on another workstation. It does not set

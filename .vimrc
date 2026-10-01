@@ -40,7 +40,7 @@ Plug 'mustache/vim-mustache-handlebars'
 Plug 'nvim-lua/lsp-status.nvim'
 Plug 'nvim-lua/plenary.nvim'
 Plug 'nvim-tree/nvim-web-devicons'
-Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}  " We recommend updating the parsers on update
+Plug 'nvim-treesitter/nvim-treesitter', {'branch': 'master', 'do': ':TSUpdate'}  " Keep the configs API supported by Neovim 0.11
 Plug 'pangloss/vim-javascript'
 Plug 'pearofducks/ansible-vim'
 Plug 'pedrohdz/vim-yaml-folds'
