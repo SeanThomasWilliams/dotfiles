@@ -117,6 +117,7 @@ CLI_PACKAGES=(
   gettext
   gh
   git
+  git-lfs
   glab
   gnupg
   golang-go
