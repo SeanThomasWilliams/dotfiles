@@ -149,7 +149,7 @@ bindsym $mod+a focus parent
 # We use variables to avoid repeating the names in multiple places.
 set $ws1 "1:web"
 set $ws2 "2:texts"
-set $ws3 "3:web"
+set $ws3 "3:ai"
 set $ws4 "4:tmux"
 set $ws5 "5:misc"
 set $ws6 "6:chat"
@@ -332,6 +332,7 @@ assign [class="[Mm]attermost.*"] $ws6
 assign [class="[Mm]icrosoft [Tt]eams.*"] $ws6
 assign [class="[Ss]ignal"] $ws2
 assign [class="[Ss]lack"] $ws6
+assign [class="(?i)chatgpt"] $ws3
 assign [class="[Tt]hunderbird"] $ws10
 assign [class="[Rr]emote-viewer"] $ws8
 

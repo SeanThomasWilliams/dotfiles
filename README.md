@@ -81,6 +81,8 @@ prove success when startup errors were printed.
 
 On i3 login, a plain terminal opens on `4:tmux`; no default tmux session is
 created. Run `tmux-sessionizer` (or `ts` in interactive Bash) to choose a project.
+ChatGPT windows are assigned to `3:ai` by their window class, without changing
+layout or floating behavior.
 
 `.profile` sets graphical-login command paths without loading Bash bindings or
 completions. User commands take priority in this order: `~/scripts`, `~/bin`,
