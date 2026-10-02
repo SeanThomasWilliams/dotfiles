@@ -56,6 +56,27 @@ its actual graphical launch. Observe Tailscale membership with
 `tailscale status --json` read-only; preserve any existing identity and network
 settings rather than changing them to meet an unenrolled-state check.
 
+## Neovim on older Ubuntu releases
+
+If Ubuntu's Neovim is too old for the editor configuration, run this before
+`./bootstrap`:
+
+```sh
+./scripts/install-neovim-appimage.sh
+```
+
+The installer selects the Neovim release supported by the configured
+Tree-sitter branch. It keeps the extracted binary and runtime together under
+`~/software/neovim-appimage` and links `~/bin/nvim` to that installation,
+without replacing package-managed files in `/usr`. Previous bundles remain
+available to existing editors. New launches use the selected bundle; run
+`hash -r` in an existing Bash shell to refresh its command paths.
+
+After each coherent shared editor edit, immediately check the real local
+configured startup and its messages, then the affected laptop startup.
+`nvim --headless '+qa!'` uses the default configuration; exit 0 alone does not
+prove success when startup errors were printed.
+
 ## Desktop and shell startup
 
 On i3 login, a plain terminal opens on `4:tmux`; no default tmux session is
