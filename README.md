@@ -56,6 +56,22 @@ its actual graphical launch. Observe Tailscale membership with
 `tailscale status --json` read-only; preserve any existing identity and network
 settings rather than changing them to meet an unenrolled-state check.
 
+## Optional crictl user configuration
+
+`config/crictl.yaml` preserves the local containerd client settings without
+duplicate keys. Install it explicitly when retaining that user configuration:
+
+```sh
+install -m 0664 config/crictl.yaml "$HOME/.config/crictl.yaml"
+crictl --config "$HOME/.config/crictl.yaml" config --list
+```
+
+Bootstrap does not install this file or change crictl's default lookup.
+Plain `crictl` uses `/etc/crictl.yaml` or its executable-directory fallback;
+select the user file with `--config` or `CRI_CONFIG_FILE`. These client settings
+do not enable containerd's CRI plugin. A Docker containerd with CRI disabled
+returns `unknown service runtime.v1.RuntimeService` for CRI operations.
+
 ## Neovim on older Ubuntu releases
 
 If Ubuntu's Neovim is too old for the editor configuration, run this before
