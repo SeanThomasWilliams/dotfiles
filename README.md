@@ -56,16 +56,6 @@ its actual graphical launch. Observe Tailscale membership with
 `tailscale status --json` read-only; preserve any existing identity and network
 settings rather than changing them to meet an unenrolled-state check.
 
-## crictl configuration lookup
-
-Dotfiles does not install a host crictl configuration. Plain `crictl` reads
-`/etc/crictl.yaml` or its executable-directory fallback. Select another file
-with `--config` or `CRI_CONFIG_FILE`; `CRICTL_CONFIG` does not select a file.
-Do not use `config --list` or `config --get` to check that a file is absent:
-these commands can create a missing configuration. Client settings do not
-enable containerd's CRI plugin; a Docker containerd with CRI disabled returns
-`unknown service runtime.v1.RuntimeService` for CRI operations.
-
 ## Neovim on older Ubuntu releases
 
 If Ubuntu's Neovim is too old for the editor configuration, run this before
