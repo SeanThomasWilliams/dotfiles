@@ -112,6 +112,7 @@ require("copilot_cmp").setup()
 require("nvim-treesitter.install").prefer_git = true
 
 require "nvim-treesitter.configs".setup {
+    sync_install = vim.env.DOTFILES_INSTALL_PARSERS == "1",
     ensure_installed = {
         "awk",
         "bash",

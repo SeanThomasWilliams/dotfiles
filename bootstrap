@@ -5,6 +5,10 @@ IFS=$'\n\t'
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
+# Provisioning shells must see newly installed helpers before the next login.
+export PATH="$HOME/scripts:$HOME/bin:$HOME/.local/bin:$PATH"
+export GOBIN="$HOME/.local/bin"
+
 # Darwin/Linux
 UNAME_S="$(uname -s)"
 HOSTNAME_S="$(hostname -s)"
@@ -133,7 +137,9 @@ ln -sfn "$SCRIPT_DIR"/vim "$HOME"/.vim
 "$SCRIPT_DIR/install-helpers"
 
 # Keep editor setup here so command-line helpers can be upgraded independently.
-nvim --headless '+PlugInstall --sync' +qall
-nvim --headless +GoInstallBinaries +qall
+# Declare all plugins before loading Lua/theme configuration that needs them.
+nvim --headless --cmd 'let g:dotfiles_installing_plugins = 1' '+PlugInstall --sync' +messages +qall
+# Wait for configured parsers before this short-lived editor exits.
+DOTFILES_INSTALL_PARSERS=1 nvim --headless +GoInstallBinaries +messages +qall
 # Providers and plugins are installed before remote-plugin registration.
-nvim --headless +UpdateRemotePlugins +qall
+nvim --headless +UpdateRemotePlugins +messages +qall

@@ -42,7 +42,7 @@ Plug 'mustache/vim-mustache-handlebars'
 Plug 'nvim-lua/lsp-status.nvim'
 Plug 'nvim-lua/plenary.nvim'
 Plug 'nvim-tree/nvim-web-devicons'
-Plug 'nvim-treesitter/nvim-treesitter', {'branch': 'master', 'do': ':TSUpdate'}  " Keep the configs API supported by Neovim 0.11
+Plug 'nvim-treesitter/nvim-treesitter', {'branch': 'master', 'do': ':TSUpdateSync'}  " Keep the configs API supported by Neovim 0.11
 Plug 'pangloss/vim-javascript'
 Plug 'pearofducks/ansible-vim'
 Plug 'pedrohdz/vim-yaml-folds'
@@ -69,7 +69,7 @@ Plug 'mason-org/mason.nvim'
 " Required, plugins available after.
 call plug#end()
 
-if has('nvim')
+if has('nvim') && !get(g:, 'dotfiles_installing_plugins', 0)
   lua require('init')
 endif
 
@@ -190,7 +190,7 @@ set tags=./.tags                  " Look for tags in this file
 " }}}
 
 " {{{ colorscheme/style options
-if has('nvim')
+if has('nvim') && !get(g:, 'dotfiles_installing_plugins', 0)
   colorscheme tokyonight-storm
 endif
 let g:airline_theme = 'tender'

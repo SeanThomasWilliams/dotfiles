@@ -46,6 +46,15 @@ configured `configs.setup` API on Neovim 0.11; its rewritten `main` branch
 requires Neovim 0.12 or newer. Neovim-only Lua setup, SOPS integration and
 TokyoNight colors are limited to Neovim; Vim retains the shared Vimscript setup.
 
+Bootstrap exposes user-local helpers immediately and installs Go plugin tools
+into `~/.local/bin`. Its initial plugin-manager session declares every plugin
+without loading Lua/theme configuration before those plugins exist. Subsequent
+sessions use the full configuration, wait for configured Tree-sitter parsers,
+and register remote plugins after providers are installed. Parser update hooks
+also run synchronously. Editor messages remain in the installation output;
+read them even when Neovim exits successfully. Check `GoDoc` in a Go buffer
+(`:setfiletype go`), not a blank buffer where its filetype command is absent.
+
 The bootstrap replaces home-directory configuration links. Run it only in the
 user account being configured, not on another workstation. It does not set
 GNOME display layouts, greeter settings or battery policy. Successful package
