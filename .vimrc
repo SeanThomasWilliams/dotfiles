@@ -18,7 +18,9 @@ Plug 'benekastah/neomake'
 Plug 'bling/vim-airline'
 Plug 'ekalinin/Dockerfile.vim'
 Plug 'ellisonleao/gruvbox.nvim'
-Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries' }
+" Bootstrap installs Go tools in a fresh session after plugin discovery.
+Plug 'fatih/vim-go', get(g:, 'dotfiles_installing_plugins', 0)
+      \ ? {} : { 'do': ':GoUpdateBinaries' }
 Plug 'folke/tokyonight.nvim', { 'branch': 'main' }
 Plug 'gagoar/StripWhiteSpaces'
 Plug 'honza/vim-snippets'
@@ -506,7 +508,9 @@ if has('autocmd')
 
     " Neomake options
     " normal mode (after 1s; no delay when writing).
-    call neomake#configure#automake('nrwi', 1000)
+    if !get(g:, 'dotfiles_installing_plugins', 0)
+      call neomake#configure#automake('nrwi', 1000)
+    endif
   augroup end
 endif
 
@@ -548,7 +552,9 @@ nnoremap * *``
 "------------------------------------------------
 " Status Line START
 set statusline=%<%f\ %h%m%r
-set statusline+=%=%-10.60{LspStatus()}\ %-.(%l,%c%V%)\ %P
+if !get(g:, 'dotfiles_installing_plugins', 0)
+  set statusline+=%=%-10.60{LspStatus()}\ %-.(%l,%c%V%)\ %P
+endif
 
 function! LspStatus() abort
   if luaeval('#vim.lsp.buf_get_clients() > 0')
@@ -725,7 +731,9 @@ if executable('cmake-language-server')
 endif
 
 " gutentags
-set statusline+=%{gutentags#statusline()}
+if !get(g:, 'dotfiles_installing_plugins', 0)
+  set statusline+=%{gutentags#statusline()}
+endif
 let g:gutentags_define_advanced_commands = 1 " Extra Debugging
 let g:gutentags_file_list_command = {
 \  'markers': {

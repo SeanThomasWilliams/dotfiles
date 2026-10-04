@@ -48,8 +48,9 @@ TokyoNight colors are limited to Neovim; Vim retains the shared Vimscript setup.
 
 Bootstrap exposes user-local helpers immediately and installs Go plugin tools
 into `~/.local/bin`. Its initial plugin-manager session declares every plugin
-without loading Lua/theme configuration before those plugins exist. Subsequent
-sessions use the full configuration, wait for configured Tree-sitter parsers,
+without running plugin-dependent setup or statusline callbacks before those
+plugins exist. Later sessions use the full configuration, wait for configured
+Tree-sitter parsers,
 and register remote plugins after providers are installed. Parser update hooks
 also run synchronously. Editor messages remain in the installation output;
 read them even when Neovim exits successfully. Check `GoDoc` in a Go buffer
