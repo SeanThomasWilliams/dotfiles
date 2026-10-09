@@ -261,6 +261,10 @@ staged_path_allowed() {
 pattern_allowed_by_repo_context() {
   local pattern="$1"
   case "$pattern" in
+    '\.pi/')
+      # Runtime references are valid text; staged private files are checked separately.
+      return 0
+      ;;
     '(^|[^[:alnum:]_])AGENTS\.md([^[:alnum:]_]|$)')
       has_tracked_instruction_name "AGENTS.md"
       ;;

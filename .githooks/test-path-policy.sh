@@ -4,6 +4,66 @@ set -euo pipefail
 
 DOTFILES_ROOT="$(git -C "$(dirname "${BASH_SOURCE[0]}")/.." rev-parse --show-toplevel)"
 SOURCE_HOOKS="${DOTFILES_ROOT}/.githooks"
+
+# This incident-sized mode uses only an alternate index in the real checkout.
+# It never writes fixture source files or changes the caller's index/worktree.
+if [[ "${1:-}" == --pi-runtime-references ]]; then
+  SCRATCH="$(mktemp -d "${DOTFILES_ROOT}/ai_temp/pi-runtime-policy.XXXXXX")"
+  trap 'rm -rf -- "${SCRATCH}"' EXIT
+  cd "${DOTFILES_ROOT}"
+  before_status="$(git status --porcelain=v2)"
+  effective_hook="$(git config --get core.hooksPath)/pre-commit"
+  export GIT_INDEX_FILE="${SCRATCH}/index"
+  checks=0
+
+  stage_index_content() {
+    local path="$1" content="$2" blob
+    blob="$(printf '%s\n' "${content}" | git hash-object -w --stdin)"
+    git update-index --add --cacheinfo "100644,${blob},${path}"
+  }
+
+  expect_index_policy() {
+    local expected="$1" label="$2" diagnostic="${3:-}" status=0
+    checks=$((checks + 1))
+    "${effective_hook}" >"${SCRATCH}/output" 2>&1 || status=$?
+    if [[ "${expected}" == pass && "${status}" == 0 ]] ||
+       { [[ "${expected}" == fail && "${status}" != 0 ]] &&
+         grep -Fq -- "${diagnostic}" "${SCRATCH}/output"; }; then
+      printf 'ok %d - %s\n' "${checks}" "${label}"
+    else
+      printf 'not ok %d - %s (status %s)\n' "${checks}" "${label}" "${status}" >&2
+      cat "${SCRATCH}/output" >&2
+      exit 1
+    fi
+  }
+
+  git read-tree HEAD
+  stage_index_content 'deploy/agent/Dockerfile' 'ENV PI_HOME=/home/agent/.pi/agent'
+  stage_index_content 'docs/contracts/c04-c05.md' 'The production runner loads /home/agent/.pi/agent.'
+  expect_index_policy pass 'production Docker and documentation runtime references'
+  bash -x "${effective_hook}" >"${SCRATCH}/delegation" 2>&1
+  grep -Fq '+ .githooks/pre-commit' "${SCRATCH}/delegation"
+  printf 'ok - repository-local hook delegation remains active\n'
+
+  for path in '.pi/agent/state.json' 'nested/.pi/state'; do
+    git read-tree HEAD
+    stage_index_content "${path}" 'private runtime state'
+    expect_index_policy fail "private file rejected: ${path}" 'staged path is blocked by the global path policy'
+  done
+
+  git read-tree HEAD
+  stage_index_content 'docs/contracts/c04-c05.md' 'Private evidence is in ai_temp/session.log.'
+  expect_index_policy fail 'unrelated private-content guard retained' 'Matched pattern: ai_temp/'
+  git read-tree HEAD
+  stage_index_content 'ai_logs/session.log' 'private runtime log'
+  expect_index_policy fail 'disposable evidence-file guard retained' 'ai_temp and ai_logs are disposable'
+
+  unset GIT_INDEX_FILE
+  [[ "$(git status --porcelain=v2)" == "${before_status}" ]]
+  printf 'PASS: %d focused policy checks; caller state preserved\n' "${checks}"
+  exit 0
+fi
+
 RUNTIME_PARENT="${XDG_RUNTIME_DIR:-${HOME}/.cache}"
 mkdir -p "${RUNTIME_PARENT}"
 SCRATCH="$(mktemp -d "${RUNTIME_PARENT}/dotfiles-hook-policy.XXXXXX")"
