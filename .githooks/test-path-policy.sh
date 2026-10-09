@@ -51,6 +51,27 @@ if [[ "${1:-}" == --pi-runtime-references ]]; then
     expect_index_policy fail "private file rejected: ${path}" 'staged path is blocked by the global path policy'
   done
 
+  # Model legacy HEAD membership without creating a repository or changing HEAD.
+  # Exercise the real path predicates; only their tracked-file lookup is supplied.
+  (
+    eval "$(awk '
+      /^is_instruction_path\(\)|^is_skill_work_path\(\)|^is_always_blocked_path\(\)|^staged_path_allowed\(\)/ { emit=1 }
+      emit { print }
+      emit && /^}/ { emit=0 }
+    ' "${effective_hook}")"
+    is_already_tracked_in_head() { return 0; }
+    for path in '.pi/AGENTS.md' 'nested/.pi/SUBAGENTS.md'; do
+      if staged_path_allowed "${path}"; then
+        printf 'Tracked private instruction unexpectedly allowed: %s\n' "${path}" >&2
+        exit 1
+      fi
+    done
+    staged_path_allowed 'existing/AGENTS.md'
+    staged_path_allowed 'existing/SUBAGENTS.md'
+  )
+  checks=$((checks + 1))
+  printf 'ok %d - tracked private instructions rejected; ordinary instructions retained\n' "${checks}"
+
   git read-tree HEAD
   stage_index_content 'docs/contracts/c04-c05.md' 'Private evidence is in ai_temp/session.log.'
   expect_index_policy fail 'unrelated private-content guard retained' 'Matched pattern: ai_temp/'

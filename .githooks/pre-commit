@@ -222,9 +222,6 @@ staged_path_allowed() {
   if is_skill_work_path "$file"; then
     return 1
   fi
-  if is_instruction_path "$file" && is_already_tracked_in_head "$file"; then
-    return 0
-  fi
   if is_always_blocked_path "$file"; then
     return 1
   fi
