@@ -39,8 +39,8 @@ if [[ "${1:-}" == --pi-runtime-references ]]; then
 
   git read-tree HEAD
   stage_index_content 'deploy/agent/Dockerfile' 'ENV PI_HOME=/home/agent/.pi/agent'
-  stage_index_content 'docs/contracts/c04-c05.md' 'The production runner loads /home/agent/.pi/agent.'
-  expect_index_policy pass 'production Docker and documentation runtime references'
+  stage_index_content 'docs/contracts/c04-c05.md' 'The production runner loads /home/agent/.pi/agent; see AGENTS.override.md for local policy.'
+  expect_index_policy pass 'combined Pi runtime and override content allowed'
   bash -x "${effective_hook}" >"${SCRATCH}/delegation" 2>&1
   grep -Fq '+ .githooks/pre-commit' "${SCRATCH}/delegation"
   printf 'ok - repository-local hook delegation remains active\n'
@@ -49,6 +49,13 @@ if [[ "${1:-}" == --pi-runtime-references ]]; then
     git read-tree HEAD
     stage_index_content "${path}" 'private runtime state'
     expect_index_policy fail "private file rejected: ${path}" 'staged path is blocked by the global path policy'
+  done
+
+  # Actual override files are path-blocked even though the content pattern is allowed.
+  for path in 'AGENTS.override.md' 'nested/TEAM.override.md'; do
+    git read-tree HEAD
+    stage_index_content "${path}" 'override content'
+    expect_index_policy fail "override file rejected: ${path}" 'staged path is blocked by the global path policy'
   done
 
   # Model legacy HEAD membership without creating a repository or changing HEAD.
@@ -66,6 +73,11 @@ if [[ "${1:-}" == --pi-runtime-references ]]; then
         exit 1
       fi
     done
+    # Legacy tracked override still blocked by is_always_blocked_path.
+    if staged_path_allowed 'AGENTS.override.md'; then
+      printf 'Tracked override unexpectedly allowed\n' >&2
+      exit 1
+    fi
     staged_path_allowed 'existing/AGENTS.md'
     staged_path_allowed 'existing/SUBAGENTS.md'
   )
