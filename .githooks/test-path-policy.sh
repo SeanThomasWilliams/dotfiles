@@ -41,7 +41,8 @@ if [[ "${1:-}" == --pi-runtime-references ]]; then
   stage_index_content 'deploy/agent/Dockerfile' 'ENV PI_HOME=/home/agent/.pi/agent'
   stage_index_content 'docs/contracts/c04-c05.md' 'The production runner loads /home/agent/.pi/agent; see AGENTS.override.md for local policy.
 Native instruction filenames are `CLAUDE.md`, "CLAUDE.MD" and CLAUDE.md.
-const names = ["CLAUDE.md","CLAUDE.MD"];'
+const names = ["CLAUDE.md","CLAUDE.MD"];
+Native default: CLAUDE.md'
   expect_index_policy pass 'Pi runtime, override and native instruction filename text allowed'
   bash -x "${effective_hook}" >"${SCRATCH}/delegation" 2>&1
   grep -Fq '+ .githooks/pre-commit' "${SCRATCH}/delegation"
@@ -69,9 +70,12 @@ const names = ["CLAUDE.md","CLAUDE.MD"];'
   # A native filename must not exempt a different CLAUDE token on the same line.
   for reference in 'CLAUDE.local.md' 'CLAUDE.md.backup' 'CLAUDE.MDX' 'CLAUDE.md/notes.md'; do
     git read-tree HEAD
-    stage_index_content 'docs/contracts/c04-c05.md' "Native CLAUDE.md and CLAUDE.MD do not permit ${reference}."
+    stage_index_content 'docs/contracts/c04-c05.md' "Keep ${reference} and CLAUDE.md"
     expect_index_policy fail "non-native content still rejected: ${reference}" 'Matched pattern: (^|[^[:alnum:]_])CLAUDE[^/[:space:]]*'
   done
+  git read-tree HEAD
+  stage_index_content 'docs/contracts/c04-c05.md' 'Keep CLAUDE.md.backup and CLAUDE.md.'
+  expect_index_policy fail 'non-native prefix retained before native sentence ending' 'Matched pattern: (^|[^[:alnum:]_])CLAUDE[^/[:space:]]*'
 
   # Model legacy HEAD membership without creating a repository or changing HEAD.
   # Exercise the real path predicates; only their tracked-file lookup is supplied.

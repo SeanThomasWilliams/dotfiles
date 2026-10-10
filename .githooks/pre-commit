@@ -289,7 +289,11 @@ staged_content_matches_pattern() {
   local diff_text="$1" pattern="$2" native_reference
   if [[ "${pattern}" == '(^|[^[:alnum:]_])CLAUDE[^/[:space:]]*' ]]; then
     diff_text="$(printf '%s\n' "${diff_text}" | grep -E '^\+' | cut -c 2-)" || return 1
-    native_reference='(^|[^[:alnum:]_.-])CLAUDE\.(md|MD)([^[:alnum:]_./-]|\.([[:space:]]|$)|$)'
+    # Give every candidate a real trailing delimiter. An end-of-line match has to carry that
+    # character too, so the rewrite below always lands on the matched region and never on the
+    # same text that sits inside a longer sibling name earlier on the line.
+    diff_text+=$'\n'
+    native_reference='(^|[^[:alnum:]_.-])CLAUDE\.(md|MD)([^[:alnum:]_./-]|\.([[:space:]]))'
     while [[ "${diff_text}" =~ ${native_reference} ]]; do
       diff_text="${diff_text/"${BASH_REMATCH[0]}"/"${BASH_REMATCH[1]}${BASH_REMATCH[3]}"}"
     done
