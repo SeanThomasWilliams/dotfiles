@@ -39,8 +39,10 @@ if [[ "${1:-}" == --pi-runtime-references ]]; then
 
   git read-tree HEAD
   stage_index_content 'deploy/agent/Dockerfile' 'ENV PI_HOME=/home/agent/.pi/agent'
-  stage_index_content 'docs/contracts/c04-c05.md' 'The production runner loads /home/agent/.pi/agent; see AGENTS.override.md for local policy.'
-  expect_index_policy pass 'combined Pi runtime and override content allowed'
+  stage_index_content 'docs/contracts/c04-c05.md' 'The production runner loads /home/agent/.pi/agent; see AGENTS.override.md for local policy.
+Native instruction filenames are `CLAUDE.md`, "CLAUDE.MD" and CLAUDE.md.
+const names = ["CLAUDE.md","CLAUDE.MD"];'
+  expect_index_policy pass 'Pi runtime, override and native instruction filename text allowed'
   bash -x "${effective_hook}" >"${SCRATCH}/delegation" 2>&1
   grep -Fq '+ .githooks/pre-commit' "${SCRATCH}/delegation"
   printf 'ok - repository-local hook delegation remains active\n'
@@ -58,6 +60,19 @@ if [[ "${1:-}" == --pi-runtime-references ]]; then
     expect_index_policy fail "override file rejected: ${path}" 'staged path is blocked by the global path policy'
   done
 
+  for path in 'CLAUDE.md' 'nested/CLAUDE.MD' 'nested/CLAUDE.local.md' '.pi/CLAUDE.md'; do
+    git read-tree HEAD
+    stage_index_content "${path}" 'private instruction'
+    expect_index_policy fail "CLAUDE private artifact rejected: ${path}" 'staged path is blocked by the global path policy'
+  done
+
+  # A native filename must not exempt a different CLAUDE token on the same line.
+  for reference in 'CLAUDE.local.md' 'CLAUDE.md.backup' 'CLAUDE.MDX' 'CLAUDE.md/notes.md'; do
+    git read-tree HEAD
+    stage_index_content 'docs/contracts/c04-c05.md' "Native CLAUDE.md and CLAUDE.MD do not permit ${reference}."
+    expect_index_policy fail "non-native content still rejected: ${reference}" 'Matched pattern: (^|[^[:alnum:]_])CLAUDE[^/[:space:]]*'
+  done
+
   # Model legacy HEAD membership without creating a repository or changing HEAD.
   # Exercise the real path predicates; only their tracked-file lookup is supplied.
   (
@@ -70,6 +85,13 @@ if [[ "${1:-}" == --pi-runtime-references ]]; then
     for path in '.pi/AGENTS.md' 'nested/.pi/SUBAGENTS.md'; do
       if staged_path_allowed "${path}"; then
         printf 'Tracked private instruction unexpectedly allowed: %s\n' "${path}" >&2
+        exit 1
+      fi
+    done
+    # Native and non-native CLAUDE paths are always-blocked regardless of HEAD.
+    for path in 'CLAUDE.md' 'nested/CLAUDE.MD' 'nested/CLAUDE.local.md' '.pi/CLAUDE.md'; do
+      if staged_path_allowed "${path}"; then
+        printf 'Tracked CLAUDE artifact unexpectedly allowed: %s\n' "${path}" >&2
         exit 1
       fi
     done

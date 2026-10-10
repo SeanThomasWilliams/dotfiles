@@ -284,6 +284,21 @@ pattern_allowed_by_repo_context() {
   esac
 }
 
+# Ignore only native filename tokens, not whole lines or CLAUDE-prefixed siblings.
+staged_content_matches_pattern() {
+  local diff_text="$1" pattern="$2" native_reference
+  if [[ "${pattern}" == '(^|[^[:alnum:]_])CLAUDE[^/[:space:]]*' ]]; then
+    diff_text="$(printf '%s\n' "${diff_text}" | grep -E '^\+' | cut -c 2-)" || return 1
+    native_reference='(^|[^[:alnum:]_.-])CLAUDE\.(md|MD)([^[:alnum:]_./-]|\.([[:space:]]|$)|$)'
+    while [[ "${diff_text}" =~ ${native_reference} ]]; do
+      diff_text="${diff_text/"${BASH_REMATCH[0]}"/"${BASH_REMATCH[1]}${BASH_REMATCH[3]}"}"
+    done
+    printf '%s\n' "${diff_text}" | grep -E "${pattern}" >/dev/null 2>&1
+    return
+  fi
+  printf '%s\n' "${diff_text}" | grep -E "^\+.*${pattern}" >/dev/null 2>&1
+}
+
 # Deletions are intentionally absent from this stream and are always allowed.
 # Existing instruction files are editable at any depth. New instruction files
 # require an existing root AGENTS.md. Private roots and skill work trees remain
@@ -307,7 +322,7 @@ while IFS= read -r -d '' file; do
     if pattern_allowed_by_repo_context "$pattern"; then
       continue
     fi
-    if printf '%s\n' "$file_diff" | grep -E "^\+.*$pattern" >/dev/null 2>&1; then
+    if staged_content_matches_pattern "$file_diff" "$pattern"; then
       echo "ERROR: staged additions reference a blocked private path" >&2
       echo "Matched pattern: $pattern" >&2
       printf 'File: %q\n' "$file" >&2
