@@ -258,8 +258,10 @@ staged_path_allowed() {
 pattern_allowed_by_repo_context() {
   local pattern="$1"
   case "$pattern" in
-    '\.pi/' | '(^|[^[:alnum:]_])[^/[:space:]]*\.override\.md([^[:alnum:]_]|$)')
+    '\.pi/' | '\.agents/skills/' | '(^|[^[:alnum:]_])[^/[:space:]]*\.override\.md([^[:alnum:]_]|$)')
       # Runtime paths and instruction filenames are valid text; private files are checked separately.
+      # Skill runtime text is valid even where HEAD tracks no skills: the separate work-path pattern
+      # and the path policy still reject skill work trees and new files under an untracked prefix.
       return 0
       ;;
     '(^|[^[:alnum:]_])AGENTS\.md([^[:alnum:]_]|$)')
@@ -274,9 +276,6 @@ pattern_allowed_by_repo_context() {
       ;;
     'ai_scripts/')
       has_tracked_prefix_in_head "ai_scripts"
-      ;;
-    '\.agents/skills/')
-      has_tracked_prefix_in_head ".agents/skills"
       ;;
     *)
       return 1

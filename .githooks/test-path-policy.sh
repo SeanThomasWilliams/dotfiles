@@ -37,13 +37,22 @@ if [[ "${1:-}" == --pi-runtime-references ]]; then
     fi
   }
 
+  # Report the HEAD context so no-prefix runtime text acceptance is observable.
+  skill_prefix_count="$(git ls-tree -r --name-only HEAD -- .agents/skills | wc -l)"
+  printf '# HEAD tracks %s .agents/skills paths\n' "${skill_prefix_count}"
+
   git read-tree HEAD
   stage_index_content 'deploy/agent/Dockerfile' 'ENV PI_HOME=/home/agent/.pi/agent'
   stage_index_content 'docs/contracts/c04-c05.md' 'The production runner loads /home/agent/.pi/agent; see AGENTS.override.md for local policy.
 Native instruction filenames are `CLAUDE.md`, "CLAUDE.MD" and CLAUDE.md.
 const names = ["CLAUDE.md","CLAUDE.MD"];
-Native default: CLAUDE.md'
-  expect_index_policy pass 'Pi runtime, override and native instruction filename text allowed'
+Native default: CLAUDE.md
+Recipe SKILL: .agents/skills/lake-monroe-boating-forecast/SKILL.md
+.agents/skills/lake-monroe-boating-forecast/scripts/run_and_deliver.sh
+.agents/skills/lake-monroe-boating-forecast/scripts/run_forecast.sh
+.agents/skills/lake-monroe-boating-forecast/scripts/lake_monroe_forecast.py
+cd /home/williamss/.local/state/ai-orchestrator/cronjobs/lake-monroe-boating-forecast && ./.agents/skills/lake-monroe-boating-forecast/scripts/run_and_deliver.sh'
+  expect_index_policy pass 'Pi runtime, override, native instruction and skill runtime text allowed'
   bash -x "${effective_hook}" >"${SCRATCH}/delegation" 2>&1
   grep -Fq '+ .githooks/pre-commit' "${SCRATCH}/delegation"
   printf 'ok - repository-local hook delegation remains active\n'
@@ -77,6 +86,22 @@ Native default: CLAUDE.md'
   stage_index_content 'docs/contracts/c04-c05.md' 'Keep CLAUDE.md.backup and CLAUDE.md.'
   expect_index_policy fail 'non-native prefix retained before native sentence ending' 'Matched pattern: (^|[^[:alnum:]_])CLAUDE[^/[:space:]]*'
 
+  # The skill content exception must never become a path exemption. A fixture skill name that is
+  # never a global skill keeps check-skill-conflicts, which runs before the path policy, from
+  # masking the diagnosis this mode asserts.
+  git read-tree HEAD
+  stage_index_content '.agents/skills/hook-policy-private-fixture/SKILL.md' 'name: hook-policy-private-fixture'
+  expect_index_policy fail 'new skill file rejected without tracked skill prefix' 'staged path is blocked by the global path policy'
+  git read-tree HEAD
+  stage_index_content '.agents/skills/hook-policy-private-fixture/work/report.md' 'work output'
+  expect_index_policy fail 'new skill work file rejected without tracked skill prefix' 'staged path is blocked by the global path policy'
+
+  # Skill work text is rejected by the separate work pattern even though the generic skill text is
+  # accepted, so the two patterns keep independent contracts.
+  git read-tree HEAD
+  stage_index_content 'docs/contracts/c04-c05.md' 'Publish the forecast to .agents/skills/lake-monroe-boating-forecast/work/report.md'
+  expect_index_policy fail 'skill work content rejected by the work pattern' 'Matched pattern: \.agents/skills/.*/work/'
+
   # Model legacy HEAD membership without creating a repository or changing HEAD.
   # Exercise the real path predicates; only their tracked-file lookup is supplied.
   (
@@ -102,6 +127,13 @@ Native default: CLAUDE.md'
     # Legacy tracked override still blocked by is_always_blocked_path.
     if staged_path_allowed 'AGENTS.override.md'; then
       printf 'Tracked override unexpectedly allowed\n' >&2
+      exit 1
+    fi
+    # Historical tracked skill work precedence: is_skill_work_path denies before the tracked-file
+    # lookup, so no skill content exception can exempt a work tree. Only HEAD membership is
+    # modeled here; this mode never creates a repository or mutates HEAD.
+    if staged_path_allowed '.agents/skills/hook-policy-private-fixture/work/report.md'; then
+      printf 'Tracked skill work unexpectedly allowed\n' >&2
       exit 1
     fi
     staged_path_allowed 'existing/AGENTS.md'
